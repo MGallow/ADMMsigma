@@ -1,0 +1,65 @@
+---
+title: "ADMMsigma"
+output: github_document
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+See [vignette](https://htmlpreview.github.io/?https://github.com/MGallow/ADMMsigma/blob/master/vignette/Vignette.html) or [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
+
+## Overview
+
+`ADMMsigma` is an R package that esetimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. A (possibly incomplete) list of functions contained in the package can be found below:
+
+* `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
+
+
+## Installation
+
+```{r, eval = FALSE}
+# The easiest way to install is from the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("MGallow/ADMMsigma")
+```
+
+If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
+
+## Usage
+
+```{r, message = FALSE}
+library(ADMMsigma)
+
+# generate data from tri-diagonal (sparse) matrix for example
+# first compute covariance matrix (can confirm inverse is tri-diagonal)
+S = matrix(0, nrow = 10, ncol = 10)
+
+for (i in 1:10){
+  for (j in 1:10){
+    S[i, j] = 0.7^(abs(i - j))
+  }
+}
+
+# generate 100x10 matrix with rows drawn from iid N_p(0, S)
+Z = matrix(rnorm(100*10), nrow = 100, ncol = 10)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+
+#ridge penalty (use CV for optimal lambda)
+ADMMsigma(X, alpha = 0)
+
+#lasso penalty (use CV for optimal lambda)
+ADMMsigma(X)
+
+# lasso penalty (lam = 0.1)
+ADMMsigma(X, lam = 0.1)
+
+#elastic-net type penalty (use CV for optimal lambda)
+ADMMsigma(X, alpha = 0.5)
+
+```
