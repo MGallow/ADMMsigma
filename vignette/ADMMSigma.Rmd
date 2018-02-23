@@ -3,13 +3,13 @@ title: "Regularized Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 date: \today
 output:
-  html_document:
-    toc: yes
-    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
     number_sections: true
+  html_document:
+    toc: yes
+    toc_depth: 2
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
 #fontfamily: mathpazo
