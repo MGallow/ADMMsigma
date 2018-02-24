@@ -40,31 +40,3 @@ ADMMsigmac <- function(S, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
     .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
 }
 
-#' @title Soft threshold (elementwise) (c++)
-#' @description Elementwise soft thresholding function. Augmented from Adam Rothman's STAT 8931 code.
-#'
-#' @param s scalar
-#' @param tau scalar
-#' @return scalar
-#' @export
-#' @examples
-#' softc(10, 5)
-#'
-softc <- function(s, tau) {
-    .Call('_ADMMsigma_softc', PACKAGE = 'ADMMsigma', s, tau)
-}
-
-#' @title Soft threshold (matrix) (c++)
-#' @description Matrix soft thresholding function. Requires `softc`. Augmented from Adam Rothman's STAT 8931 code.
-#'
-#' @param s matrix
-#' @param tau scalar
-#' @return soft threshold s matrix
-#' @export
-#' @examples
-#' softmatrixc(10, 5)
-#'
-softmatrixc <- function(S, tau) {
-    .Call('_ADMMsigma_softmatrixc', PACKAGE = 'ADMMsigma', S, tau)
-}
-

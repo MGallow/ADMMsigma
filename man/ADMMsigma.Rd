@@ -39,7 +39,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = 1,
 iterations, lam, omega, and gradient
 }
 \description{
-penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm. Likelihood: Tr(S %*% Omega) - log(det(Omega)) + lambda((1 - alpha)/2 |Omega|_F^2 + alpha |Omega|_eta^eta)
+Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
 }
 \examples{
 ADMM_sigma(X, lam = 0.1, rho = 10)

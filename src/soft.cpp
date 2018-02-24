@@ -16,7 +16,7 @@ using namespace Rcpp;
 //' @examples
 //' softc(10, 5)
 //'
-// [[Rcpp::export]]
+
 double softc(double s, double tau) {
 
   // soft-thresholding
@@ -43,7 +43,7 @@ double softc(double s, double tau) {
 //' @examples
 //' softmatrixc(10, 5)
 //'
-// [[Rcpp::export]]
+
 arma::mat softmatrixc(const arma::mat &S, double tau) {
 
   // initialize

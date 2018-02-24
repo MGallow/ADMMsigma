@@ -39,36 +39,10 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// softc
-double softc(double s, double tau);
-RcppExport SEXP _ADMMsigma_softc(SEXP sSEXP, SEXP tauSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< double >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(softc(s, tau));
-    return rcpp_result_gen;
-END_RCPP
-}
-// softmatrixc
-arma::mat softmatrixc(const arma::mat& S, double tau);
-RcppExport SEXP _ADMMsigma_softmatrixc(SEXP SSEXP, SEXP tauSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< double >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(softmatrixc(S, tau));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ADMMsigma_sigma_ridgec", (DL_FUNC) &_ADMMsigma_sigma_ridgec, 2},
     {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 11},
-    {"_ADMMsigma_softc", (DL_FUNC) &_ADMMsigma_softc, 2},
-    {"_ADMMsigma_softmatrixc", (DL_FUNC) &_ADMMsigma_softmatrixc, 2},
     {NULL, NULL, 0}
 };
 
