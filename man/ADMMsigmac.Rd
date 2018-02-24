@@ -36,7 +36,7 @@ ADMMsigmac(S, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
 iterations, lam, omega
 }
 \description{
-penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm. Likelihood: Tr(S %*% Omega) - log(det(Omega)) + lambda((1 - alpha)/2 |Omega|_F^2 + alpha |Omega|_1)
+Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
 }
 \examples{
 ADMM_sigmac(X, lam = 0.1)

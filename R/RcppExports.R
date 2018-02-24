@@ -7,17 +7,14 @@
 #' @param S sample covariance matrix (denominator n)
 #' @param lam tuning parameter for penalty
 #' @return matrix of omega hat
-#' @export
 #' @examples
 #' n = nrow(X)
 #' sigma_ridgec(S = (n-1)/n*cov(X), lam = 0.1)
 #'
-sigma_ridgec <- function(S, lam) {
-    .Call('_ADMMsigma_sigma_ridgec', PACKAGE = 'ADMMsigma', S, lam)
-}
+NULL
 
 #' @title ADMM penalized precision matrix estimation (c++)
-#' @description penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm. Likelihood: Tr(S %*% Omega) - log(det(Omega)) + lambda((1 - alpha)/2 |Omega|_F^2 + alpha |Omega|_1)
+#' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
 #'
 #' @param X data matrix
 #' @param S option to specify sample covariance matrix (denominator n)
@@ -32,7 +29,6 @@ sigma_ridgec <- function(S, lam) {
 #' @param tol2 relative tolerance. Defaults to 1e-4
 #' @param maxit maximum number of iterations
 #' @return iterations, lam, omega
-#' @export
 #' @examples
 #' ADMM_sigmac(X, lam = 0.1)
 #'

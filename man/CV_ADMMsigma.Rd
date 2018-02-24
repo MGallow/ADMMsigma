@@ -44,6 +44,6 @@ iterations, lam, S, Omega, and cv.errors
 Cross validation function for ADMM_sigma.
 }
 \examples{
-CV_sigma_ridge(X, lam = seq(0.1, 3, 0.1))
+CV_ADMMsigma(X, lam = seq(0.1, 3, 0.1))
 
 }

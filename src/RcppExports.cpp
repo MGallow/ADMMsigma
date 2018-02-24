@@ -6,18 +6,6 @@
 
 using namespace Rcpp;
 
-// sigma_ridgec
-arma::mat sigma_ridgec(const arma::mat& S, double lam);
-RcppExport SEXP _ADMMsigma_sigma_ridgec(SEXP SSEXP, SEXP lamSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    Rcpp::traits::input_parameter< double >::type lam(lamSEXP);
-    rcpp_result_gen = Rcpp::wrap(sigma_ridgec(S, lam));
-    return rcpp_result_gen;
-END_RCPP
-}
 // ADMMsigmac
 List ADMMsigmac(const arma::mat& S, const double lam, const double alpha, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, const int maxit);
 RcppExport SEXP _ADMMsigma_ADMMsigmac(SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP) {
@@ -41,7 +29,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ADMMsigma_sigma_ridgec", (DL_FUNC) &_ADMMsigma_sigma_ridgec, 2},
     {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 11},
     {NULL, NULL, 0}
 };
