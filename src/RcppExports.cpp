@@ -6,6 +6,43 @@
 
 using namespace Rcpp;
 
+// CV_ADMMsigmac
+List CV_ADMMsigmac(const arma::mat& X, const arma::colvec& lam, const arma::colvec& alpha, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, const int maxit, int K, bool quiet);
+RcppExport SEXP _ADMMsigma_CV_ADMMsigmac(SEXP XSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP KSEXP, SEXP quietSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< const double >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const double >::type tau1(tau1SEXP);
+    Rcpp::traits::input_parameter< const double >::type tau2(tau2SEXP);
+    Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol1(tol1SEXP);
+    Rcpp::traits::input_parameter< const double >::type tol2(tol2SEXP);
+    Rcpp::traits::input_parameter< const int >::type maxit(maxitSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< bool >::type quiet(quietSEXP);
+    rcpp_result_gen = Rcpp::wrap(CV_ADMMsigmac(X, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CV_sigma_ridgec
+List CV_sigma_ridgec(const arma::mat& X, const arma::colvec& lam, int K, bool quiet);
+RcppExport SEXP _ADMMsigma_CV_sigma_ridgec(SEXP XSEXP, SEXP lamSEXP, SEXP KSEXP, SEXP quietSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< bool >::type quiet(quietSEXP);
+    rcpp_result_gen = Rcpp::wrap(CV_sigma_ridgec(X, lam, K, quiet));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ADMMsigmac
 List ADMMsigmac(const arma::mat& S, const double lam, const double alpha, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, const int maxit);
 RcppExport SEXP _ADMMsigma_ADMMsigmac(SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP) {
@@ -29,6 +66,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_ADMMsigma_CV_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CV_ADMMsigmac, 13},
+    {"_ADMMsigma_CV_sigma_ridgec", (DL_FUNC) &_ADMMsigma_CV_sigma_ridgec, 4},
     {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 11},
     {NULL, NULL, 0}
 };

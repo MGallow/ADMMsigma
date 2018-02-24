@@ -6,7 +6,7 @@
 \usage{
 ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = 1,
   rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
-  tol2 = 1e-04, maxit = 1000, ind = NULL, K = 3, quiet = TRUE)
+  tol2 = 1e-04, maxit = 1000, K = 3, quiet = TRUE)
 }
 \arguments{
 \item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
@@ -28,8 +28,6 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = 1,
 \item{tol2}{relative tolerance. Defaults to 1e-4}
 
 \item{maxit}{maximum number of iterations}
-
-\item{ind}{vector of a permutation of 1,..,n for CV}
 
 \item{K}{specify the number of folds for cross validation}
 

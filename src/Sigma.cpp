@@ -133,6 +133,7 @@ List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, do
 
   return List::create(Named("Iterations") = iter,
                       Named("lam") = lam,
+                      Named("alpha") = alpha,
                       Named("Omega") = Omega);
 
 }
