@@ -15,32 +15,52 @@
 #' @param tol2 relative tolerance. Defaults to 1e-4
 #' @param maxit maximum number of iterations
 #' @param K specify the number of folds for cross validation
+#' @param parallel option to run CV in parallel. Defaults to FALSE
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, omega, and gradient
 #' @export
 #' @examples
 #' ADMM_sigma(X, lam = 0.1, rho = 10)
 
-# we define the ADMM covariance estimation function
+# we define the ADMM covariance estimation
+# function
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
-    crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
-    K = 3, quiet = TRUE) {
+    5, 0.5), alpha = 1, rho = 2, mu = 10, tau1 = 2, 
+    tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
+    maxit = 1000, K = 3, parallel = FALSE, quiet = TRUE) {
     
     # perform cross validation, if necessary
-    if ((length(lam) > 1 || length(alpha) > 1) & !is.null(X)) {
+    if ((length(lam) > 1 || length(alpha) > 1) & 
+        !is.null(X)) {
         
-        # execute CV_ADMM_sigma
-        ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit, 
-            K = K, quiet = quiet)
+        # run CV in parallel?
+        if (parallel) {
+            
+            # execute ParallelCV
+            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
+                rho = rho, mu = mu, tau1 = tau1, 
+                tau2 = tau2, crit = crit, tol1 = tol1, 
+                tol2 = tol2, maxit = maxit, K = K, 
+                quiet = quiet)
+            
+        } else {
+            
+            # execute CV_ADMM_sigma
+            ADMM = CV_ADMMsigmac(X = X, lam = lam, 
+                alpha = alpha, rho = rho, mu = mu, 
+                tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, 
+                K = K, quiet = quiet)
+            
+        }
         
-        # compute final estimate at best tuning parameters
+        # compute final estimate at best tuning
+        # parameters
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
-        ADMM = ADMMsigmac(S = S, lam = ADMM$lam, alpha = ADMM$alpha, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        ADMM = ADMMsigmac(S = S, lam = ADMM$lam, 
+            alpha = ADMM$alpha, rho = rho, mu = mu, 
+            tau1 = tau1, tau2 = tau2, crit = crit, 
+            tol1 = tol1, tol2 = tol2, maxit = maxit)
         
         if (maxit <= ADMM$Iterations) {
             print("Maximum iterations reached...")
@@ -53,7 +73,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             
             # covariance matrix
             X_bar = apply(X, 2, mean)
-            S = crossprod(scale(X, center = X_bar, scale = F))/dim(X)[1]
+            S = crossprod(scale(X, center = X_bar, 
+                scale = F))/dim(X)[1]
             
         }
         
@@ -63,7 +84,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         }
         ADMM = ADMMsigmac(S = S, lam = lam, alpha = alpha, 
             rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+            crit = crit, tol1 = tol1, tol2 = tol2, 
+            maxit = maxit)
         if (maxit <= ADMM$Iterations) {
             print("Maximum iterations reached...")
         }
@@ -71,9 +93,11 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     }
     
     # compute gradient
-    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * (1 - ADMM$alpha) * 
-        ADMM$Omega + ADMM$lam * ADMM$alpha * sign(ADMM$Omega)
-    parameters = matrix(c(ADMM$lam, ADMM$alpha), ncol = 2)
+    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * 
+        (1 - ADMM$alpha) * ADMM$Omega + ADMM$lam * 
+        ADMM$alpha * sign(ADMM$Omega)
+    parameters = matrix(c(ADMM$lam, ADMM$alpha), 
+        ncol = 2)
     colnames(parameters) = c("lam", "alpha")
     
     return(list(Iterations = ADMM$Iterations, Parameters = parameters, 

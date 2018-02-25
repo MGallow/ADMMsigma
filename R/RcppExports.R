@@ -29,6 +29,7 @@ NULL
 #' @param K specify the number of folds for cross validation
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
+#' @export
 #' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
 CV_ADMMsigmac <- function(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 3L, quiet = TRUE) {

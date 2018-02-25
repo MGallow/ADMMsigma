@@ -12,8 +12,10 @@ NeedsCompilation: yes
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Imports: Rcpp (>= 0.12.10),
-    RcppArmadillo
+Depends: Rcpp (>= 0.12.10),
+    RcppArmadillo,
+    doParallel,
+    foreach
 LinkingTo: Rcpp,
     RcppArmadillo,
     RcppParallel
