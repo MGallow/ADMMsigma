@@ -27,9 +27,9 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
     maxit = 1000, K = 3, quiet = TRUE) {
     
     # make cluster and register cluster
-    cores = parallel::detectCores() - 1
-    cluster = parallel::makeCluster(cores)
-    doParallel::registerDoParallel(cluster)
+    cores = detectCores() - 1
+    cluster = makeCluster(cores)
+    registerDoParallel(cluster)
     
     # expand grid of lambda and alpha values to
     # partition
@@ -39,15 +39,12 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
         alpha))
     
     # using cluster, loop over tuning parameters
-    CV = foreach::foreach(i = 1:cores, .combine = rbind) %dopar% 
+    CV = foreach(i = 1:cores, .combine = rbind, .packages = "ADMMsigma") %dopar% 
         {
             
             # run foreach loop on CV_ADMMsigmac
-            new_parameters = subset(parameters, subset = counter == 
-                i)
-            
-            ADMM = CV_ADMMsigmac(X = X, lam = new_parameters[, 
-                2], alpha = new_parameters[, 3], 
+            ADMM = CV_ADMMsigmac(X = X, lam = filter(parameters, counter == i)[, 
+                2], alpha = filter(parameters, counter == i)[, 3], 
                 rho = rho, mu = mu, tau1 = tau1, 
                 tau2 = tau2, crit = crit, tol1 = tol1, 
                 tol2 = tol2, maxit = maxit, K = K, 
@@ -58,7 +55,7 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
         }
     
     # stop cluster
-    parallel::stopCluster(cluster)
+    stopCluster(cluster)
     
     # return best lam and alpha values
     return(list(lam = CV[which.min(CV[, 4]), 2], 

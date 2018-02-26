@@ -15,7 +15,8 @@ RoxygenNote: 6.0.1
 Depends: Rcpp (>= 0.12.10),
     RcppArmadillo,
     doParallel,
-    foreach
+    foreach,
+    dplyr
 LinkingTo: Rcpp,
     RcppArmadillo,
     RcppParallel
