@@ -238,7 +238,8 @@ Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^
 <h3>Proof of (1):</h3>
 <p>(Work in progress.)</p>
 <p><br> <strong>Code snippet</strong>:</p>
-<p><br> Note this is not the actual code. The real code is written in c++.</p>
+<p>Note this is not the actual code. The real code is written in c++.</p>
+<p><br></p>
 <pre class="r"><code># ridge penalized precision matrix
 # function
 sigma_ridge = function(S, lam) {
@@ -338,6 +339,10 @@ ADMMsigma = function(X = NULL, S = NULL,
 <div id="installation" class="section level2">
 <h2>Installation</h2>
 <p><br></p>
+<pre class="r"><code># The easiest way to install is from the
+# development version from GitHub:
+# install.packages('devtools')
+devtools::install_github(&quot;MGallow/ADMMsigma&quot;)</code></pre>
 <p><br></p>
 <p>If there are any issues/bugs, please let me know: <a href="https://github.com/MGallow/ADMMsigma/issues">github</a>. You can also contact me via my <a href="http://users.stat.umn.edu/~gall0441/">website</a>. Pull requests are welcome!</p>
 <p><br></p>
@@ -530,38 +535,42 @@ X = Z %*% S.sqrt
 # glasso
 microbenchmark(glasso(s = S, rho = 0.1))</code></pre>
 <pre><code>## Unit: microseconds
-##                      expr     min       lq     mean   median     uq
-##  glasso(s = S, rho = 0.1) 243.754 276.2555 309.6297 289.9025 307.16
+##                      expr     min       lq     mean   median      uq
+##  glasso(s = S, rho = 0.1) 261.724 283.5695 425.5652 307.1995 341.166
 ##       max neval
-##  1601.712   100</code></pre>
+##  9280.112   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma - default tolerance
 microbenchmark(ADMMsigma(S = S, lam = 0.1, 
     tol1 = 1e-04, tol2 = 1e-04))</code></pre>
 <pre><code>## Unit: microseconds
 ##                                                     expr     min       lq
-##  ADMMsigma(S = S, lam = 0.1, tol1 = 1e-04, tol2 = 1e-04) 567.837 600.4275
-##      mean median       uq      max neval
-##  754.1452 675.68 812.0655 2098.071   100</code></pre>
+##  ADMMsigma(S = S, lam = 0.1, tol1 = 1e-04, tol2 = 1e-04) 693.225 752.4075
+##      mean   median       uq      max neval
+##  1275.589 818.0235 926.5685 39404.01   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma - tolerance 1e-8
 microbenchmark(ADMMsigma(S = S, lam = 0.1, 
     tol1 = 1e-08, tol2 = 1e-08))</code></pre>
 <pre><code>## Unit: milliseconds
 ##                                                     expr      min       lq
-##  ADMMsigma(S = S, lam = 0.1, tol1 = 1e-08, tol2 = 1e-08) 1.576151 1.635201
-##     mean   median       uq      max neval
-##  2.00609 1.852381 2.158443 3.738119   100</code></pre>
+##  ADMMsigma(S = S, lam = 0.1, tol1 = 1e-08, tol2 = 1e-08) 1.654605 1.919985
+##      mean   median      uq      max neval
+##  2.343245 2.182213 2.47964 6.344208   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma CV - likelihood
 # convergence criteria
 microbenchmark(ADMMsigma(X, crit = &quot;lik&quot;))</code></pre>
 <pre><code>## Unit: milliseconds
 ##                        expr      min       lq     mean   median      uq
-##  ADMMsigma(X, crit = &quot;lik&quot;) 26.29759 28.19949 32.09784 29.90724 33.8958
+##  ADMMsigma(X, crit = &quot;lik&quot;) 26.47059 28.06866 30.57946 29.37268 31.6004
 ##       max neval
-##  50.25216   100</code></pre>
+##  58.24766   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma CV
-# microbenchmark(ADMMsigma(X, lam =
-# 10^seq(-8, 8, 0.1), alpha = seq(0, 1,
-# 0.1)))</code></pre>
+microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 
+    8, 0.1), alpha = seq(0, 1, 0.1)))</code></pre>
+<pre><code>## Unit: seconds
+##                                                            expr      min
+##  ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 1, 0.1)) 3.322491
+##       lq     mean   median       uq      max neval
+##  3.41676 3.642404 3.489003 3.671647 6.223101   100</code></pre>
 <p><br></p>
 <p><br></p>
 

@@ -3,13 +3,13 @@ title: "Regularized Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 date: \today
 output:
-  html_document:
-    toc: yes
-    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
     number_sections: true
+  html_document:
+    toc: yes
+    toc_depth: 2
 abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for `ADMMsigma`."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
@@ -176,9 +176,10 @@ Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^{k +
 <br>\vspace{1cm}
 **Code snippet**:
 
-<br>\vspace{0.5cm}
+
 Note this is not the actual code. The real code is written in c++.
 
+<br>\vspace{0.5cm}
 ```{r eval = FALSE, echo = TRUE}
 
 # ridge penalized precision matrix function
@@ -281,7 +282,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam, alpha = 1, rho = 2, mu = 10, tau1 
 ## Installation
 
 <br>\vspace{0.5cm}
-```{r, eval = FALSE}
+```{r, eval = FALSE, echo = TRUE}
 # The easiest way to install is from the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("MGallow/ADMMsigma")
@@ -380,7 +381,7 @@ microbenchmark(ADMMsigma(S = S, lam = 0.1, tol1 = 1e-8, tol2 = 1e-8))
 microbenchmark(ADMMsigma(X, crit = "lik"))
 
 # benchmark ADMMsigma CV
-#microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 1, 0.1)))
+microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 1, 0.1)))
 
 ```
 <br>\vspace{0.5cm}
