@@ -10,6 +10,7 @@ output:
     toc: yes
     toc_depth: 2
     number_sections: true
+abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for `ADMMsigma`."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
 #fontfamily: mathpazo
@@ -40,6 +41,8 @@ library(lmerTest)
 library(lsmeans)
 library(car)
 library(lme4)
+library(microbenchmark)
+library(glasso)
 
 panderOptions('digits', 2)
 panderOptions('keep.trailing.zeros', FALSE)
@@ -49,16 +52,8 @@ panderOptions('table.split.table', Inf)
 
 <br>\vspace{1cm}
 
-This note describes the estimation procedure for regularized precision matrices using the alternating direction method of multipliers (ADMM) \cite{1}. We use an elastic-net-type penalty that allows for flexible experimentation.
-
-(WE MIGHT WANT TO EXPLAIN DUAL ASCENT FURTHER)
-
 
 # Introduction
-
-Suppose we want to solve the following optimization problem...
-
-Solve blah blah blah.... subject to
 
 Suppose we want to minimize $f(x) + g(z)$ subject to the constraint that $Ax + Bz = c$. For now, we will take $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}$ -- though we will later consider cases where $x$ and $z$ are matrices. The *augmented lagrangian* is constructed as follows:
 
@@ -111,13 +106,12 @@ The ADMM algorithm for regularized precision matrix estimation is
   \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align}
 
-We can simplify this algorithm further using the *condensed-form ADMM* which we will show in the next section.
 
-<br>\newpage
+<br>\vspace{1cm}
 
 ## Condensed-Form ADMM
 
-A sometimes more convenient form of the ADMM algorithm is constructed by scaling the dual variable. Let us define $R^{k} = \Omega - Z^{k}$ and $U^{k} = \Lambda^{k}/\rho$. Then
+An alternate form of the ADMM algorithm can constructed by scaling the dual variable. Let us define $R^{k} = \Omega - Z^{k}$ and $U^{k} = \Lambda^{k}/\rho$. Then
 
 \begin{align*}
   Tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &= Tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
@@ -143,7 +137,7 @@ More generally (in vector form),
 
 Note that there are limitations to using this method. For instance, because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size (without making further adjustments to $U^{k}$) -- a limitation that could prolong the convergence rate.
 
-<br>\newpage
+<br>\vspace{1cm}
 
 ## Algorithm
 
@@ -171,10 +165,225 @@ Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^{k +
 \[ U^{k + 1} = U^{k} + \Omega^{k + 1} - Z^{k + 1} \]
 
 
-### Proof:
+<br>\vspace{1cm}
+
+### Proof of (1):
 
 (Work in progress.)
 
+
+
+<br>\vspace{1cm}
+**Code snippet**:
+
+<br>\vspace{0.5cm}
+Note this is not the actual code. The real code is written in c++.
+
+```{r eval = FALSE, echo = TRUE}
+
+# ridge penalized precision matrix function
+sigma_ridge = function(S, lam){
+  
+  # dimensions
+  p = dim(S)[1]
+  
+  # gather eigen values of S (spectral decomposition)
+  e.out = eigen(S, symmetric = TRUE)
+  
+  # augment eigen values for omega hat
+  new.evs = (-e.out$val + sqrt(e.out$val^2 + 4*lam))/(2*lam)
+  
+  # compute omega hat for lambda (zero gradient equation)
+  omega = tcrossprod(e.out$vec*rep(new.evs, each = p), e.out$vec)
+  
+  # compute gradient
+  grad = S - qr.solve(omega) + lam * omega
+  
+  return(list(omega = omega, gradient = grad))
+}
+
+```
+<br>\vspace{1cm}
+
+
+### Proof of (2)
+
+(Work in progress.)
+
+
+
+<br>\vspace{1cm}
+**Code snippet**:
+
+Note this is not the actual code. The real code is written in c++.
+
+<br>\vspace{0.5cm}
+```{r eval = FALSE, echo = TRUE}
+
+# ADMMsigma function
+ADMMsigma = function(X = NULL, S = NULL, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3){
+  
+  # compute sample covariance matrix, if necessary
+  if (is.null(S)){
+    
+    # covariance matrix
+    n = dim(X)[1]
+    S = (n - 1)/n*cov(X)
+    
+  }
+  
+  # allocate memory
+  p = dim(S)[1]
+  criterion = TRUE
+  iter = lik = s = r = eps1 = eps2 = 0
+  new.Z = Y = Omega = matrix(0, nrow = p, ncol = p)
+  
+  # loop until convergence
+  while (criterion && (iter <= maxit)){
+    
+    # ridge equation (1)
+    # gather eigen values (spectral decomposition)
+    Z = new.Z
+    Omega = sigma_ridge(S + Y - rho*Z, lam = rho)$omega
+    
+    # penalty equation (2)
+    # soft-thresholding
+    new.Z = soft(Y + rho*Omega, lam*alpha)/(lam*(1 - alpha) + rho)
+    
+    # update U (3)
+    Y = Y + rho*(Omega - new.Z)
+    
+    # calculate new rho
+    s = sqrt(sum((rho*(new.Z - Z))^2))
+    r = sqrt(sum((Omega - new.Z)^2))
+    rho = rho*(tau1*(r > mu*s) + (s > mu*r)/tau2 + (s/mu <= r & r <= mu*s))
+    iter = iter + 1
+    
+    # stopping criterion
+    eps1 = p*tol1 + tol2*max(sqrt(sum(Omega^2)), sqrt(sum(new.Z^2)))
+    eps2 = p*tol1 + tol2*sqrt(sum(Y^2))
+    criterion = (r >= eps1 || s >= eps2)
+  
+  }
+  return(list(Iterations = iter, Omega = Omega))
+}
+
+
+```
+<br>\vspace{1cm}
+
+
+
+<br>\vspace{1cm}
+
+# R Package
+
+## Installation
+
+<br>\vspace{0.5cm}
+```{r, eval = FALSE}
+# The easiest way to install is from the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("MGallow/ADMMsigma")
+```
+<br>\vspace{0.5cm}
+
+If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
+
+
+
+<br>\vspace{1cm}
+
+## Usage
+
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+library(ADMMsigma)
+
+# generate data from tri-diagonal (sparse) matrix for example
+# first compute covariance matrix (can confirm inverse is tri-diagonal)
+S = matrix(0, nrow = 5, ncol = 5)
+
+for (i in 1:5){
+  for (j in 1:5){
+    S[i, j] = 0.7^(abs(i - j))
+  }
+}
+
+# generate 100x5 matrix with rows drawn from iid N_p(0, S)
+Z = matrix(rnorm(100*10), nrow = 100, ncol = 5)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+
+# ridge penalty (use CV for optimal lambda)
+ADMMsigma(X, alpha = 0)
+
+# lasso penalty (use CV for optimal lambda)
+ADMMsigma(X)
+
+# lasso penalty (lam = 0.1)
+ADMMsigma(X, lam = 0.1)
+
+# elastic-net type penalty (use CV for optimal lambda)
+ADMMsigma(X, alpha = 0.5)
+
+# elastic-net type penalty (use CV for optimal lambda and alpha)
+ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 1, 0.1))
+
+```
+<br>\vspace{0.5cm}
+
+
+## Benchmark
+
+### Computer Specs:
+
+ - MacBook Pro (Late 2016)
+ - Processor: 2.9 GHz Intel Core i5
+ - Memory: 8GB 2133 MHz
+ - Graphics: Intel Iris Graphics 550
+
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# generate data from tri-diagonal (sparse) matrix for example
+# first compute covariance matrix (can confirm inverse is tri-diagonal)
+S = matrix(0, nrow = 10, ncol = 10)
+
+for (i in 1:10){
+  for (j in 1:10){
+    S[i, j] = 0.7^(abs(i - j))
+  }
+}
+
+# generate 1000x100 matrix with rows drawn from iid N_p(0, S)
+Z = matrix(rnorm(100*10), nrow = 100, ncol = 10)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+
+# glasso
+microbenchmark(glasso(s = S, rho = 0.1))
+
+# benchmark ADMMsigma - default tolerance
+microbenchmark(ADMMsigma(S = S, lam = 0.1, tol1 = 1e-4, tol2 = 1e-4))
+
+# benchmark ADMMsigma - tolerance 1e-8
+microbenchmark(ADMMsigma(S = S, lam = 0.1, tol1 = 1e-8, tol2 = 1e-8))
+
+# benchmark ADMMsigma CV - likelihood convergence criteria
+microbenchmark(ADMMsigma(X, crit = "lik"))
+
+# benchmark ADMMsigma CV
+#microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 1, 0.1)))
+
+```
+<br>\vspace{0.5cm}
 
 
 <br>\newpage
@@ -194,8 +403,3 @@ Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^{k +
   Zou, Hui, and Trevor Hastie. "Regularization and variable selection via the elastic net." Journal of the Royal Statistical Society: Series B (Statistical Methodology) 67.2 (2005): 301-320.
 
 \end{thebibliography}
-
-
-<br>\newpage
-
-# Appendix

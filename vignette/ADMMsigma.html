@@ -41,6 +41,16 @@ if (window.hljs) {
 </script>
 
 
+<style type="text/css">
+  p.abstract{
+    text-align: center;
+    font-weight: bold;
+  }
+  div.abstract{
+    margin: auto;
+    width: 90%;
+  }
+</style>
 
 <style type="text/css">
 h1 {
@@ -120,6 +130,10 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Regularized Precision Matrix Estimation via ADMM</h1>
 <h4 class="author"><em>Matt Galloway</em></h4>
+<div class="abstract">
+<p class="abstract">Abstract</p>
+<code>ADMMsigma</code> is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for <code>ADMMsigma</code>.
+</div>
 
 </div>
 
@@ -130,17 +144,17 @@ $(document).ready(function () {
 <li><a href="#condensed-form-admm">Condensed-Form ADMM</a></li>
 <li><a href="#algorithm">Algorithm</a></li>
 </ul></li>
-<li><a href="#appendix">Appendix</a></li>
+<li><a href="#r-package">R Package</a><ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#benchmark">Benchmark</a></li>
+</ul></li>
 </ul>
 </div>
 
 <p><br></p>
-<p>This note describes the estimation procedure for regularized precision matrices using the alternating direction method of multipliers (ADMM) . We use an elastic-net-type penalty that allows for flexible experimentation.</p>
-<p>(WE MIGHT WANT TO EXPLAIN DUAL ASCENT FURTHER)</p>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>Suppose we want to solve the following optimization problem…</p>
-<p>Solve blah blah blah…. subject to</p>
 <p>Suppose we want to minimize <span class="math inline">\(f(x) + g(z)\)</span> subject to the constraint that <span class="math inline">\(Ax + Bz = c\)</span>. For now, we will take <span class="math inline">\(x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}\)</span> – though we will later consider cases where <span class="math inline">\(x\)</span> and <span class="math inline">\(z\)</span> are matrices. The <em>augmented lagrangian</em> is constructed as follows:</p>
 <p><span class="math display">\[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]</span></p>
 <p>where <span class="math inline">\(y \in \mathbb{R}^{p}\)</span> is the lagrange multiplier. The optimal value is</p>
@@ -172,11 +186,10 @@ $(document).ready(function () {
   Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
   \Lambda^{k + 1} &amp;= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align}\]</span>
-<p>We can simplify this algorithm further using the <em>condensed-form ADMM</em> which we will show in the next section.</p>
 <p><br></p>
 <div id="condensed-form-admm" class="section level2">
 <h2>Condensed-Form ADMM</h2>
-<p>A sometimes more convenient form of the ADMM algorithm is constructed by scaling the dual variable. Let us define <span class="math inline">\(R^{k} = \Omega - Z^{k}\)</span> and <span class="math inline">\(U^{k} = \Lambda^{k}/\rho\)</span>. Then</p>
+<p>An alternate form of the ADMM algorithm can constructed by scaling the dual variable. Let us define <span class="math inline">\(R^{k} = \Omega - Z^{k}\)</span> and <span class="math inline">\(U^{k} = \Lambda^{k}/\rho\)</span>. Then</p>
 <span class="math display">\[\begin{align*}
   Tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &amp;= Tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
   &amp;= \frac{\rho}{2}\left\| R^{k} + \Lambda^{k}/\rho \right\|_{F}^{2} - \frac{\rho}{2}\left\| \Lambda^{k}/\rho \right\|_{F}^{2} \\
@@ -220,17 +233,340 @@ Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^
 <li>Update <span class="math inline">\(U\)</span>.</li>
 </ol>
 <p><span class="math display">\[ U^{k + 1} = U^{k} + \Omega^{k + 1} - Z^{k + 1} \]</span></p>
-<div id="proof" class="section level3">
-<h3>Proof:</h3>
+<p><br></p>
+<div id="proof-of-1" class="section level3">
+<h3>Proof of (1):</h3>
 <p>(Work in progress.)</p>
+<p><br> <strong>Code snippet</strong>:</p>
+<p><br> Note this is not the actual code. The real code is written in c++.</p>
+<pre class="r"><code># ridge penalized precision matrix
+# function
+sigma_ridge = function(S, lam) {
+    
+    # dimensions
+    p = dim(S)[1]
+    
+    # gather eigen values of S (spectral
+    # decomposition)
+    e.out = eigen(S, symmetric = TRUE)
+    
+    # augment eigen values for omega hat
+    new.evs = (-e.out$val + sqrt(e.out$val^2 + 
+        4 * lam))/(2 * lam)
+    
+    # compute omega hat for lambda (zero
+    # gradient equation)
+    omega = tcrossprod(e.out$vec * rep(new.evs, 
+        each = p), e.out$vec)
+    
+    # compute gradient
+    grad = S - qr.solve(omega) + lam * omega
+    
+    return(list(omega = omega, gradient = grad))
+}</code></pre>
+<p><br></p>
+</div>
+<div id="proof-of-2" class="section level3">
+<h3>Proof of (2)</h3>
+<p>(Work in progress.)</p>
+<p><br> <strong>Code snippet</strong>:</p>
+<p>Note this is not the actual code. The real code is written in c++.</p>
+<p><br></p>
+<pre class="r"><code># ADMMsigma function
+ADMMsigma = function(X = NULL, S = NULL, 
+    lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, 
+    tau2 = 2, tol1 = 1e-04, tol2 = 1e-04, 
+    maxit = 1000) {
+    
+    # compute sample covariance matrix, if
+    # necessary
+    if (is.null(S)) {
+        
+        # covariance matrix
+        n = dim(X)[1]
+        S = (n - 1)/n * cov(X)
+        
+    }
+    
+    # allocate memory
+    p = dim(S)[1]
+    criterion = TRUE
+    iter = lik = s = r = eps1 = eps2 = 0
+    new.Z = Y = Omega = matrix(0, nrow = p, 
+        ncol = p)
+    
+    # loop until convergence
+    while (criterion &amp;&amp; (iter &lt;= maxit)) {
+        
+        # ridge equation (1) gather eigen values
+        # (spectral decomposition)
+        Z = new.Z
+        Omega = sigma_ridge(S + Y - rho * 
+            Z, lam = rho)$omega
+        
+        # penalty equation (2) soft-thresholding
+        new.Z = soft(Y + rho * Omega, lam * 
+            alpha)/(lam * (1 - alpha) + rho)
+        
+        # update U (3)
+        Y = Y + rho * (Omega - new.Z)
+        
+        # calculate new rho
+        s = sqrt(sum((rho * (new.Z - Z))^2))
+        r = sqrt(sum((Omega - new.Z)^2))
+        rho = rho * (tau1 * (r &gt; mu * s) + 
+            (s &gt; mu * r)/tau2 + (s/mu &lt;= 
+            r &amp; r &lt;= mu * s))
+        iter = iter + 1
+        
+        # stopping criterion
+        eps1 = p * tol1 + tol2 * max(sqrt(sum(Omega^2)), 
+            sqrt(sum(new.Z^2)))
+        eps2 = p * tol1 + tol2 * sqrt(sum(Y^2))
+        criterion = (r &gt;= eps1 || s &gt;= eps2)
+        
+    }
+    return(list(Iterations = iter, Omega = Omega))
+}</code></pre>
+<p><br></p>
+<p><br></p>
+</div>
+</div>
+</div>
+<div id="r-package" class="section level1">
+<h1>R Package</h1>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p><br></p>
+<p><br></p>
+<p>If there are any issues/bugs, please let me know: <a href="https://github.com/MGallow/ADMMsigma/issues">github</a>. You can also contact me via my <a href="http://users.stat.umn.edu/~gall0441/">website</a>. Pull requests are welcome!</p>
+<p><br></p>
+</div>
+<div id="usage" class="section level2">
+<h2>Usage</h2>
+<p><br></p>
+<pre class="r"><code>library(ADMMsigma)
+
+# generate data from tri-diagonal
+# (sparse) matrix for example first
+# compute covariance matrix (can confirm
+# inverse is tri-diagonal)
+S = matrix(0, nrow = 5, ncol = 5)
+
+for (i in 1:5) {
+    for (j in 1:5) {
+        S[i, j] = 0.7^(abs(i - j))
+    }
+}
+
+# generate 100x5 matrix with rows drawn
+# from iid N_p(0, S)
+Z = matrix(rnorm(100 * 10), nrow = 100, ncol = 5)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% 
+    t(out$vectors)
+X = Z %*% S.sqrt
+
+
+# ridge penalty (use CV for optimal
+# lambda)
+ADMMsigma(X, alpha = 0)</code></pre>
+<pre><code>## $Iterations
+## [1] 23
+## 
+## $Parameters
+##              lam alpha
+## [1,] 0.003162278     0
+## 
+## $Omega
+##            [,1]         [,2]       [,3]       [,4]         [,5]
+## [1,]  2.0779130 -1.222817057 -0.4650732  0.4360070 -0.277199465
+## [2,] -1.2228171  2.700852231 -1.1382289 -0.1527581  0.009894831
+## [3,] -0.4650732 -1.138228933  3.1807363 -1.6151188  0.139898112
+## [4,]  0.4360070 -0.152758053 -1.6151188  2.8365836 -1.331159913
+## [5,] -0.2771995  0.009894831  0.1398981 -1.3311599  1.800983323
+## 
+## $Gradient
+##               [,1]          [,2]          [,3]          [,4]          [,5]
+## [1,] -1.376103e-05 -9.188109e-07  3.223621e-05 -3.621261e-05  1.765172e-05
+## [2,] -9.188109e-07 -2.877771e-05  5.535067e-05 -4.396099e-05  1.807855e-05
+## [3,]  3.223621e-05  5.535067e-05 -1.740679e-04  1.617914e-04 -7.265861e-05
+## [4,] -3.621261e-05 -4.396099e-05  1.617914e-04 -1.553951e-04  7.090077e-05
+## [5,]  1.765172e-05  1.807855e-05 -7.265861e-05  7.090077e-05 -3.258913e-05</code></pre>
+<pre class="r"><code># lasso penalty (use CV for optimal
+# lambda)
+ADMMsigma(X)</code></pre>
+<pre><code>## $Iterations
+## [1] 18
+## 
+## $Parameters
+##       lam alpha
+## [1,] 0.01     1
+## 
+## $Omega
+##            [,1]          [,2]        [,3]        [,4]          [,5]
+## [1,]  1.9934594 -1.1702710447 -0.37840802  0.29485151 -0.1985778896
+## [2,] -1.1702710  2.6220547841 -1.14515898 -0.09506475 -0.0005302717
+## [3,] -0.3784080 -1.1451589826  3.08396460 -1.48579428  0.0297456944
+## [4,]  0.2948515 -0.0950647489 -1.48579428  2.67036640 -1.2235506586
+## [5,] -0.1985779 -0.0005302717  0.02974569 -1.22355066  1.7442562369
+## 
+## $Gradient
+##               [,1]          [,2]          [,3]          [,4]          [,5]
+## [1,]  5.221207e-06  3.126230e-05 -1.108116e-04  9.248804e-05  6.204908e-07
+## [2,]  3.126230e-05 -1.085911e-04  1.829387e-04 -9.641365e-05 -3.274907e-03
+## [3,] -1.108116e-04  1.829387e-04 -4.640924e-05 -4.145295e-05  2.093162e-05
+## [4,]  9.248804e-05 -9.641365e-05 -4.145295e-05  1.668319e-04 -1.033365e-04
+## [5,]  6.204908e-07 -3.274907e-03  2.093162e-05 -1.033365e-04  1.111442e-04</code></pre>
+<pre class="r"><code># lasso penalty (lam = 0.1)
+ADMMsigma(X, lam = 0.1)</code></pre>
+<pre><code>## $Iterations
+## [1] 17
+## 
+## $Parameters
+##      lam alpha
+## [1,] 0.1     1
+## 
+## $Omega
+##               [,1]        [,2]        [,3]          [,4]        [,5]
+## [1,]  1.3651643902 -0.61806333 -0.20671017  0.0001747992 -0.05374221
+## [2,] -0.6180633330  1.60880421 -0.59138995 -0.0799212198 -0.05607930
+## [3,] -0.2067101747 -0.59138995  1.75833783 -0.6964280430 -0.07204353
+## [4,]  0.0001747992 -0.07992122 -0.69642804  1.5887374923 -0.66608144
+## [5,] -0.0537422072 -0.05607930 -0.07204353 -0.6660814435  1.21461926
+## 
+## $Gradient
+##               [,1]          [,2]          [,3]          [,4]          [,5]
+## [1,] -4.070453e-07  2.278216e-05 -5.371592e-05  1.360940e-01 -2.702951e-05
+## [2,]  2.278216e-05 -7.593213e-05  1.171287e-04 -1.045148e-04  4.752474e-05
+## [3,] -5.371592e-05  1.171287e-04 -1.325740e-04  1.037627e-04 -4.475471e-05
+## [4,]  1.360940e-01 -1.045148e-04  1.037627e-04 -8.031988e-05  3.556859e-05
+## [5,] -2.702951e-05  4.752474e-05 -4.475471e-05  3.556859e-05 -1.627210e-05</code></pre>
+<pre class="r"><code># elastic-net type penalty (use CV for
+# optimal lambda)
+ADMMsigma(X, alpha = 0.5)</code></pre>
+<pre><code>## $Iterations
+## [1] 20
+## 
+## $Parameters
+##       lam alpha
+## [1,] 0.01   0.5
+## 
+## $Omega
+##            [,1]          [,2]        [,3]       [,4]          [,5]
+## [1,]  1.9718203 -1.1354459874 -0.40427462  0.3203008 -0.2138762541
+## [2,] -1.1354460  2.5441667186 -1.06024861 -0.1406131 -0.0003381227
+## [3,] -0.4042746 -1.0602486097  2.94497771 -1.4089045  0.0357950938
+## [4,]  0.3203008 -0.1406131350 -1.40890447  2.5912180 -1.1965017963
+## [5,] -0.2138763 -0.0003381227  0.03579509 -1.1965018  1.7207455879
+## 
+## $Gradient
+##               [,1]          [,2]          [,3]          [,4]          [,5]
+## [1,] -1.442724e-05  9.949138e-06  1.158747e-05 -2.677499e-05  2.154877e-05
+## [2,]  9.949138e-06 -4.952536e-05  7.956432e-05 -4.133287e-05 -1.930418e-03
+## [3,]  1.158747e-05  7.956432e-05 -1.808014e-04  1.475578e-04 -5.440468e-05
+## [4,] -2.677499e-05 -4.133287e-05  1.475578e-04 -1.395532e-04  6.031558e-05
+## [5,]  2.154877e-05 -1.930418e-03 -5.440468e-05  6.031558e-05 -2.499803e-05</code></pre>
+<pre class="r"><code># elastic-net type penalty (use CV for
+# optimal lambda and alpha)
+ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 
+    1, 0.1))</code></pre>
+<pre><code>## $Iterations
+## [1] 20
+## 
+## $Parameters
+##             lam alpha
+## [1,] 0.01995262     1
+## 
+## $Omega
+##            [,1]        [,2]          [,3]        [,4]          [,5]
+## [1,]  1.8768887 -1.06946095 -0.3080532228  0.16646927 -0.1419965542
+## [2,] -1.0694609  2.44352912 -1.0685399861 -0.05716484 -0.0253489031
+## [3,] -0.3080532 -1.06853999  2.8296621135 -1.32160206 -0.0005737369
+## [4,]  0.1664693 -0.05716484 -1.3216020623  2.46545558 -1.1200660235
+## [5,] -0.1419966 -0.02534890 -0.0005737369 -1.12006602  1.6524167132
+## 
+## $Gradient
+##               [,1]          [,2]          [,3]          [,4]          [,5]
+## [1,] -3.871004e-06  2.684135e-05 -4.518867e-05  7.569899e-06  2.275912e-05
+## [2,]  2.684135e-05 -7.996578e-05  3.451622e-05  2.579805e-05  3.390823e-06
+## [3,] -4.518867e-05  3.451622e-05  1.542779e-04 -1.397453e-04 -1.538407e-02
+## [4,]  7.569899e-06  2.579805e-05 -1.397453e-04  2.119603e-04 -8.545260e-05
+## [5,]  2.275912e-05  3.390823e-06 -1.538407e-02 -8.545260e-05  9.710714e-05</code></pre>
+<p><br></p>
+</div>
+<div id="benchmark" class="section level2">
+<h2>Benchmark</h2>
+<div id="computer-specs" class="section level3">
+<h3>Computer Specs:</h3>
+<ul>
+<li>MacBook Pro (Late 2016)</li>
+<li>Processor: 2.9 GHz Intel Core i5</li>
+<li>Memory: 8GB 2133 MHz</li>
+<li>Graphics: Intel Iris Graphics 550</li>
+</ul>
+<p><br></p>
+<pre class="r"><code># generate data from tri-diagonal
+# (sparse) matrix for example first
+# compute covariance matrix (can confirm
+# inverse is tri-diagonal)
+S = matrix(0, nrow = 10, ncol = 10)
+
+for (i in 1:10) {
+    for (j in 1:10) {
+        S[i, j] = 0.7^(abs(i - j))
+    }
+}
+
+# generate 1000x100 matrix with rows
+# drawn from iid N_p(0, S)
+Z = matrix(rnorm(100 * 10), nrow = 100, ncol = 10)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% 
+    t(out$vectors)
+X = Z %*% S.sqrt
+
+
+# glasso
+microbenchmark(glasso(s = S, rho = 0.1))</code></pre>
+<pre><code>## Unit: microseconds
+##                      expr     min       lq     mean   median     uq
+##  glasso(s = S, rho = 0.1) 243.754 276.2555 309.6297 289.9025 307.16
+##       max neval
+##  1601.712   100</code></pre>
+<pre class="r"><code># benchmark ADMMsigma - default tolerance
+microbenchmark(ADMMsigma(S = S, lam = 0.1, 
+    tol1 = 1e-04, tol2 = 1e-04))</code></pre>
+<pre><code>## Unit: microseconds
+##                                                     expr     min       lq
+##  ADMMsigma(S = S, lam = 0.1, tol1 = 1e-04, tol2 = 1e-04) 567.837 600.4275
+##      mean median       uq      max neval
+##  754.1452 675.68 812.0655 2098.071   100</code></pre>
+<pre class="r"><code># benchmark ADMMsigma - tolerance 1e-8
+microbenchmark(ADMMsigma(S = S, lam = 0.1, 
+    tol1 = 1e-08, tol2 = 1e-08))</code></pre>
+<pre><code>## Unit: milliseconds
+##                                                     expr      min       lq
+##  ADMMsigma(S = S, lam = 0.1, tol1 = 1e-08, tol2 = 1e-08) 1.576151 1.635201
+##     mean   median       uq      max neval
+##  2.00609 1.852381 2.158443 3.738119   100</code></pre>
+<pre class="r"><code># benchmark ADMMsigma CV - likelihood
+# convergence criteria
+microbenchmark(ADMMsigma(X, crit = &quot;lik&quot;))</code></pre>
+<pre><code>## Unit: milliseconds
+##                        expr      min       lq     mean   median      uq
+##  ADMMsigma(X, crit = &quot;lik&quot;) 26.29759 28.19949 32.09784 29.90724 33.8958
+##       max neval
+##  50.25216   100</code></pre>
+<pre class="r"><code># benchmark ADMMsigma CV
+# microbenchmark(ADMMsigma(X, lam =
+# 10^seq(-8, 8, 0.1), alpha = seq(0, 1,
+# 0.1)))</code></pre>
+<p><br></p>
 <p><br></p>
 
-<p><br></p>
 </div>
 </div>
-</div>
-<div id="appendix" class="section level1">
-<h1>Appendix</h1>
 </div>
 
 

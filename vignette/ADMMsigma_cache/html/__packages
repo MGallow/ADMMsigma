@@ -33,3 +33,8 @@ lme4
 lmerTest
 lsmeans
 car
+RcppArmadillo
+foreach
+iterators
+doParallel
+glasso
