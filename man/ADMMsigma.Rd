@@ -4,9 +4,10 @@
 \alias{ADMMsigma}
 \title{ADMM penalized precision matrix estimation (using ADMMsigmac)}
 \usage{
-ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = 1,
-  rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
-  tol2 = 1e-04, maxit = 1000, K = 3, parallel = FALSE, quiet = TRUE)
+ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(-1,
+  1, 0.1), rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM",
+  tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, K = 3, parallel = FALSE,
+  quiet = TRUE)
 }
 \arguments{
 \item{X}{data matrix}
@@ -15,7 +16,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = 1,
 
 \item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
 
-\item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge}
+\item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge. Defaults to seq(-1, 1, 0.1)}
 
 \item{rho}{initial step size for ADMM}
 
