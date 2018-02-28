@@ -45,10 +45,10 @@ CV_ADMMsigmac <- function(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, c
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
 #' @export
-#' @examples CV_sigma_ridge(X, lam = seq(0.1, 3, 0.1))
+#' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
-CV_sigma_ridgec <- function(X, lam, K = 3L, quiet = TRUE) {
-    .Call('_ADMMsigma_CV_sigma_ridgec', PACKAGE = 'ADMMsigma', X, lam, K, quiet)
+CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
+    .Call('_ADMMsigma_CV_RIDGEsigmac', PACKAGE = 'ADMMsigma', X, lam, K, quiet)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)
@@ -59,9 +59,11 @@ CV_sigma_ridgec <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @return matrix of omega hat
 #' @examples
 #' n = nrow(X)
-#' sigma_ridgec(S = (n-1)/n*cov(X), lam = 0.1)
+#' RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
 #'
-NULL
+RIDGEsigmac <- function(S, lam) {
+    .Call('_ADMMsigma_RIDGEsigmac', PACKAGE = 'ADMMsigma', S, lam)
+}
 
 #' @title ADMM penalized precision matrix estimation (c++)
 #' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
@@ -80,7 +82,7 @@ NULL
 #' @param maxit maximum number of iterations
 #' @return iterations, lam, omega
 #' @examples
-#' ADMM_sigmac(X, lam = 0.1)
+#' ADMMsigmac(X, lam = 0.1)
 #'
 ADMMsigmac <- function(S, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
     .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)

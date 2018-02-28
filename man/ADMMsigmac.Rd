@@ -39,6 +39,6 @@ iterations, lam, omega
 Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
 }
 \examples{
-ADMM_sigmac(X, lam = 0.1)
+ADMMsigmac(X, lam = 0.1)
 
 }

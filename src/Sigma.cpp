@@ -16,10 +16,10 @@ using namespace Rcpp;
 //' @return matrix of omega hat
 //' @examples
 //' n = nrow(X)
-//' sigma_ridgec(S = (n-1)/n*cov(X), lam = 0.1)
+//' RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
 //'
-
-arma::mat sigma_ridgec(const arma::mat &S, double lam){
+// [[Rcpp::export]]
+arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 
   // gather eigen values of S (spectral decomposition)
   arma::mat V;
@@ -59,7 +59,7 @@ arma::mat sigma_ridgec(const arma::mat &S, double lam){
 //' @param maxit maximum number of iterations
 //' @return iterations, lam, omega
 //' @examples
-//' ADMM_sigmac(X, lam = 0.1)
+//' ADMMsigmac(X, lam = 0.1)
 //'
 // [[Rcpp::export]]
 List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
@@ -81,7 +81,7 @@ List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, do
     // ridge equation (1)
     // gather eigen values (spectral decomposition)
     Z = Z2;
-    Omega = sigma_ridgec(S + Y - rho*Z, rho);
+    Omega = RIDGEsigmac(S + Y - rho*Z, rho);
 
     // penalty equation (2)
     // soft-thresholding

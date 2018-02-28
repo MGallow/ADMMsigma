@@ -1,9 +1,10 @@
 ## Matt Galloway
 
 
-#' @title ADMM penalized precision matrix estimation (using ADMM_sigmac)
+#' @title ADMM penalized precision matrix estimation (using ADMMsigmac)
 #' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
-#'
+#' @param X data matrix
+#' @param S option to specify sample covariance matrix (denominator n)
 #' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
 #' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
 #' @param rho initial step size for ADMM
@@ -24,9 +25,9 @@
 
 # we define the ADMM covariance estimation function
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = 1, rho = 2, mu = 10, tau1 = 2, 
-    tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, K = 3, parallel = FALSE, quiet = TRUE) {
+    5, 0.5), alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
+    crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
+    K = 3, parallel = FALSE, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -50,7 +51,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     }
     
     # perform cross validation, if necessary
-    CV.erro = NULL
+    CV.error = NULL
     if ((length(lam) > 1 || length(alpha) > 1) & !is.null(X)) {
         
         # run CV in parallel?
@@ -66,11 +67,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         } else {
             
             # execute CV_ADMM_sigma
-            ADMM = CV_ADMMsigmac(X = X, lam = lam, 
-                alpha = alpha, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, maxit = maxit, 
-                K = K, quiet = quiet)
+            ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
+                rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
+                crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, K = K, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -79,8 +79,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
         ADMM = ADMMsigmac(S = S, lam = ADMM$lam, alpha = ADMM$alpha, 
             rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, 
-            maxit = maxit)
+            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
         
         
     } else {
@@ -90,8 +89,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             
             # covariance matrix
             X_bar = apply(X, 2, mean)
-            S = crossprod(scale(X, center = X_bar, 
-                scale = F))/dim(X)[1]
+            S = crossprod(scale(X, center = X_bar, scale = F))/dim(X)[1]
             
         }
         
@@ -101,8 +99,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         }
         ADMM = ADMMsigmac(S = S, lam = lam, alpha = alpha, 
             rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, 
-            maxit = maxit)
+            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
         
     }
     
@@ -112,8 +109,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         sign(ADMM$Omega)
     
     # return values
-    tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), 
-        ncol = 2)
+    tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), ncol = 2)
     colnames(tuning) = c("log10(lam)", "alpha")
     returns = list(Iterations = ADMM$Iterations, Tuning = tuning, 
         Lambdas = lam, Alphas = alpha, maxit = maxit, 
@@ -178,7 +174,7 @@ plot.ADMMsigma = function(x, ...) {
     
     # augment values for heat map (helps visually)
     cv = expand.grid(lam = x$Lambdas, alpha = x$Alphas)
-    Errors = 1/c(x$CV.error)
+    cv$Errors = 1/c(x$CV.error)
     
     # design color palette
     bluetowhite <- c("#000E29", "white")

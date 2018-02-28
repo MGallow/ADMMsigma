@@ -166,10 +166,10 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
 //' @export
-//' @examples CV_sigma_ridge(X, lam = seq(0.1, 3, 0.1))
+//' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]
-List CV_sigma_ridgec(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {
+List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {
   
   // initialization
   int n = X.n_rows;
@@ -213,7 +213,7 @@ List CV_sigma_ridgec(const arma::mat &X, const arma::colvec &lam, int K = 3, boo
       double lam_ = lam[i];
       
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-      Omega = sigma_ridgec(S_train, lam_);
+      Omega = RIDGEsigmac(S_train, lam_);
       
       // compute the observed negative validation loglikelihood
       arma::log_det(logdet, sgn, Omega);
@@ -236,17 +236,13 @@ List CV_sigma_ridgec(const arma::mat &X, const arma::colvec &lam, int K = 3, boo
   
   // determine optimal tuning parameters
   CV_errors = CV_errors/K;
+  double error = CV_errors.min();
   arma::uword ind = CV_errors.index_min();
   int lam_ind = ind % CV_errors.n_rows;
   double best_lam = lam[lam_ind];
   
-  // compute final estimate at best tuning parameter
-  arma::mat S = arma::cov(X, 1);
-  arma::mat best_Omega = sigma_ridgec(S, best_lam);
-  
-  
   // return list of coefficients
   return List::create(Named("lam") = best_lam,
-                      Named("Omega") = best_Omega,
+                      Named("cv.error") = error,
                       Named("cv.errors") = CV_errors);
 }
