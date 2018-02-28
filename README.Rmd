@@ -25,6 +25,8 @@ See [vignette](https://htmlpreview.github.io/?https://github.com/MGallow/ADMMsig
 
 * `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
 
+* `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
+
 
 ## Installation
 
@@ -41,36 +43,39 @@ If there are any issues/bugs, please let me know: [github](https://github.com/MG
 ```{r, message = FALSE}
 library(ADMMsigma)
 
-# generate data from tri-diagonal (sparse) matrix for example
-# first compute covariance matrix (can confirm inverse is tri-diagonal)
-S = matrix(0, nrow = 10, ncol = 10)
+#  generate data from a dense matrix for example
+# first compute covariance matrix
+S = matrix(0, nrow = 5, ncol = 5)
 
-for (i in 1:10){
-  for (j in 1:10){
-    S[i, j] = 0.7^(abs(i - j))
+for (i in 1:5){
+  for (j in 1:5){
+    S[i, j] = 0.9^(i != j)
   }
 }
 
-# generate 100x10 matrix with rows drawn from iid N_p(0, S)
-Z = matrix(rnorm(100*10), nrow = 100, ncol = 10)
+# generate 100x5 matrix with rows drawn from iid N_p(0, S)
+Z = matrix(rnorm(100*10), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 
+# elastic-net type penalty (use CV for optimal lambda and alpha)
+ADMMsigma(X)
+
 # ridge penalty (use CV for optimal lambda)
 ADMMsigma(X, alpha = 0)
 
-# lasso penalty (use CV for optimal lambda)
-ADMMsigma(X)
-
 # lasso penalty (lam = 0.1)
-ADMMsigma(X, lam = 0.1)
+ADMMsigma(X, lam = 0.1, alpha = 1)
 
-# elastic-net type penalty (use CV for optimal lambda)
-ADMMsigma(X, alpha = 0.5)
+# ridge penalty no ADMM
+RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 
-# elastic-net type penalty (use CV for optimal lambda and alpha)
-ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = seq(0, 1, 0.1))
+# produce CV heat map for ADMMsigma
+ADMMsigma(X) %>% plot
+
+# produce CV heat map for RIDGEsigma
+RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
 
 ```

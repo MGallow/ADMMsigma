@@ -4,7 +4,7 @@
 \alias{ADMMsigma}
 \title{ADMM penalized precision matrix estimation (using ADMMsigmac)}
 \usage{
-ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(-1,
+ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
   1, 0.1), rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM",
   tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, K = 3, parallel = FALSE,
   quiet = TRUE)
