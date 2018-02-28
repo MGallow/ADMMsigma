@@ -21,7 +21,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = 1,
 
 \item{tau2}{adjustment for rho}
 
-\item{crit}{criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Default is 'ADMM'}
+\item{crit}{criterion for convergence c('ADMM', 'grad', 'loglik'). Option crit != 'ADMM' will use tol1 as tolerance. Default is 'ADMM'}
 
 \item{tol1}{absolute tolerance. Defaults to 1e-4}
 

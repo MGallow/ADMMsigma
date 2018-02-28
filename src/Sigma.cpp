@@ -108,7 +108,7 @@ List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, do
       grad = S - Omega.i() + lam*(1 - alpha)*Omega + lam*alpha*arma::sign(Omega);
       criterion = (arma::norm(grad, "inf") >= tol1);
 
-    } else if (crit == "lik"){
+    } else if (crit == "loglik"){
 
       // compute likelihood
       arma::log_det(logdet, sgn, Omega);

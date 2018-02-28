@@ -19,8 +19,7 @@
 #' @return iterations, lam, omega, and gradient
 #' @export
 
-# we define the ADMM covariance estimation
-# function
+# we define the ADMM covariance estimation function
 ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5, 
     5, 0.5), alpha = 1, rho = 2, mu = 10, tau1 = 2, 
     tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
@@ -35,20 +34,19 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # partition
     counter = rep_len(1:cores, length.out = length(lam) * 
         length(alpha))
-    parameters = cbind(counter, expand.grid(lam, 
-        alpha))
+    parameters = cbind(counter, expand.grid(lam, alpha))
     
     # using cluster, loop over tuning parameters
     CV = foreach(i = 1:cores, .combine = rbind, .packages = "ADMMsigma") %dopar% 
         {
             
             # run foreach loop on CV_ADMMsigmac
-            ADMM = CV_ADMMsigmac(X = X, lam = filter(parameters, counter == i)[, 
-                2], alpha = filter(parameters, counter == i)[, 3], 
-                rho = rho, mu = mu, tau1 = tau1, 
-                tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, K = K, 
-                quiet = quiet)
+            ADMM = CV_ADMMsigmac(X = X, lam = filter(parameters, 
+                counter == i)[, 2], alpha = filter(parameters, 
+                counter == i)[, 3], rho = rho, mu = mu, 
+                tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, 
+                K = K, quiet = quiet)
             
             # return lam, alpha, and minimum error
             return(c(i, ADMM$lam, ADMM$alpha, ADMM$cv.error))
@@ -58,7 +56,7 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = CV[which.min(CV[, 4]), 2], 
-        alpha = CV[which.min(CV[, 4]), 3]))
+    return(list(lam = CV[which.min(CV[, 4]), 2], alpha = CV[which.min(CV[, 
+        4]), 3]))
     
 }

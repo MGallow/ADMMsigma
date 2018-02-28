@@ -134,6 +134,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   }
   
   // determine optimal tuning parameters
+  CV_errors = CV_errors/K;
   double error = CV_errors.min();
   arma::uword ind = CV_errors.index_min();
   int lam_ind = ind % CV_errors.n_rows;
@@ -156,8 +157,8 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 
 
 
-//' @title CV ADMM penalized precision matrix estimation (c++)
-//' @description Cross validation function for ADMM_sigma.
+//' @title CV ridge penalized precision matrix estimation (c++)
+//' @description Cross validation function for RIDGEsigma.
 //'
 //' @param X matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector
 //' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
@@ -165,7 +166,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
 //' @export
-//' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
+//' @examples CV_sigma_ridge(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]
 List CV_sigma_ridgec(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {
@@ -234,6 +235,7 @@ List CV_sigma_ridgec(const arma::mat &X, const arma::colvec &lam, int K = 3, boo
   }
   
   // determine optimal tuning parameters
+  CV_errors = CV_errors/K;
   arma::uword ind = CV_errors.index_min();
   int lam_ind = ind % CV_errors.n_rows;
   double best_lam = lam[lam_ind];

@@ -13,6 +13,14 @@ See [vignette](https://htmlpreview.github.io/?https://github.com/MGallow/ADMMsig
 
 ## Overview
 
+<br>\vspace{0.5cm}
+
+<p align="center">
+  <img src="lik.gif">
+</p>
+
+<br>\vspace{0.5cm}
+
 `ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. A (possibly incomplete) list of functions contained in the package can be found below:
 
 * `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)

@@ -16,7 +16,8 @@ Depends: Rcpp (>= 0.12.10),
     RcppArmadillo,
     doParallel,
     foreach,
-    dplyr
+    dplyr,
+    ggplot2
 LinkingTo: Rcpp,
     RcppArmadillo,
     RcppParallel

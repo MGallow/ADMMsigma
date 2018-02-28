@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{CV_sigma_ridgec}
 \alias{CV_sigma_ridgec}
-\title{CV ADMM penalized precision matrix estimation (c++)}
+\title{CV ridge penalized precision matrix estimation (c++)}
 \usage{
 CV_sigma_ridgec(X, lam, K = 3L, quiet = TRUE)
 }
@@ -19,9 +19,9 @@ CV_sigma_ridgec(X, lam, K = 3L, quiet = TRUE)
 iterations, lam, S, Omega, and cv.errors
 }
 \description{
-Cross validation function for ADMM_sigma.
+Cross validation function for RIDGEsigma.
 }
 \examples{
-CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
+CV_sigma_ridge(X, lam = seq(0.1, 3, 0.1))
 
 }
