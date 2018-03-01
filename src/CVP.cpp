@@ -31,7 +31,7 @@ using namespace Rcpp;
 arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
   
   // initialization
-  int p = S_train.n_rows;
+  int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
   double sgn, logdet;
   sgn = logdet = 0;
   arma::mat Omega, initZ2, initY;
@@ -40,8 +40,8 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
   
   
   // loop over all tuning parameters
-  for (int i = 0; i < lam.n_rows; i++){
-    for (int j = 0; j < alpha.n_rows; j++){
+  for (int i = 0; i < l; i++){
+    for (int j = 0; j < a; j++){
       
       // set temporary tuning parameters
       double lam_ = lam[i];

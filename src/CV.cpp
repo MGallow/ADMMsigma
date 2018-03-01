@@ -66,7 +66,7 @@ arma::vec kfold(int n, int K){
 List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
 
   // initialization
-  int n = X.n_rows, p = X.n_cols;
+  int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows;
   double sgn, logdet;
   sgn = logdet = 0;
   arma::mat Omega, initZ2, initY, CV_errors, CV_error;
@@ -100,8 +100,8 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
     // loop over all tuning parameters
     CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
     
-    for (int i = 0; i < lam.n_rows; i++){
-      for (int j = 0; j < alpha.n_rows; j++){
+    for (int i = 0; i < l; i++){
+      for (int j = 0; j < a; j++){
         
         // set temporary tuning parameters
         double lam_ = lam[i];
@@ -172,7 +172,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {
   
   // initialization
-  int n = X.n_rows;
+  int n = X.n_rows, l = lam.n_rows;
   double sgn, logdet;
   sgn = logdet = 0;
   arma::mat CV_errors = arma::zeros<arma::colvec>(lam.n_rows);
@@ -207,7 +207,7 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
     arma::mat Omega = arma::ones<arma::mat>(bp, bp);
     CV_error = arma::zeros<arma::colvec>(lam.n_rows);
     
-    for (int i = 0; i < lam.n_rows; i++){
+    for (int i = 0; i < l; i++){
       
       // set temporary tuning parameters
       double lam_ = lam[i];
