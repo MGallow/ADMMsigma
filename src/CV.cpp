@@ -66,11 +66,12 @@ arma::vec kfold(int n, int K){
 List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
 
   // initialization
-  int n = X.n_rows;
+  int n = X.n_rows, p = X.n_cols;
   double sgn, logdet;
   sgn = logdet = 0;
-  arma::mat CV_errors = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
-  arma::mat CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
+  arma::mat initZ2, initY, CV_errors, CV_error;
+  initZ2 = initY = arma::zeros<arma::mat>(p, p);
+  CV_errors = CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -97,8 +98,6 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 
     
     // loop over all tuning parameters
-    int bp = X_train.n_cols;
-    NumericMatrix Omega(bp, bp);
     CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
     
     for (int i = 0; i < lam.n_rows; i++){
@@ -109,12 +108,15 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
         double alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-        List ADMM = ADMMsigmac(S_train, lam_, alpha_, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
-        Omega = as<NumericMatrix>(ADMM["Omega"]);
+        List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+        arma::mat Omega = ADMM["Omega"];
+        arma::mat initZ2 = ADMM["Z2"];
+        arma::mat initY = ADMM["Y"];
         
         // compute the observed negative validation loglikelihood
-        arma::log_det(logdet, sgn, as<arma::mat>(Omega));
-        CV_error(i, j) = arma::accu(as<arma::mat>(Omega) % S_test) - logdet;
+        //arma::log_det(logdet, sgn, as<arma::mat>(Omega));
+        arma::log_det(logdet, sgn, Omega);
+        CV_error(i, j) = arma::accu(Omega % S_test) - logdet;
         
         // if not quiet, then print progress lambda
         if (!quiet){

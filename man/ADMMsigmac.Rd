@@ -4,11 +4,13 @@
 \alias{ADMMsigmac}
 \title{ADMM penalized precision matrix estimation (c++)}
 \usage{
-ADMMsigmac(S, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
-  crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000L)
+ADMMsigmac(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2,
+  tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000L)
 }
 \arguments{
 \item{S}{option to specify sample covariance matrix (denominator n)}
+
+\item{initY}{initialization matrix for Y}
 
 \item{lam}{tuning parameter for penalty}
 
@@ -30,7 +32,7 @@ ADMMsigmac(S, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
 
 \item{maxit}{maximum number of iterations}
 
-\item{X}{data matrix}
+\item{initZ}{initialization matrix for Z2}
 }
 \value{
 iterations, lam, omega

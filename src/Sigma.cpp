@@ -45,8 +45,9 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @title ADMM penalized precision matrix estimation (c++)
 //' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
 //'
-//' @param X data matrix
 //' @param S option to specify sample covariance matrix (denominator n)
+//' @param initZ initialization matrix for Z2
+//' @param initY initialization matrix for Y
 //' @param lam tuning parameter for penalty
 //' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
 //' @param rho initial step size for ADMM
@@ -62,7 +63,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' ADMMsigmac(X, lam = 0.1)
 //'
 // [[Rcpp::export]]
-List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
+List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
 
   // allocate memory
   bool criterion = true;
@@ -70,9 +71,10 @@ List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, do
   int iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
-
-  arma::mat Z2, Z, Omega, Y, grad;
-  Z2 = Z = Omega = Y = grad = arma::zeros<arma::mat>(p, p);
+  arma::mat Z2, Z, Y, Omega, grad;
+  Omega = grad = arma::zeros<arma::mat>(p, p);
+  Z2 = Z = initZ2;
+  Y = initY;
 
 
   // loop until convergence
@@ -80,7 +82,6 @@ List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, do
 
     // ridge equation (1)
     // gather eigen values (spectral decomposition)
-    Z = Z2;
     Omega = RIDGEsigmac(S + Y - rho*Z, rho);
 
     // penalty equation (2)
@@ -134,7 +135,9 @@ List ADMMsigmac(const arma::mat &S, const double lam, const double alpha = 1, do
   return List::create(Named("Iterations") = iter,
                       Named("lam") = lam,
                       Named("alpha") = alpha,
-                      Named("Omega") = Omega);
+                      Named("Omega") = Omega,
+                      Named("Z2") = Z2,
+                      Named("Y") = Y);
 
 }
 

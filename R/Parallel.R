@@ -25,7 +25,7 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
     tol2 = 1e-04, maxit = 1000, K = 5, quiet = TRUE) {
     
     # make cluster and register cluster
-    cores = detectCores() - 1
+    cores = min(detectCores() - 1, K)
     cluster = makeCluster(cores)
     registerDoParallel(cluster)
     

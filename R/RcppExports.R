@@ -88,8 +88,9 @@ RIDGEsigmac <- function(S, lam) {
 #' @title ADMM penalized precision matrix estimation (c++)
 #' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
 #'
-#' @param X data matrix
 #' @param S option to specify sample covariance matrix (denominator n)
+#' @param initZ initialization matrix for Z2
+#' @param initY initialization matrix for Y
 #' @param lam tuning parameter for penalty
 #' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
 #' @param rho initial step size for ADMM
@@ -104,7 +105,7 @@ RIDGEsigmac <- function(S, lam) {
 #' @examples
 #' ADMMsigmac(X, lam = 0.1)
 #'
-ADMMsigmac <- function(S, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
-    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
+ADMMsigmac <- function(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
+    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initZ2, initY, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
 }
 

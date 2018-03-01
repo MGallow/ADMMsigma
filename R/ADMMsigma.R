@@ -78,9 +78,11 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         
         # compute final estimate at best tuning parameters
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
-        ADMM = ADMMsigmac(S = S, lam = ADMM$lam, alpha = ADMM$alpha, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        init = matrix(0, nrow = ncol(S), ncol = ncol(S))
+        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, 
+            lam = ADMM$lam, alpha = ADMM$alpha, rho = rho, 
+            mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
+            tol1 = tol1, tol2 = tol2, maxit = maxit)
         
         
     } else {
@@ -98,9 +100,11 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (length(lam) > 1 || length(alpha) > 1) {
             stop("Must specify X or provide single value for lam and alpha.")
         }
-        ADMM = ADMMsigmac(S = S, lam = lam, alpha = alpha, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        init = matrix(0, nrow = ncol(S), ncol = ncol(S))
+        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, 
+            lam = lam, alpha = alpha, rho = rho, mu = mu, 
+            tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
+            tol2 = tol2, maxit = maxit)
         
     }
     
