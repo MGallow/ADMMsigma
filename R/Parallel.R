@@ -20,9 +20,9 @@
 
 # we define the ADMM covariance estimation function
 ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), rho = 2, mu = 10, 
-    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 1000, K = 5, quiet = TRUE) {
+    5, 0.5), alpha = seq(0, 1, 0.1), rho = 2, mu = 10, tau1 = 2, 
+    tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
+    maxit = 1000, K = 5, quiet = TRUE) {
     
     # make cluster and register cluster
     cores = min(detectCores() - 1, K)
@@ -52,9 +52,8 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CV_ADMMsigmac
-        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, 
-            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
-            quiet)
+        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, rho, 
+            mu, tau1, tau2, crit, tol1, tol2, maxit, quiet)
         
     }
     
@@ -69,7 +68,7 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = best_lam, alpha = best_alpha, 
-        cv.error = error, cv.errors = CV))
+    return(list(lam = best_lam, alpha = best_alpha, cv.error = error, 
+        cv.errors = CV))
     
 }

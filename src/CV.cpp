@@ -69,7 +69,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   int n = X.n_rows, p = X.n_cols;
   double sgn, logdet;
   sgn = logdet = 0;
-  arma::mat initZ2, initY, CV_errors, CV_error;
+  arma::mat Omega, initZ2, initY, CV_errors, CV_error;
   initZ2 = initY = arma::zeros<arma::mat>(p, p);
   CV_errors = CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
   
@@ -109,9 +109,9 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
         List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
-        arma::mat Omega = ADMM["Omega"];
-        arma::mat initZ2 = ADMM["Z2"];
-        arma::mat initY = ADMM["Y"];
+        Omega = as<arma::mat>(ADMM["Omega"]);
+        initZ2 = as<arma::mat>(ADMM["Z2"]);
+        initY = as<arma::mat>(ADMM["Y"]);
         
         // compute the observed negative validation loglikelihood
         //arma::log_det(logdet, sgn, as<arma::mat>(Omega));

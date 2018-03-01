@@ -73,7 +73,7 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
   arma::mat Z2, Z, Y, Omega, grad;
   Omega = grad = arma::zeros<arma::mat>(p, p);
-  Z2 = Z = initZ2;
+  Z2 = initZ2;
   Y = initY;
 
 
@@ -82,6 +82,7 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
 
     // ridge equation (1)
     // gather eigen values (spectral decomposition)
+    Z = Z2;
     Omega = RIDGEsigmac(S + Y - rho*Z, rho);
 
     // penalty equation (2)

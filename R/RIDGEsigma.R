@@ -70,9 +70,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # return values
     tuning = matrix(c(lam, log10(lam)), ncol = 2)
     colnames(tuning) = c("lam", "log10(alpha)")
-    returns = list(Lambda = tuning, Lambdas = Lambdas, 
-        Omega = Omega, Sigma = qr.solve(Omega), Gradient = grad, 
-        CV.error = CV.error)
+    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
+        Sigma = qr.solve(Omega), Gradient = grad, CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -94,8 +93,7 @@ print.RIDGEsigma = function(x, ...) {
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
-    print.default(round(x$Lambda, 3), print.gap = 2L, 
-        quote = FALSE)
+    print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
