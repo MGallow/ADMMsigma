@@ -16,4 +16,8 @@ ADMMsigma.Rproj
 README.Rmd
 vignette/ADMMsigma.Rmd
 vignette/ADMMsigma_cache/html/*.rdb
-vignette/ADMMsigma_cache/html/*rdx
+vignette/ADMMsigma_cache/html/*.rdx
+vignette/ADMMsigma_cache/html/*.Rdata
+vignette/ADMMsigma_cache/latex/*.rdb
+vignette/ADMMsigma_cache/latex/*.rdx
+vignette/ADMMsigma_cache/latex/*.Rdata
