@@ -15,5 +15,5 @@ src/*.dll
 ADMMsigma.Rproj
 README.Rmd
 vignette/ADMMsigma.Rmd
-vignette/ADMMsigma_cache/*.rdb
-vignette/ADMMsigma_cache/*rdx
+vignette/ADMMsigma_cache/html/*.rdb
+vignette/ADMMsigma_cache/html/*rdx
