@@ -29,10 +29,9 @@ NULL
 #' @param K specify the number of folds for cross validation
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
-#' @export
 #' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
-CV_ADMMsigmac <- function(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 3L, quiet = TRUE) {
+CV_ADMMsigmac <- function(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
     .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
 }
 
@@ -44,11 +43,32 @@ CV_ADMMsigmac <- function(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, c
 #' @param K specify the number of folds for cross validation
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
-#' @export
 #' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
 CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
     .Call('_ADMMsigma_CV_RIDGEsigmac', PACKAGE = 'ADMMsigma', X, lam, K, quiet)
+}
+
+#' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
+#' @description Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.
+#'
+#' @param S_train matrix or data frame. This is pxp sample covariance for training data
+#' @param S_valid matrix or data frame. This is pxp sample covariance for validation data
+#' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
+#' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
+#' @param rho initial step size for ADMM
+#' @param mu factor for primal and residual norms
+#' @param tau1 adjustment for rho
+#' @param tau2 adjustment for rho
+#' @param crit criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'
+#' @param tol1 absolute tolerance. Defaults to 1e-4
+#' @param tol2 relative tolerance. Defaults to 1e-4
+#' @param maxit maximum number of iterations
+#' @param quiet specify whether the function returns progress of CV or not
+#' @return iterations, lam, S, Omega, and cv.errors
+#'
+CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
+    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)

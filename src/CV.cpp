@@ -60,11 +60,10 @@ arma::vec kfold(int n, int K){
 //' @param K specify the number of folds for cross validation
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
-//' @export
 //' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]
-List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 3, bool quiet = true) {
+List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
 
   // initialization
   int n = X.n_rows;
@@ -165,7 +164,6 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' @param K specify the number of folds for cross validation
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
-//' @export
 //' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]

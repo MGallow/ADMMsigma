@@ -14,10 +14,9 @@
 #' @examples
 #' RIDGEsigma(X, lam = 0.1)
 
-# we define the ADMM covariance
-# estimation function
-RIDGEsigma = function(X = NULL, S = NULL, 
-    lam = 10^seq(-5, 5, 0.5), K = 3, quiet = TRUE) {
+# we define the ADMM covariance estimation function
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
+    5, 0.5), K = 3, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -30,34 +29,30 @@ RIDGEsigma = function(X = NULL, S = NULL,
         stop("Entry must be an integer!")
     }
     
-    # perform cross validation, if
-    # necessary
+    # perform cross validation, if necessary
     CV.error = NULL
     Lambdas = lam
     if ((length(lam) > 1) & !is.null(X)) {
         
         # execute CV_RIDGEsigma
-        RIDGE = CV_RIDGEsigmac(X = X, 
-            lam = lam, K = K, quiet = quiet)
+        RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
+            quiet = quiet)
         CV.error = RIDGE$cv.errors
         lam = RIDGE$lam
         
-        # compute final estimate at best
-        # tuning parameters
+        # compute final estimate at best tuning parameters
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
         Omega = RIDGEsigmac(S = S, lam = lam)
         
         
     } else {
         
-        # compute sample covariance matrix, if
-        # necessary
+        # compute sample covariance matrix, if necessary
         if (is.null(S)) {
             
             # covariance matrix
             X_bar = apply(X, 2, mean)
-            S = crossprod(scale(X, center = X_bar, 
-                scale = F))/dim(X)[1]
+            S = crossprod(scale(X, center = X_bar, scale = F))/dim(X)[1]
             
         }
         
@@ -70,16 +65,14 @@ RIDGEsigma = function(X = NULL, S = NULL,
     }
     
     # compute gradient
-    grad = S - qr.solve(Omega) + lam * 
-        Omega
+    grad = S - qr.solve(Omega) + lam * Omega
     
     # return values
-    tuning = matrix(c(lam, log10(lam)), 
-        ncol = 2)
+    tuning = matrix(c(lam, log10(lam)), ncol = 2)
     colnames(tuning) = c("lam", "log10(alpha)")
     returns = list(Lambda = tuning, Lambdas = Lambdas, 
-        Omega = Omega, Sigma = qr.solve(Omega), 
-        Gradient = grad, CV.error = CV.error)
+        Omega = Omega, Sigma = qr.solve(Omega), Gradient = grad, 
+        CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -101,8 +94,8 @@ print.RIDGEsigma = function(x, ...) {
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
-    print.default(round(x$Lambda, 3), 
-        print.gap = 2L, quote = FALSE)
+    print.default(round(x$Lambda, 3), print.gap = 2L, 
+        quote = FALSE)
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -127,10 +120,8 @@ plot.RIDGEsigma = function(x, ...) {
         stop("No cross validation errors to plot!")
     }
     
-    # augment values for heat map (helps
-    # visually)
-    cv = expand.grid(lam = x$Lambdas, 
-        alpha = 0)
+    # augment values for heat map (helps visually)
+    cv = expand.grid(lam = x$Lambdas, alpha = 0)
     cv$Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
         1)
     
@@ -138,13 +129,10 @@ plot.RIDGEsigma = function(x, ...) {
     bluetowhite <- c("#000E29", "white")
     
     # produce ggplot heat map
-    ggplot(cv, aes(alpha, log10(lam))) + 
-        geom_raster(aes(fill = Errors)) + 
+    ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
         scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + 
-        ggtitle("Heatmap of Cross-Validation Errors") + 
-        theme(axis.title.x = element_blank(), 
-            axis.text.x = element_blank(), 
+            guide = "none") + theme_minimal() + ggtitle("Heatmap of Cross-Validation Errors") + 
+        theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
             axis.ticks.x = element_blank())
     
 }

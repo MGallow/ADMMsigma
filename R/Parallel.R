@@ -1,7 +1,7 @@
 ## Matt Galloway
 
 
-#' @title Parallel CV (using CV_ADMMsigmac)
+#' @title Parallel CV (uses CV_ADMMsigmac)
 #' @description Parallel implementation of cross validation.
 #'
 #' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
@@ -17,57 +17,59 @@
 #' @param K specify the number of folds for cross validation
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, omega, and gradient
-#' @export
 
-# we define the ADMM covariance
-# estimation function
-ParallelCV = function(X = NULL, S = NULL, 
-    lam = 10^seq(-5, 5, 0.5), alpha = 1, 
-    rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
-    crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, K = 3, quiet = TRUE) {
+# we define the ADMM covariance estimation function
+ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5, 
+    5, 0.5), alpha = seq(0, 1, 0.1), rho = 2, mu = 10, 
+    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
+    tol2 = 1e-04, maxit = 1000, K = 5, quiet = TRUE) {
     
     # make cluster and register cluster
     cores = detectCores() - 1
     cluster = makeCluster(cores)
     registerDoParallel(cluster)
     
-    # expand grid of lambda and alpha
-    # values to partition
-    counter = rep_len(1:cores, length.out = length(lam) * 
-        length(alpha))
-    parameters = cbind(counter, expand.grid(lam, 
-        alpha))
+    # use cluster for each fold in CV
+    n = dim(X)[1]
+    ind = sample(n)
+    CV = foreach(k = 1:K, .packages = "ADMMsigma", .combine = "+", 
+        .inorder = FALSE) %dopar% {
+        
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
+            n/K)]
+        
+        # training set
+        X.train = X[-leave.out, , drop = FALSE]
+        X_bar = apply(X.train, 2, mean)
+        X.train = scale(X.train, center = X_bar, scale = FALSE)
+        
+        # validation set
+        X.valid = X[leave.out, , drop = FALSE]
+        X.valid = scale(X.valid, center = X_bar, scale = FALSE)
+        
+        # sample covariances
+        S.train = crossprod(X.train)/(dim(X.train)[1])
+        S.valid = crossprod(X.valid)/(dim(X.valid)[1])
+        
+        # run foreach loop on CV_ADMMsigmac
+        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, 
+            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
+            quiet)
+        
+    }
     
-    # using cluster, loop over tuning
-    # parameters
-    CV = foreach(i = 1:cores, .combine = rbind, 
-        .packages = "ADMMsigma") %dopar% 
-        {
-            
-            # run foreach loop on CV_ADMMsigmac
-            ADMM = CV_ADMMsigmac(X = X, 
-                lam = filter(parameters, 
-                  counter == i)[, 2], 
-                alpha = filter(parameters, 
-                  counter == i)[, 3], 
-                rho = rho, mu = mu, tau1 = tau1, 
-                tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, 
-                maxit = maxit, K = K, 
-                quiet = quiet)
-            
-            # return lam, alpha, and minimum error
-            return(c(i, ADMM$lam, ADMM$alpha, 
-                ADMM$cv.error))
-        }
+    # determine optimal tuning parameters
+    CV = CV/K
+    best = which(CV == min(CV), arr.ind = TRUE)
+    error = min(CV)
+    best_lam = lam[best[1]]
+    best_alpha = alpha[best[2]]
     
     # stop cluster
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = CV[which.min(CV[, 
-        4]), 2], alpha = CV[which.min(CV[, 
-        4]), 3]))
+    return(list(lam = best_lam, alpha = best_alpha, 
+        cv.error = error, cv.errors = CV))
     
 }

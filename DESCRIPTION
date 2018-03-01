@@ -19,7 +19,6 @@ Depends: Rcpp (>= 0.12.10),
     dplyr,
     ggplot2
 LinkingTo: Rcpp,
-    RcppArmadillo,
-    RcppParallel
+    RcppArmadillo
 Suggests: testthat
 SystemRequirements: GNU make
