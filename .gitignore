@@ -12,3 +12,6 @@ src/*.dll
 .rdb
 .rdx
 .Rmd
+ADMMsigma.Rproj
+README.Rmd
+Vignette/ADMMsigma.Rmd
