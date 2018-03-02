@@ -1,4 +1,4 @@
 #' @useDynLib ADMMsigma
 #' @importFrom Rcpp sourceCpp
-#' @importFrom RcppParallel RcppParallelLibs
+# @importFrom RcppParallel RcppParallelLibs
 NULL
