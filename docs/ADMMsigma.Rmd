@@ -3,13 +3,14 @@ title: "Regularized Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 date: \today
 output:
-  html_document:
-    toc: yes
-    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
     number_sections: true
+  html_document:
+    toc: yes
+    toc_depth: 2
+bibliography: lib.bib
 abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for `ADMMsigma`."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
@@ -73,7 +74,7 @@ The ADMM algorithm consists of the following repeated iterations:
   y^{k + 1} &:= y^{k} + \rho(Ax^{k + 1} + Bz^{k + 1} - c)
 \end{align}
 
-A more complete introduction to the algorithm -- specifically how it arose out of *dual ascent* and *method of multipliers* -- can be found in Boyd, et al. (2011).
+A more complete introduction to the algorithm -- specifically how it arose out of *dual ascent* and *method of multipliers* -- can be found in @boyd2011distributed.
 
 # Regularized Precision Matrix Estimation
 
@@ -91,7 +92,7 @@ Throughout the rest of this document we will take $P_{\lambda}\left( \Omega \rig
 
 \[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]
 
-where $0 \leq \alpha \leq 1$, $\lambda > 0$, $0 < \eta < 2$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. This penalty is closely related to the elastic-net penalty explored by Hui Zou and Trevor Hastie \cite{4}. Clearly, when $\alpha = 0$ this reduces to a ridge-type penalty and when $\alpha = 1$ this reduces to a lasso-type penalty.
+where $0 \leq \alpha \leq 1$, $\lambda > 0$, $0 < \eta < 2$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. This penalty is closely related to the elastic-net penalty explored by Hui Zou and Trevor Hastie [@zou2005regularization]. Clearly, when $\alpha = 0$ this reduces to a ridge-type penalty and when $\alpha = 1$ this reduces to a lasso-type penalty.
 
 By letting $f$ be equal to the non-penalized likelihood and $g$ equal to $P_{\lambda}\left( \Omega \right)$, our goal is to minimize the full augmented lagrangian where the constraint is that $\Omega - Z$ is equal to zero:
 
@@ -394,18 +395,20 @@ microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = 1), times = 5)
 
 <br>\newpage
 
-\begin{thebibliography}{9}
+<!-- \begin{thebibliography}{9} -->
 
-\bibitem{1}
-  Boyd, Stephen, et al. "Distributed optimization and statistical learning via the alternating direction method of multipliers." Foundations and Trends® in Machine Learning 3.1 (2011): 1-122.
-  
-\bibitem{2}
-  Polson, Nicholas G., James G. Scott, and Brandon T. Willard. "Proximal algorithms in statistics and machine learning." Statistical Science 30.4 (2015): 559-581.
-  
-\bibitem{3}
-  Marjanovic, Goran, and Victor Solo. "On $ l_q $ optimization and matrix completion." IEEE Transactions on signal processing 60.11 (2012): 5714-5724.
-  
-\bibitem{4}
-  Zou, Hui, and Trevor Hastie. "Regularization and variable selection via the elastic net." Journal of the Royal Statistical Society: Series B (Statistical Methodology) 67.2 (2005): 301-320.
+<!-- \bibitem{1} -->
+<!--   Boyd, Stephen, et al. "Distributed optimization and statistical learning via the alternating direction method of multipliers." Foundations and Trends® in Machine Learning 3.1 (2011): 1-122. -->
 
-\end{thebibliography}
+<!-- \bibitem{2} -->
+<!--   Polson, Nicholas G., James G. Scott, and Brandon T. Willard. "Proximal algorithms in statistics and machine learning." Statistical Science 30.4 (2015): 559-581. -->
+
+<!-- \bibitem{3} -->
+<!--   Marjanovic, Goran, and Victor Solo. "On $ l_q $ optimization and matrix completion." IEEE Transactions on signal processing 60.11 (2012): 5714-5724. -->
+
+<!-- \bibitem{4} -->
+<!--   Zou, Hui, and Trevor Hastie. "Regularization and variable selection via the elastic net." Journal of the Royal Statistical Society: Series B (Statistical Methodology) 67.2 (2005): 301-320. -->
+
+<!-- \end{thebibliography} -->
+
+# References
