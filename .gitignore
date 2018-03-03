@@ -11,9 +11,7 @@ src/*.dll
 .Rdata
 .rdb
 .rdx
-.Rmd
 ADMMsigma.Rproj
-README.Rmd
 docs/ADMMsigma_cache/html/*.rdb
 docs/ADMMsigma_cache/html/*.rdx
 docs/ADMMsigma_cache/html/*.Rdata
