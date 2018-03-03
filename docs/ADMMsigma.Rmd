@@ -3,13 +3,13 @@ title: "Regularized Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 date: \today
 output:
+  html_document:
+    toc: yes
+    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
     number_sections: true
-  html_document:
-    toc: yes
-    toc_depth: 2
 abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for `ADMMsigma`."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
@@ -288,6 +288,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam, alpha = 1, rho = 2, mu = 10, tau1 
 devtools::install_github("MGallow/ADMMsigma")
 ```
 <br>\vspace{0.5cm}
+
+**Important**: if using operating systems other than Mac or Windows, you will have to download the package as source and add a `src/Makevars` file (idential to the `Makevars.win` already included).
 
 If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
 
