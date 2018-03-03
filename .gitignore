@@ -11,6 +11,7 @@ src/*.dll
 .Rdata
 .rdb
 .rdx
+<<<<<<< HEAD
 .Rmd
 ADMMsigma.Rproj
 README.Rmd
@@ -21,3 +22,15 @@ vignette/ADMMsigma_cache/html/*.Rdata
 vignette/ADMMsigma_cache/latex/*.rdb
 vignette/ADMMsigma_cache/latex/*.rdx
 vignette/ADMMsigma_cache/latex/*.Rdata
+=======
+ADMMsigma.Rproj
+docs/ADMMsigma_cache/html/*.rdb
+docs/ADMMsigma_cache/html/*.rdx
+docs/ADMMsigma_cache/html/*.Rdata
+docs/ADMMsigma_cache/latex/*.rdb
+docs/ADMMsigma_cache/latex/*.rdx
+docs/ADMMsigma_cache/latex/*.Rdata
+docs/ADMMsigma_cache/markdown_github/*.rdb
+docs/ADMMsigma_cache/markdown_github/*.rdx
+docs/ADMMsigma_cache/markdown_github/*.Rdata
+>>>>>>> oldstate
