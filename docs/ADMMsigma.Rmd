@@ -289,11 +289,7 @@ devtools::install_github("MGallow/ADMMsigma")
 ```
 <br>\vspace{0.5cm}
 
-<<<<<<< HEAD:docs/ADMMsigma.Rmd
 **Important:** if using operating systems other than Mac or Windows, you will have to download the package as source and add a `src/Makevars` file (idential to the `Makevars.win` already included).
-=======
-**Important**: if using operating systems other than Mac or Windows, you will have to download the package as source and add a `src/Makevars` file (idential to the `Makevars.win` already included).
->>>>>>> oldstate:docs/ADMMsigma.Rmd
 
 If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
 
