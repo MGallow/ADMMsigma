@@ -4,10 +4,12 @@
 \alias{plot.RIDGEsigma}
 \title{Plot RIDGEsigma object}
 \usage{
-\method{plot}{RIDGEsigma}(x, ...)
+\method{plot}{RIDGEsigma}(x, footnote = TRUE, ...)
 }
 \arguments{
 \item{x}{RIDGEsigma class object}
+
+\item{footnote}{option to print footnote of optimal values}
 }
 \description{
 produces a heat plot for the cross validation errors

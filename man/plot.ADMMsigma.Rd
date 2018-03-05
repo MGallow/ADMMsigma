@@ -4,10 +4,12 @@
 \alias{plot.ADMMsigma}
 \title{Plot ADMMsigma object}
 \usage{
-\method{plot}{ADMMsigma}(x, ...)
+\method{plot}{ADMMsigma}(x, footnote = TRUE, ...)
 }
 \arguments{
 \item{x}{ADMMsigma class object}
+
+\item{footnote}{option to print footnote of optimal values}
 }
 \description{
 produces a heat plot for the cross validation errors
