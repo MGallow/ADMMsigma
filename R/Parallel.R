@@ -15,18 +15,22 @@
 #' @param tol2 relative tolerance. Defaults to 1e-4
 #' @param maxit maximum number of iterations
 #' @param K specify the number of folds for cross validation
+#' @param cores option to specify number of cores. Defaults to NULL
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, omega, and gradient
 
-# we define the ADMM covariance estimation
-# function
-ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), rho = 2, mu = 10, 
-    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 1000, K = 5, quiet = TRUE) {
+# we define the ADMM covariance
+# estimation function
+ParallelCV = function(X = NULL, S = NULL, 
+    lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 
+        1, 0.1), rho = 2, mu = 10, tau1 = 2, 
+    tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
+    tol2 = 1e-04, maxit = 1000, K = 5, cores = NULL, 
+    quiet = TRUE) {
     
     # make cluster and register cluster
-    cores = min(detectCores() - 1, K)
+    cores = ifelse(!is.null(cores), min(cores, 
+        K), min(detectCores() - 1, K))
     cluster = makeCluster(cores)
     registerDoParallel(cluster)
     
@@ -37,8 +41,8 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
         .combine = "+", .inorder = FALSE) %dopar% 
         {
             
-            leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
-                n/K)]
+            leave.out = ind[(1 + floor((k - 
+                1) * n/K)):floor(k * n/K)]
             
             # training set
             X.train = X[-leave.out, , drop = FALSE]
@@ -56,9 +60,10 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
             S.valid = crossprod(X.valid)/(dim(X.valid)[1])
             
             # run foreach loop on CV_ADMMsigmac
-            CVP_ADMMsigmac(S.train, S.valid, lam, 
-                alpha, rho, mu, tau1, tau2, crit, 
-                tol1, tol2, maxit, quiet)
+            CVP_ADMMsigmac(S.train, S.valid, 
+                lam, alpha, rho, mu, tau1, 
+                tau2, crit, tol1, tol2, 
+                maxit, quiet)
             
         }
     

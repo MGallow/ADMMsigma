@@ -24,7 +24,7 @@ ADMMsigmac(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2,
 
 \item{tau2}{adjustment for rho}
 
-\item{crit}{criterion for convergence c("ADMM", "grad", "lik"). Option crit != "ADMM" will use tol1 as tolerance. Defaults to "ADMM"}
+\item{crit}{criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'}
 
 \item{tol1}{absolute tolerance. Defaults to 1e-4}
 
