@@ -26,10 +26,10 @@
 
 # we define the ADMM covariance estimation function
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), rho = 2, mu = 10, tau1 = 2, 
-    tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, K = 5, parallel = FALSE, cores = NULL, 
-    quiet = TRUE) {
+    5, 0.5), alpha = seq(0, 1, 0.1), rho = 2, mu = 10, 
+    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
+    tol2 = 1e-04, maxit = 1000, K = 5, parallel = FALSE, 
+    cores = NULL, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -62,8 +62,9 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             # execute ParallelCV
             ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
                 rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-                crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit, 
-                K = K, cores = cores, quiet = quiet)
+                crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, K = K, cores = cores, 
+                quiet = quiet)
             CV.error = ADMM$cv.errors
             
         } else {
@@ -71,8 +72,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             # execute CV_ADMM_sigma
             ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
                 rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-                crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit, 
-                K = K, quiet = quiet)
+                crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, K = K, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -110,15 +111,18 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     }
     
     # compute gradient
-    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * (1 - ADMM$alpha) * 
-        ADMM$Omega + ADMM$lam * ADMM$alpha * sign(ADMM$Omega)
+    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * (1 - 
+        ADMM$alpha) * ADMM$Omega + ADMM$lam * ADMM$alpha * 
+        sign(ADMM$Omega)
     
     # return values
-    tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), ncol = 2)
+    tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), 
+        ncol = 2)
     colnames(tuning) = c("log10(lam)", "alpha")
     returns = list(Iterations = ADMM$Iterations, Tuning = tuning, 
-        Lambdas = lam, Alphas = alpha, maxit = maxit, Omega = ADMM$Omega, 
-        Sigma = qr.solve(ADMM$Omega), Gradient = grad, CV.error = CV.error)
+        Lambdas = lam, Alphas = alpha, maxit = maxit, 
+        Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
+        Gradient = grad, CV.error = CV.error)
     
     class(returns) = "ADMMsigma"
     return(returns)
@@ -150,7 +154,8 @@ print.ADMMsigma = function(x, ...) {
     
     # print optimal tuning parameters
     cat("\nTuning parameters:\n")
-    print.default(round(x$Tuning, 3), print.gap = 2L, quote = FALSE)
+    print.default(round(x$Tuning, 3), print.gap = 2L, 
+        quote = FALSE)
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -190,17 +195,19 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
         # print without footnote
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors")
+                guide = "none") + theme_minimal() + 
+            labs(title = "Heatmap of Cross-Validation Errors")
         
     } else {
         
         # print with footnote
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", 
-                x$Tuning[1], ", alpha = ", x$Tuning[2], 
-                sep = ""))
+                guide = "none") + theme_minimal() + 
+            labs(title = "Heatmap of Cross-Validation Errors", 
+                caption = paste("**Optimal: log10(lam) = ", 
+                  round(x$Tuning[1], 3), ", alpha = ", round(x$Tuning[2], 3), 
+                  sep = ""))
         
     }
     
