@@ -68,7 +68,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
     
     # return values
     tuning = matrix(c(lam, log10(lam)), ncol = 2)
-    colnames(tuning) = c("lam", "log10(alpha)")
+    colnames(tuning) = c("lam", "log10(lam)")
     returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
         Sigma = qr.solve(Omega), Gradient = grad, CV.error = CV.error)
     
