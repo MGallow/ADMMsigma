@@ -4,9 +4,9 @@
 \alias{CV_ADMMsigmac}
 \title{CV ADMM penalized precision matrix estimation (c++)}
 \usage{
-CV_ADMMsigmac(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
-  crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000L, K = 5L,
-  quiet = TRUE)
+CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
+  tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04,
+  maxit = 1000L, K = 5L, quiet = TRUE)
 }
 \arguments{
 \item{X}{matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector}
@@ -14,6 +14,8 @@ CV_ADMMsigmac(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
 \item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
 
 \item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge}
+
+\item{diagonal}{option to penalize diagonal elements. Defaults to true}
 
 \item{rho}{initial step size for ADMM}
 

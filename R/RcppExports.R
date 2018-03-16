@@ -18,6 +18,7 @@ NULL
 #' @param X matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector
 #' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
 #' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
+#' @param diagonal option to penalize diagonal elements. Defaults to true
 #' @param rho initial step size for ADMM
 #' @param mu factor for primal and residual norms
 #' @param tau1 adjustment for rho
@@ -31,8 +32,8 @@ NULL
 #' @return iterations, lam, S, Omega, and cv.errors
 #' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
-CV_ADMMsigmac <- function(X, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
+    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
 }
 
 #' @title CV ridge penalized precision matrix estimation (c++)
@@ -56,6 +57,7 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param S_valid matrix or data frame. This is pxp sample covariance for validation data
 #' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
 #' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
+#' @param diagonal option to penalize diagonal elements. Defaults to false
 #' @param rho initial step size for ADMM
 #' @param mu factor for primal and residual norms
 #' @param tau1 adjustment for rho
@@ -67,8 +69,8 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
 #'
-CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
+    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)
@@ -93,6 +95,7 @@ RIDGEsigmac <- function(S, lam) {
 #' @param initY initialization matrix for Y
 #' @param lam tuning parameter for penalty
 #' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
+#' @param diagonal option to penalize diagonal elements. Defaults to false
 #' @param rho initial step size for ADMM
 #' @param mu factor for primal and residual norms
 #' @param tau1 adjustment for rho
@@ -105,7 +108,7 @@ RIDGEsigmac <- function(S, lam) {
 #' @examples
 #' ADMMsigmac(X, lam = 0.1)
 #'
-ADMMsigmac <- function(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
-    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initZ2, initY, lam, alpha, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
+ADMMsigmac <- function(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
+    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
 }
 

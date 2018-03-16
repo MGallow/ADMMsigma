@@ -16,6 +16,7 @@ using namespace Rcpp;
 //' @param S_valid matrix or data frame. This is pxp sample covariance for validation data
 //' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
 //' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
+//' @param diagonal option to penalize diagonal elements. Defaults to false
 //' @param rho initial step size for ADMM
 //' @param mu factor for primal and residual norms
 //' @param tau1 adjustment for rho
@@ -28,7 +29,7 @@ using namespace Rcpp;
 //' @return iterations, lam, S, Omega, and cv.errors
 //'
 // [[Rcpp::export]]
-arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
+arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
@@ -48,7 +49,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       double alpha_ = alpha[j];
       
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-      List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+      List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
       initZ2 = as<arma::mat>(ADMM["Z2"]);
       initY = as<arma::mat>(ADMM["Y"]);

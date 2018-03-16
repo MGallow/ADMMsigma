@@ -36,13 +36,13 @@ double softc(double s, double tau) {
 //' @description Matrix soft thresholding function. Requires `softc`. Augmented from Adam Rothman's STAT 8931 code.
 //'
 //' @param s matrix
-//' @param tau scalar
-//' @return soft threshold s matrix
+//' @param Tau scalar
+//' @return soft threshold matrix
 //' @examples
-//' softmatrixc(10, 5)
+//' softmatrixc(A, 5*diag(10))
 //'
 
-arma::mat softmatrixc(const arma::mat &S, double tau) {
+arma::mat softmatrixc(const arma::mat &S, const arma::mat &Tau) {
 
   // initialize
   int n = S.n_rows, p = S.n_cols;
@@ -52,7 +52,7 @@ arma::mat softmatrixc(const arma::mat &S, double tau) {
   for (int i = 0; i < n; ++i){
     for (int j = 0; j < p; ++j){
 
-      D(i, j) = softc(S(i, j), tau);
+      D(i, j) = softc(S(i, j), Tau(i, j));
 
     }
   }

@@ -6,7 +6,7 @@
 
 double softc(double s, double tau);
 
-arma::mat softmatrixc(const arma::mat &S, double tau);
+arma::mat softmatrixc(const arma::mat &S, const arma::mat &Tau);
 
 
 #endif

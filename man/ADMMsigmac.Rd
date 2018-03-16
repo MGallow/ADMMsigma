@@ -4,8 +4,9 @@
 \alias{ADMMsigmac}
 \title{ADMM penalized precision matrix estimation (c++)}
 \usage{
-ADMMsigmac(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2,
-  tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000L)
+ADMMsigmac(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2,
+  mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
+  tol2 = 1e-04, maxit = 1000L)
 }
 \arguments{
 \item{S}{option to specify sample covariance matrix (denominator n)}
@@ -16,6 +17,8 @@ ADMMsigmac(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2,
 
 \item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge}
 
+\item{diagonal}{option to penalize diagonal elements. Defaults to false}
+
 \item{rho}{initial step size for ADMM}
 
 \item{mu}{factor for primal and residual norms}
@@ -24,7 +27,7 @@ ADMMsigmac(S, initZ2, initY, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2,
 
 \item{tau2}{adjustment for rho}
 
-\item{crit}{criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'}
+\item{crit}{criterion for convergence c("ADMM", "grad", "lik"). Option crit != "ADMM" will use tol1 as tolerance. Defaults to "ADMM"}
 
 \item{tol1}{absolute tolerance. Defaults to 1e-4}
 

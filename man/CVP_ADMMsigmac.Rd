@@ -4,9 +4,9 @@
 \alias{CVP_ADMMsigmac}
 \title{CV (no folds) ADMM penalized precision matrix estimation (c++)}
 \usage{
-CVP_ADMMsigmac(S_train, S_valid, lam, alpha, rho = 2, mu = 10, tau1 = 2,
-  tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000L,
-  K = 5L, quiet = TRUE)
+CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
+  mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
+  tol2 = 1e-04, maxit = 1000L, K = 5L, quiet = TRUE)
 }
 \arguments{
 \item{S_train}{matrix or data frame. This is pxp sample covariance for training data}
@@ -16,6 +16,8 @@ CVP_ADMMsigmac(S_train, S_valid, lam, alpha, rho = 2, mu = 10, tau1 = 2,
 \item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
 
 \item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge}
+
+\item{diagonal}{option to penalize diagonal elements. Defaults to false}
 
 \item{rho}{initial step size for ADMM}
 

@@ -50,6 +50,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @param initY initialization matrix for Y
 //' @param lam tuning parameter for penalty
 //' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
+//' @param diagonal option to penalize diagonal elements. Defaults to false
 //' @param rho initial step size for ADMM
 //' @param mu factor for primal and residual norms
 //' @param tau1 adjustment for rho
@@ -63,7 +64,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' ADMMsigmac(X, lam = 0.1)
 //'
 // [[Rcpp::export]]
-List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
+List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
 
   // allocate memory
   bool criterion = true;
@@ -71,11 +72,16 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
   int iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
-  arma::mat Z2, Z, Y, Omega, grad;
+  arma::mat Z2, Z, Y, Omega, grad, C;
   Omega = grad = arma::zeros<arma::mat>(p, p);
+  C = arma::ones<arma::mat>(p, p);
   Z2 = initZ2;
   Y = initY;
-
+  
+  // option to penalize diagonal elements
+  if (diagonal){
+    C -= arma::eye<arma::mat>(p, p);
+  }
 
   // loop until convergence
   while (criterion && (iter <= maxit)){
@@ -87,7 +93,7 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
 
     // penalty equation (2)
     // soft-thresholding
-    Z2 = softmatrixc(Y + rho*Omega, lam*alpha)/(lam*(1 - alpha) + rho);
+    Z2 = softmatrixc(Y + rho*Omega, lam*alpha*C)/(lam*(1 - alpha)*C + rho);
 
     // update Y (3)
     Y += rho*(Omega - Z2);
@@ -107,14 +113,14 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
     if (crit == "grad"){
 
       // compute gradient
-      grad = S - Omega.i() + lam*(1 - alpha)*Omega + lam*alpha*arma::sign(Omega);
+      grad = S - Omega.i() + lam*(1 - alpha)*C % Omega + lam*alpha*C % arma::sign(Omega);
       criterion = (arma::norm(grad, "inf") >= tol1);
 
     } else if (crit == "loglik"){
 
       // compute likelihood
       arma::log_det(logdet, sgn, Omega);
-      lik2 = arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(Omega, "fro") + alpha*arma::accu(arma::abs(Omega)));
+      lik2 = arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega)));
       criterion = (std::abs(lik2 - lik) >= tol1);
       lik = lik2;
 

@@ -15,8 +15,8 @@
 #' RIDGEsigma(X, lam = 0.1)
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 3, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    K = 3, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -35,8 +35,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if ((length(lam) > 1) & !is.null(X)) {
         
         # execute CV_RIDGEsigma
-        RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
-            quiet = quiet)
+        RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
         CV.error = RIDGE$cv.errors
         lam = RIDGE$lam
         
@@ -70,9 +69,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # return values
     tuning = matrix(c(lam, log10(lam)), ncol = 2)
     colnames(tuning) = c("lam", "log10(alpha)")
-    returns = list(Lambda = tuning, Lambdas = Lambdas, 
-        Omega = Omega, Sigma = qr.solve(Omega), Gradient = grad, 
-        CV.error = CV.error)
+    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
+        Sigma = qr.solve(Omega), Gradient = grad, CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -94,8 +92,7 @@ print.RIDGEsigma = function(x, ...) {
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
-    print.default(round(x$Lambda, 3), print.gap = 2L, 
-        quote = FALSE)
+    print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -123,8 +120,7 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     
     # augment values for heat map (helps visually)
     cv = expand.grid(lam = x$Lambdas, alpha = 0)
-    cv$Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
-        1)
+    cv$Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
     
     # design color palette
     bluetowhite <- c("#000E29", "white")
@@ -141,8 +137,7 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
         # print without footnote
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + 
-            labs(title = "Heatmap of Cross-Validation Errors") + 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
             theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
                 axis.ticks.x = element_blank())
         
@@ -151,10 +146,9 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
         # print with footnote
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + 
-            labs(title = "Heatmap of Cross-Validation Errors", 
-                caption = paste("**Optimal: log10(lam) = ", 
-                  x$Lambda[2], sep = "")) + theme(axis.title.x = element_blank(), 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
+            caption = paste("**Optimal: log10(lam) = ", x$Lambda[2], 
+                sep = "")) + theme(axis.title.x = element_blank(), 
             axis.text.x = element_blank(), axis.ticks.x = element_blank())
     }
     
