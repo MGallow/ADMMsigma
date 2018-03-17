@@ -290,8 +290,6 @@ devtools::install_github("MGallow/ADMMsigma")
 ```
 <br>\vspace{0.5cm}
 
-**Important:** if using operating systems other than Mac or Windows, you will have to download the package as source and add a `src/Makevars` file (idential to the `Makevars.win` already included).
-
 If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
 
 
@@ -305,7 +303,7 @@ If there are any issues/bugs, please let me know: [github](https://github.com/MG
 ```{r, message = FALSE, echo = TRUE}
 library(ADMMsigma)
 
-# generate data from a dense matrix for example
+# generate data from a dense matrix
 # first compute covariance matrix
 S = matrix(0, nrow = 5, ncol = 5)
 
@@ -315,7 +313,7 @@ for (i in 1:5){
   }
 }
 
-# generate 100x5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
@@ -357,8 +355,8 @@ RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
 <br>\vspace{0.5cm}
 ```{r, message = FALSE, echo = TRUE}
 
-# generate data from tri-diagonal (sparse) matrix for example
-# first compute covariance matrix (can confirm inverse is tri-diagonal)
+# generate data from tri-diagonal (sparse) matrix
+# compute covariance matrix (can confirm inverse is tri-diagonal)
 S = matrix(0, nrow = 100, ncol = 100)
 
 for (i in 1:100){
@@ -367,15 +365,15 @@ for (i in 1:100){
   }
 }
 
-# generate 1000x100 matrix with rows drawn from iid N_p(0, S)
+# generate 1000 x 100 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(1000*100), nrow = 1000, ncol = 100)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 
-# glasso
-microbenchmark(glasso(s = S, rho = 0.1), times = 5)
+# glasso (for comparison)
+microbenchmark(glasso(s = S, rho = 0.1))
 
 # benchmark ADMMsigma - default tolerance
 microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-4, tol2 = 1e-4))
@@ -383,14 +381,16 @@ microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-4, tol2 = 1e-4))
 # benchmark ADMMsigma - tolerance 1e-8
 microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-8, tol2 = 1e-8))
 
-# benchmark ADMMsigma CV - likelihood convergence criteria
-microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = 1, crit = "loglik"), times = 5)
+# benchmark ADMMsigma CV - default parameter grid
+microbenchmark(ADMMsigma(X), times = 5)
 
-# benchmark ADMMsigma CV
-microbenchmark(ADMMsigma(X, lam = 10^seq(-8, 8, 0.1), alpha = 1), times = 5)
+# benchmark ADMMsigma parallel CV
+microbenchmark(ADMMsigma(X, parallel = TRUE), times = 5)
+
+# benchmark ADMMsigma CV - likelihood convergence criteria
+microbenchmark(ADMMsigma(X, crit = "loglik"), times = 5)
 
 ```
-<br>\vspace{0.5cm}
 
 
 <br>\newpage
