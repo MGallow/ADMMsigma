@@ -17,8 +17,7 @@
 #' @param tol2 relative tolerance. Defaults to 1e-4
 #' @param maxit maximum number of iterations
 #' @param K specify the number of folds for cross validation
-#' @param parallel option to run CV in parallel. Defaults to FALSE
-#' @param cores option to specify number of cores for ParallelCV. Defaults to NULL
+#' @param cores option to run CV in parallel. Defaults to cores = 1
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, omega, and gradient
 #' @export
@@ -29,8 +28,7 @@
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
     5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
     mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 1000, K = 5, parallel = FALSE, 
-    cores = NULL, quiet = TRUE) {
+    tol2 = 1e-04, maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -46,8 +44,11 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         K) > 0))) {
         stop("Entry must be positive!")
     }
-    if (all(c(maxit, K)%%1 != 0)) {
+    if (all(c(maxit, K, cores)%%1 != 0)) {
         stop("Entry must be an integer!")
+    }
+    if (cores < 1) {
+        stop("Number of cores must be positive!")
     }
     if (!crit %in% c("ADMM", "loglik", "grad")) {
         stop("Invalid criteria. Must be one of c(ADMM, loglik, grad)")
@@ -58,7 +59,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if ((length(lam) > 1 || length(alpha) > 1) & !is.null(X)) {
         
         # run CV in parallel?
-        if (parallel) {
+        if (cores > 1) {
             
             # execute ParallelCV
             ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
@@ -145,6 +146,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 #' @title Print ADMMsigma object
 #' @param x ADMMsigma class object
+#' @keywords internal
 #' @export
 print.ADMMsigma = function(x, ...) {
     

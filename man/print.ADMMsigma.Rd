@@ -9,3 +9,4 @@
 \arguments{
 \item{x}{ADMMsigma class object}
 }
+\keyword{internal}

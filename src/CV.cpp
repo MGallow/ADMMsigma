@@ -15,6 +15,7 @@ using namespace Rcpp;
 //' @param n number of eleemtns
 //' @param K number of folds
 //' @return returns vector
+//' @keywords internal
 //' @examples
 //' kfold(10, 3)
 //'
@@ -61,6 +62,7 @@ arma::vec kfold(int n, int K){
 //' @param K specify the number of folds for cross validation
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
+//' @keywords internal
 //' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]
@@ -167,6 +169,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' @param K specify the number of folds for cross validation
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
+//' @keywords internal
 //' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]

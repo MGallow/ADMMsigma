@@ -27,6 +27,10 @@ See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.
 
 * `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
 
+* `plot.ADMMsigma()` produces a heat map for cross validation errors
+
+* `plot.RIDGEsigma()` produces a heat map for cross validation errors
+
 
 ## Installation
 

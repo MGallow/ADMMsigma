@@ -7,7 +7,7 @@
 ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
   1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
   crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, K = 5,
-  parallel = FALSE, cores = NULL, quiet = TRUE)
+  cores = 1, quiet = TRUE)
 }
 \arguments{
 \item{X}{data matrix}
@@ -38,9 +38,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
 
 \item{K}{specify the number of folds for cross validation}
 
-\item{parallel}{option to run CV in parallel. Defaults to FALSE}
-
-\item{cores}{option to specify number of cores for ParallelCV. Defaults to NULL}
+\item{cores}{option to run CV in parallel. Defaults to cores = 1}
 
 \item{quiet}{specify whether the function returns progress of CV or not}
 }

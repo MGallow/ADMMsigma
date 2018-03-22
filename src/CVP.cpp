@@ -27,6 +27,7 @@ using namespace Rcpp;
 //' @param maxit maximum number of iterations
 //' @param quiet specify whether the function returns progress of CV or not
 //' @return iterations, lam, S, Omega, and cv.errors
+//' @keywords internal
 //'
 // [[Rcpp::export]]
 arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {

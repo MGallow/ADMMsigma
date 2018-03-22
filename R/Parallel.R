@@ -16,19 +16,27 @@
 #' @param tol2 relative tolerance. Defaults to 1e-4
 #' @param maxit maximum number of iterations
 #' @param K specify the number of folds for cross validation
-#' @param cores option to specify number of cores. Defaults to NULL
+#' @param cores option to run CV in parallel. Defaults to cores = 1
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, omega, and gradient
+#' @keywords internal
 
 # we define the ADMM covariance estimation function
 ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5, 
     5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
     mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 1000, K = 5, cores = NULL, quiet = TRUE) {
+    tol2 = 1e-04, maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
     
     # make cluster and register cluster
-    cores = ifelse(!is.null(cores), min(cores, K), min(detectCores() - 
-        1, K))
+    num_cores = detectCores()
+    if (cores > num_cores) {
+        print("Only detected", num_cores, "cores...")
+    }
+    if (cores > K) {
+        print("Number of cores exceeds K... setting cores = K")
+        cores = K
+    }
+    
     cluster = makeCluster(cores)
     registerDoParallel(cluster)
     

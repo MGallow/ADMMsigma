@@ -47,3 +47,4 @@ Cross validation function for ADMM_sigma.
 CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 
 }
+\keyword{internal}

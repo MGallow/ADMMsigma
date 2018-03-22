@@ -25,3 +25,4 @@ Cross validation function for RIDGEsigma.
 CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 
 }
+\keyword{internal}

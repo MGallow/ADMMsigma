@@ -11,7 +11,7 @@ output:
     toc: yes
     toc_depth: 2
 bibliography: lib.bib
-abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for `ADMMsigma`."
+abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of jointly normal distributions. In addition, examples and simulation results will be provided."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
 #fontfamily: mathpazo
@@ -56,7 +56,14 @@ panderOptions('table.split.table', Inf)
 
 # Introduction
 
-Suppose we want to minimize $f(x) + g(z)$ subject to the constraint that $Ax + Bz = c$. For now, we will take $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}$ -- though we will later consider cases where $x$ and $z$ are matrices. The *augmented lagrangian* is constructed as follows:
+Suppose we want to solve the following optimization problem:
+
+\begin{align*}
+  \mbox{minimize } f(x) + g(z) \\
+  \mbox{subject to } Ax + Bz = c
+\end{align*}
+
+where $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}$ -- though we will later consider cases where $x$ and $z$ are matrices. Further, we will assume $f$ and $g$ are convex. The *augmented lagrangian* is constructed as follows:
 
 \[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]
 
@@ -64,9 +71,9 @@ where $y \in \mathbb{R}^{p}$ is the lagrange multiplier. The optimal value is
 
 \[ p^{*} = inf\left\{ f(x) + g(z) | Ax + Bz = c \right\} \]
 
-Clearly, the minimization problem under the augmented lagrangian (RE-WORK) is equivalent to that of the usual lagrangian since any feasible point $(x, z)$ satisfies the constraint $\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0$.
+Clearly, the minimization under the augmented lagrangian is equivalent to that of the usual lagrangian since any feasible point $(x, z)$ satisfies the constraint $\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0$.
 
-The ADMM algorithm consists of the following repeated iterations:
+The alternating direct method of multipliers (ADMM) algorithm consists of the following repeated iterations:
 
 \begin{align}
   x^{k + 1} &:= \arg\min_{x}L_{\rho}(x, z^{k}, y^{k}) \\
@@ -76,6 +83,8 @@ The ADMM algorithm consists of the following repeated iterations:
 
 A more complete introduction to the algorithm -- specifically how it arose out of *dual ascent* and *method of multipliers* -- can be found in @boyd2011distributed.
 
+<br>\vspace{1cm}
+
 # Regularized Precision Matrix Estimation
 
 We now consider the case where $X_{1}, ..., X_{n}$ are iid $N_{p}(\mu, \Sigma)$ and we are tasked with estimating the precision matrix, denoted $\Omega \equiv \Sigma^{-1}$. The maximum likelihood estimator for $\Omega$ is
@@ -84,17 +93,17 @@ We now consider the case where $X_{1}, ..., X_{n}$ are iid $N_{p}(\mu, \Sigma)$ 
 
 where $S = \sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n$. It is straight forward to show that when the solution exists, $\hat{\Omega} = S^{-1}$.
 
-We can further construct a penalized likelihood estimator by adding a penalty term, $P_{\lambda}\left( \Omega \right)$, to the likelihood:
+We can construct a *penalized* likelihood estimator by adding a penalty term, $P\left( \Omega \right)$, to the likelihood:
 
-\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P_{\lambda}\left( \Omega \right) \right\} \]
+\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P\left( \Omega \right) \right\} \]
 
-Throughout the rest of this document we will take $P_{\lambda}\left( \Omega \right)$ to be $P_{\lambda}\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]$ so that the full penalized likelihood is as follows:
+Throughout the rest of this document we will take $P\left( \Omega \right)$ to be $P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]$ so that the full penalized likelihood is as follows:
 
 \[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]
 
-where $0 \leq \alpha \leq 1$, $\lambda > 0$, $0 < \eta < 2$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. This penalty is closely related to the elastic-net penalty explored by Hui Zou and Trevor Hastie [@zou2005regularization]. Clearly, when $\alpha = 0$ this reduces to a ridge-type penalty and when $\alpha = 1$ this reduces to a lasso-type penalty.
+where $0 \leq \alpha \leq 1$, $\lambda > 0$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. This *elastic-net* penalty was explored by Hui Zou and Trevor Hastie [@zou2005regularization] and is identical to the penalty used in the popular penalized regression package `glmnet`. Clearly, when $\alpha = 0$ the elastic-net reduces to a ridge-type penalty and when $\alpha = 1$ this reduces to a lasso-type penalty.
 
-By letting $f$ be equal to the non-penalized likelihood and $g$ equal to $P_{\lambda}\left( \Omega \right)$, our goal is to minimize the full augmented lagrangian where the constraint is that $\Omega - Z$ is equal to zero:
+By letting $f$ be equal to the non-penalized likelihood and $g$ equal to $P\left( \Omega \right)$, our goal is to minimize the full augmented lagrangian where the constraint is that $\Omega - Z$ is equal to zero:
 
 \[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + Tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]
 
@@ -102,7 +111,7 @@ By letting $f$ be equal to the non-penalized likelihood and $g$ equal to $P_{\la
 The ADMM algorithm for regularized precision matrix estimation is
 
 \begin{align}
-  \Omega^{k + 1} &= \arg\min_{S\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
   Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
   \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align}
@@ -136,41 +145,42 @@ More generally (in vector form),
   u^{k + 1} &:= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
 \end{align}
 
-Note that there are limitations to using this method. For instance, because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size (without making further adjustments to $U^{k}$) -- a limitation that could prolong the convergence rate.
+Note that there are limitations to using this method. For instance, because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size (without making further adjustments to $U^{k}$) -- a limitation that could prolong the convergence rate. Because of this, we will only consider the non-condensed form for the remainder of this report.
 
 <br>\vspace{1cm}
 
 ## Algorithm
 
 \begin{align*}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
-  Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
-  U^{k + 1} &= U^{k} + \Omega^{k + 1} - Z^{k + 1}
+  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align*}
 
 <br>\vspace{1cm}
 
-1. Decompose $S + \rho(U^{k} - Z^{k}) = VQV^{T}$.
+1. Decompose $S + \Lambda^{k} - \rho Z^{k} = VQV^{T}$.
 
 \[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + \left( Q^{2} + 4\rho I_{p} \right)^{1/2} \right]V^{T} \]
 
 2. Elementwise soft-thresholding for all $i = 1,..., p$ and $j = 1,..., p$.
 
 \begin{align*}
-Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^{k + 1} + U_{ij}^{k}\right)\left( \rho\left| \Omega_{ij}^{k + 1} + U_{ij}^{k} \right| - \lambda\eta\alpha \right)_{+} \\
-&= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left( \rho(\Omega_{ij}^{k + 1} + U_{ij}^{k}\right), \lambda\eta\alpha)
+Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right), \lambda\alpha\right)
 \end{align*}
 
-3. Update $U$.
+3. Update $\Lambda$.
 
-\[ U^{k + 1} = U^{k} + \Omega^{k + 1} - Z^{k + 1} \]
+\[ \Lambda^{k + 1} = \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right) \]
 
 
 <br>\vspace{1cm}
 
 ### Proof of (1):
 
-(Work in progress.)
+\[ \Omega^{k + 1} = \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]
+
 
 
 
@@ -210,7 +220,9 @@ RIDGEsigma = function(S, lam){
 
 ### Proof of (2)
 
-(Work in progress.)
+\[ Z^{k + 1} = \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]
+
+
 
 
 
@@ -292,9 +304,20 @@ devtools::install_github("MGallow/ADMMsigma")
 
 If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
 
-
-
 <br>\vspace{1cm}
+
+A (possibly incomplete) list of functions contained in the package can be found below:
+
+* `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
+
+* `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
+
+* `plot.ADMMsigma()` produces a heat map for cross validation errors
+
+* `plot.RIDGEsigma()` produces a heat map for cross validation errors
+
+
+<br>
 
 ## Usage
 
@@ -339,7 +362,7 @@ ADMMsigma(X) %>% plot
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
 
 ```
-<br>\vspace{0.5cm}
+<br>\vspace{1cm}
 
 
 ## Benchmark
@@ -385,13 +408,14 @@ microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-8, tol2 = 1e-8))
 microbenchmark(ADMMsigma(X), times = 5)
 
 # benchmark ADMMsigma parallel CV
-microbenchmark(ADMMsigma(X, parallel = TRUE), times = 5)
+microbenchmark(ADMMsigma(X, cores = 3), times = 5)
 
 # benchmark ADMMsigma CV - likelihood convergence criteria
 microbenchmark(ADMMsigma(X, crit = "loglik"), times = 5)
 
 ```
 
+<br>\vspace{1cm}
 
 <br>\newpage
 

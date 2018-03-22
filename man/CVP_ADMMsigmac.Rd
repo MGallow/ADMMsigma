@@ -43,3 +43,4 @@ iterations, lam, S, Omega, and cv.errors
 \description{
 Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.
 }
+\keyword{internal}

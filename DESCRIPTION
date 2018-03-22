@@ -6,6 +6,8 @@ Date: 2018-02-23
 Authors@R: person("Matt", "Galloway", email = "gall0441@umn.edu",
                   role = c("aut", "cre"))
 Description: This R package produces penalized precision matrix estimates via the alternating direction method of multipliers (ADMM) algorithm
+URL: https://github.com/MGallow/ADMMsigma
+BugReports: https://github.com/MGallow/ADMMsigma/issues
 License: MIT + file LICENSE
 ByteCompile: TRUE
 NeedsCompilation: yes

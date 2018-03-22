@@ -7,6 +7,7 @@
 #' @param n number of eleemtns
 #' @param K number of folds
 #' @return returns vector
+#' @keywords internal
 #' @examples
 #' kfold(10, 3)
 #'
@@ -30,6 +31,7 @@ NULL
 #' @param K specify the number of folds for cross validation
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
+#' @keywords internal
 #' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
 CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
@@ -44,6 +46,7 @@ CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau
 #' @param K specify the number of folds for cross validation
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
+#' @keywords internal
 #' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
 CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
@@ -68,6 +71,7 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param maxit maximum number of iterations
 #' @param quiet specify whether the function returns progress of CV or not
 #' @return iterations, lam, S, Omega, and cv.errors
+#' @keywords internal
 #'
 CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
     .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
@@ -79,6 +83,7 @@ CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho =
 #' @param S sample covariance matrix (denominator n)
 #' @param lam tuning parameter for penalty
 #' @return matrix of omega hat
+#' @keywords internal
 #' @examples
 #' n = nrow(X)
 #' RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
@@ -105,6 +110,7 @@ RIDGEsigmac <- function(S, lam) {
 #' @param tol2 relative tolerance. Defaults to 1e-4
 #' @param maxit maximum number of iterations
 #' @return iterations, lam, omega
+#' @keywords internal
 #' @examples
 #' ADMMsigmac(X, lam = 0.1)
 #'

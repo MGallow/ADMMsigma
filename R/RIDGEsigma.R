@@ -88,6 +88,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 #' @title Print RIDGEsigma object
 #' @param x RIDGEsigma class object
+#' @keywords internal
 #' @export
 print.RIDGEsigma = function(x, ...) {
     

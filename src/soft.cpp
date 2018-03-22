@@ -12,6 +12,7 @@ using namespace Rcpp;
 //' @param s scalar
 //' @param tau scalar
 //' @return scalar
+//' @keywords internal
 //' @examples
 //' softc(10, 5)
 //'
@@ -38,6 +39,7 @@ double softc(double s, double tau) {
 //' @param s matrix
 //' @param Tau scalar
 //' @return soft threshold matrix
+//' @keywords internal
 //' @examples
 //' softmatrixc(A, 5*diag(10))
 //'

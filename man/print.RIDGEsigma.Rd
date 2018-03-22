@@ -9,3 +9,4 @@
 \arguments{
 \item{x}{RIDGEsigma class object}
 }
+\keyword{internal}

@@ -14,6 +14,7 @@ using namespace Rcpp;
 //' @param S sample covariance matrix (denominator n)
 //' @param lam tuning parameter for penalty
 //' @return matrix of omega hat
+//' @keywords internal
 //' @examples
 //' n = nrow(X)
 //' RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
@@ -60,6 +61,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @param tol2 relative tolerance. Defaults to 1e-4
 //' @param maxit maximum number of iterations
 //' @return iterations, lam, omega
+//' @keywords internal
 //' @examples
 //' ADMMsigmac(X, lam = 0.1)
 //'

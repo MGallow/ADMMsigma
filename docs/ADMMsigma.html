@@ -168,6 +168,7 @@ $(document).ready(function () {
   y^{k + 1} &amp;:= y^{k} + \rho(Ax^{k + 1} + Bz^{k + 1} - c)
 \end{align}\]</span>
 <p>A more complete introduction to the algorithm – specifically how it arose out of <em>dual ascent</em> and <em>method of multipliers</em> – can be found in <span class="citation">Boyd et al. (2011)</span>.</p>
+<p><br></p>
 </div>
 <div id="regularized-precision-matrix-estimation" class="section level1">
 <h1>Regularized Precision Matrix Estimation</h1>
@@ -346,6 +347,14 @@ ADMMsigma = function(X = NULL, S = NULL,
 devtools::install_github(&quot;MGallow/ADMMsigma&quot;)</code></pre>
 <p><br></p>
 <p>If there are any issues/bugs, please let me know: <a href="https://github.com/MGallow/ADMMsigma/issues">github</a>. You can also contact me via my <a href="http://users.stat.umn.edu/~gall0441/">website</a>. Pull requests are welcome!</p>
+<p><br></p>
+<p>A (possibly incomplete) list of functions contained in the package can be found below:</p>
+<ul>
+<li><p><code>ADMMsigma()</code> computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)</p></li>
+<li><p><code>RIDGEsigma()</code> computes the estimated ridge penalized precision matrix via closed-form solution</p></li>
+<li><p><code>plot.ADMMsigma()</code> produces a heat map for cross validation errors</p></li>
+<li><p><code>plot.RIDGEsigma()</code> produces a heat map for cross validation errors</p></li>
+</ul>
 <p><br></p>
 </div>
 <div id="usage" class="section level2">
@@ -526,6 +535,7 @@ microbenchmark(ADMMsigma(X, crit = &quot;loglik&quot;),
 ##  ADMMsigma(X, crit = &quot;loglik&quot;) 76.00644 76.01432 76.11806 76.17237
 ##        uq      max neval
 ##  76.17759 76.21955     5</code></pre>
+<p><br></p>
 <p><br></p>
 <!-- \begin{thebibliography}{9} -->
 <!-- \bibitem{1} -->

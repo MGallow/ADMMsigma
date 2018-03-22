@@ -47,3 +47,4 @@ Penalized Gaussian likelihood precision matrix estimation using the ADMM algorit
 ADMMsigmac(X, lam = 0.1)
 
 }
+\keyword{internal}

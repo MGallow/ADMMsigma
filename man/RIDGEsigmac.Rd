@@ -22,3 +22,4 @@ n = nrow(X)
 RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
 
 }
+\keyword{internal}
