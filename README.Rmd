@@ -35,7 +35,10 @@ See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.
 ## Installation
 
 ```{r, eval = FALSE}
-# The easiest way to install is from the development version from GitHub:
+# The easiest way to install is from CRAN
+install.packages("ADMMsigma")
+
+# You can also install the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("MGallow/ADMMsigma")
 ```
@@ -47,15 +50,10 @@ If there are any issues/bugs, please let me know: [github](https://github.com/MG
 ```{r, message = FALSE}
 library(ADMMsigma)
 
-#  generate data from a dense matrix for example
+#  generate data from a dense matrix
 # first compute covariance matrix
-S = matrix(0, nrow = 5, ncol = 5)
-
-for (i in 1:5){
-  for (j in 1:5){
-    S[i, j] = 0.9^(i != j)
-  }
-}
+S = matrix(0.9, nrow = 5, ncol = 5)
+diag(S) = 1
 
 # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)

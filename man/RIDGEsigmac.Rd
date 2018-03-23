@@ -7,19 +7,14 @@
 RIDGEsigmac(S, lam)
 }
 \arguments{
-\item{S}{sample covariance matrix (denominator n)}
+\item{S}{sample covariance matrix (denominator n).}
 
-\item{lam}{tuning parameter for penalty}
+\item{lam}{tuning parameter for ridge penalty.}
 }
 \value{
-matrix of omega hat
+estimated Omega
 }
 \description{
-Ridge-penalized Gaussian likelihood precision matrix estimation. Augmented from Adam Rothman's STAT 8931 code.
-}
-\examples{
-n = nrow(X)
-RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
-
+Ridge penalized matrix estimation via closed-form solution. Augmented from Adam Rothman's STAT 8931 code.
 }
 \keyword{internal}

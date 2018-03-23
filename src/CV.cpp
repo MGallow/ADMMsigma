@@ -10,16 +10,11 @@ using namespace Rcpp;
 
 
 //' @title K fold (c++)
-//' @description creates vector of shuffled indices
-//'
-//' @param n number of eleemtns
-//' @param K number of folds
-//' @return returns vector
+//' @description creates vector of shuffled indices.
+//' @param n number of elements.
+//' @param K number of folds.
 //' @keywords internal
-//' @examples
-//' kfold(10, 3)
 //'
-
 arma::vec kfold(int n, int K){
   
   // create sequence 1:n
@@ -45,25 +40,30 @@ arma::vec kfold(int n, int K){
 
 
 //' @title CV ADMM penalized precision matrix estimation (c++)
-//' @description Cross validation function for ADMM_sigma.
+//' @description Cross validation function for ADMMsigma.
 //'
-//' @param X matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector
-//' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-//' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
-//' @param diagonal option to penalize diagonal elements. Defaults to true
-//' @param rho initial step size for ADMM
-//' @param mu factor for primal and residual norms
-//' @param tau1 adjustment for rho
-//' @param tau2 adjustment for rho
-//' @param crit criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'
-//' @param tol1 absolute tolerance. Defaults to 1e-4
-//' @param tol2 relative tolerance. Defaults to 1e-4
-//' @param maxit maximum number of iterations
-//' @param K specify the number of folds for cross validation
-//' @param quiet specify whether the function returns progress of CV or not
-//' @return iterations, lam, S, Omega, and cv.errors
+//' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+//' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+//' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+//' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+//' @param rho initial step size for ADMM algorithm.
+//' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+//' @param tau1 factor in which to increase step size \code{rho}
+//' @param tau2 factor in which to decrease step size \code{rho}
+//' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+//' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+//' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+//' @param maxit maximum number of iterations.
+//' @param K specify the number of folds for cross validation.
+//' @param quiet specify whether the function returns progress of CV or not.
+//' 
+//' @return list of returns includes:
+//' \item{lam}{optimal tuning parameter.}
+//' \item{alpha}{optimal tuning parameter.}
+//' \item{cv.error}{cross validation error for optimal parameters.}
+//' \item{cv.errors}{cross validation errors.}
+//' 
 //' @keywords internal
-//' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]
 List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
@@ -163,14 +163,18 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 
 //' @title CV ridge penalized precision matrix estimation (c++)
 //' @description Cross validation function for RIDGEsigma.
+//' 
+//' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+//' @param lam tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+//' @param K specify the number of folds for cross validation.
+//' @param quiet specify whether the function returns progress of CV or not.
+//' 
+//' @return list of returns includes:
+//' \item{lam}{optimal tuning parameter.}
+//' \item{cv.error}{cross validation error for optimal parameters.}
+//' \item{cv.errors}{cross validation errors.}
 //'
-//' @param X matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector
-//' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-//' @param K specify the number of folds for cross validation
-//' @param quiet specify whether the function returns progress of CV or not
-//' @return iterations, lam, S, Omega, and cv.errors
 //' @keywords internal
-//' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 //'
 // [[Rcpp::export]]
 List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {

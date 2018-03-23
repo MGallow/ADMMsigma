@@ -5,21 +5,21 @@ Version: 1.0
 Date: 2018-02-23
 Authors@R: person("Matt", "Galloway", email = "gall0441@umn.edu",
                   role = c("aut", "cre"))
-Description: This R package produces penalized precision matrix estimates via the alternating direction method of multipliers (ADMM) algorithm
+Description: This package estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases.
 URL: https://github.com/MGallow/ADMMsigma
 BugReports: https://github.com/MGallow/ADMMsigma/issues
-License: MIT + file LICENSE
+License: GPL (>= 2)
 ByteCompile: TRUE
 NeedsCompilation: yes
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Depends: Rcpp (>= 0.12.10),
-    RcppArmadillo,
-    doParallel,
+Imports: stats,
+    parallel,
     foreach,
-    dplyr,
     ggplot2
+Depends: Rcpp (>= 0.12.10),
+    doParallel
 LinkingTo: Rcpp,
     RcppArmadillo
 Suggests: testthat

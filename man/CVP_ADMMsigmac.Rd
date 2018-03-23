@@ -9,36 +9,38 @@ CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
   tol2 = 1e-04, maxit = 1000L, K = 5L, quiet = TRUE)
 }
 \arguments{
-\item{S_train}{matrix or data frame. This is pxp sample covariance for training data}
+\item{S_train}{pxp sample covariance matrix for training data (denominator n).}
 
-\item{S_valid}{matrix or data frame. This is pxp sample covariance for validation data}
+\item{S_valid}{pxp sample covariance matrix for validation data (denominator n).}
 
-\item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
+\item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
-\item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge}
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
 
-\item{diagonal}{option to penalize diagonal elements. Defaults to false}
+\item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
-\item{rho}{initial step size for ADMM}
+\item{rho}{initial step size for ADMM algorithm.}
 
-\item{mu}{factor for primal and residual norms}
+\item{mu}{factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.}
 
-\item{tau1}{adjustment for rho}
+\item{tau1}{factor in which to increase step size \code{rho}}
 
-\item{tau2}{adjustment for rho}
+\item{tau2}{factor in which to decrease step size \code{rho}}
 
-\item{crit}{criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'}
+\item{crit}{criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.}
 
-\item{tol1}{absolute tolerance. Defaults to 1e-4}
+\item{tol1}{absolute convergence tolerance. Defaults to 1e-4.}
 
-\item{tol2}{relative tolerance. Defaults to 1e-4}
+\item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
-\item{maxit}{maximum number of iterations}
+\item{maxit}{maximum number of iterations.}
 
-\item{quiet}{specify whether the function returns progress of CV or not}
+\item{K}{specify the number of folds for cross validation.}
+
+\item{quiet}{specify whether the function returns progress of CV or not.}
 }
 \value{
-iterations, lam, S, Omega, and cv.errors
+cross validation errors
 }
 \description{
 Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.

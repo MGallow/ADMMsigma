@@ -4,21 +4,29 @@
 #' @title Parallel CV (uses CV_ADMMsigmac)
 #' @description Parallel implementation of cross validation.
 #'
-#' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-#' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
-#' @param diagonal option to penalize diagonal elements. Defaults to FALSE
-#' @param rho initial step size for ADMM
-#' @param mu factor for primal and residual norms
-#' @param tau1 adjustment for rho
-#' @param tau2 adjustment for rho
-#' @param crit criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Default is 'ADMM'
-#' @param tol1 absolute tolerance. Defaults to 1e-4
-#' @param tol2 relative tolerance. Defaults to 1e-4
-#' @param maxit maximum number of iterations
-#' @param K specify the number of folds for cross validation
-#' @param cores option to run CV in parallel. Defaults to cores = 1
-#' @param quiet specify whether the function returns progress of CV or not
-#' @return iterations, lam, omega, and gradient
+#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
+#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+#' @param rho initial step size for ADMM algorithm.
+#' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+#' @param tau1 factor in which to increase step size \code{rho}
+#' @param tau2 factor in which to decrease step size \code{rho}
+#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+#' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+#' @param maxit maximum number of iterations.
+#' @param K specify the number of folds for cross validation.
+#' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
+#' @param quiet specify whether the function returns progress of CV or not.
+#' 
+#' @return returns list of returns which includes:
+#' \item{lam}{optimal tuning parameter.}
+#' \item{alpha}{optimal tuning parameter.}
+#' \item{cv.error}{cross validation error for optimal parameters.}
+#' \item{cv.errors}{cross validation errors.}
+#' 
 #' @keywords internal
 
 # we define the ADMM covariance estimation function
@@ -43,7 +51,8 @@ ParallelCV = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # use cluster for each fold in CV
     n = dim(X)[1]
     ind = sample(n)
-    CV = foreach(k = 1:K, .packages = "ADMMsigma", .combine = "+", 
+    k = 1:K
+    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", 
         .inorder = FALSE) %dopar% {
         
         leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 

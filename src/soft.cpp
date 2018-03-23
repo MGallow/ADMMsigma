@@ -7,14 +7,12 @@ using namespace Rcpp;
 
 
 //' @title Soft threshold (elementwise) (c++)
-//' @description Elementwise soft thresholding function. Augmented from Adam Rothman's STAT 8931 code.
+//' @description Soft thresholding function.
 //'
 //' @param s scalar
 //' @param tau scalar
 //' @return scalar
 //' @keywords internal
-//' @examples
-//' softc(10, 5)
 //'
 
 double softc(double s, double tau) {
@@ -34,14 +32,12 @@ double softc(double s, double tau) {
 
 
 //' @title Soft threshold (matrix) (c++)
-//' @description Matrix soft thresholding function. Requires `softc`. Augmented from Adam Rothman's STAT 8931 code.
+//' @description Elementwise soft thresholding function for matrices. Requires `softc`.
 //'
 //' @param s matrix
 //' @param Tau scalar
 //' @return soft threshold matrix
 //' @keywords internal
-//' @examples
-//' softmatrixc(A, 5*diag(10))
 //'
 
 arma::mat softmatrixc(const arma::mat &S, const arma::mat &Tau) {

@@ -3,13 +3,13 @@ title: "Regularized Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 date: \today
 output:
+  html_document:
+    toc: yes
+    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
     number_sections: true
-  html_document:
-    toc: yes
-    toc_depth: 2
 bibliography: lib.bib
 abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of jointly normal distributions. In addition, examples and simulation results will be provided."
 thanks: "**Contact**: gall0441@umn.edu."
@@ -296,7 +296,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam, alpha = 1, rho = 2, mu = 10, tau1 
 
 <br>\vspace{0.5cm}
 ```{r, eval = FALSE, echo = TRUE}
-# The easiest way to install is from the development version from GitHub:
+# The easiest way to install is from CRAN
+install.packages("ADMMsigma")
+
+# You can also install the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("MGallow/ADMMsigma")
 ```
@@ -328,13 +331,8 @@ library(ADMMsigma)
 
 # generate data from a dense matrix
 # first compute covariance matrix
-S = matrix(0, nrow = 5, ncol = 5)
-
-for (i in 1:5){
-  for (j in 1:5){
-    S[i, j] = 0.9^(i != j)
-  }
-}
+S = matrix(0.9, nrow = 5, ncol = 5)
+diag(S) = 1
 
 # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)

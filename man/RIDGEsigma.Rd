@@ -2,28 +2,69 @@
 % Please edit documentation in R/RIDGEsigma.R
 \name{RIDGEsigma}
 \alias{RIDGEsigma}
-\title{Ridge penalized precision matrix estimation (using RIDGEsigmac)}
+\title{Ridge penalized precision matrix estimation}
 \usage{
 RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3,
   quiet = TRUE)
 }
 \arguments{
-\item{X}{data matrix}
+\item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
-\item{S}{option to specify sample covariance matrix (denominator n)}
+\item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
-\item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
+\item{lam}{tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
-\item{K}{specify the number of folds for cross validation}
+\item{K}{specify the number of folds for cross validation.}
 
-\item{quiet}{specify whether the function returns progress of CV or not}
+\item{quiet}{specify whether the function returns progress of CV or not.}
 }
 \value{
-lam, omega, and gradient
+returns class object \code{RIDGEsigma} which includes:
+\item{Lambda}{optimal tuning parameter.}
+\item{Lambdas}{grid of lambda values for CV.}
+\item{Omega}{estimated penalized precision matrix.}
+\item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
+\item{Gradient}{gradient of optimization function (penalized gaussian likelihood).}
+\item{CV.error}{cross validation errors.}
 }
 \description{
-Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
+Ridge penalized matrix estimation via closed-form solution. If you are only interested in the ridge penalty, this function will be faster and provide a more precise estimate than using \code{ADMMsigma}. \cr
+Consider the case where
+\eqn{X_{1}, ..., X_{n}} are iid \eqn{N_{p}(\mu, \Sigma)}
+and we are tasked with estimating the precision matrix,
+denoted \eqn{\Omega \equiv \Sigma^{-1}}. This function solves the
+following optimization problem:
+\describe{
+\item{Objective:}{
+\eqn{\hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}
+\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) +
+\frac{\lambda}{2}\left\| \Omega \right|_{F}^{2} \right\}}}
+}
+where \eqn{\lambda > 0} and \eqn{\left\|\cdot \right\|_{F}^{2}} is the Frobenius
+norm.
 }
 \examples{
-RIDGEsigma(X, lam = 0.1)
+# generate data from a dense matrix
+# first compute covariance matrix
+S = matrix(0.9, nrow = 5, ncol = 5)
+diag(S) = 1
+
+# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors \%*\% diag(out$values^0.5)
+S.sqrt = S.sqrt \%*\% t(out$vectors)
+X = Z \%*\% S.sqrt
+
+# ridge penalty no ADMM
+RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
+
+# produce CV heat map for RIDGEsigma
+plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
+}
+\seealso{
+\code{\link{plot.RIDGEsigma}}, \code{\link{ADMMsigma}}
+}
+\author{
+Matt Galloway \email{gall0441@umn.edu}
 }

@@ -132,7 +132,7 @@ $(document).ready(function () {
 <h4 class="author"><em>Matt Galloway</em></h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
-<code>ADMMsigma</code> is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of joint normal distributions. In addition, examples and simulation results will be provided for <code>ADMMsigma</code>.
+<code>ADMMsigma</code> is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of jointly normal distributions. In addition, examples and simulation results will be provided.
 </div>
 
 </div>
@@ -156,12 +156,17 @@ $(document).ready(function () {
 <p><br></p>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>Suppose we want to minimize <span class="math inline">\(f(x) + g(z)\)</span> subject to the constraint that <span class="math inline">\(Ax + Bz = c\)</span>. For now, we will take <span class="math inline">\(x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}\)</span> – though we will later consider cases where <span class="math inline">\(x\)</span> and <span class="math inline">\(z\)</span> are matrices. The <em>augmented lagrangian</em> is constructed as follows:</p>
+<p>Suppose we want to solve the following optimization problem:</p>
+<span class="math display">\[\begin{align*}
+  \mbox{minimize } f(x) + g(z) \\
+  \mbox{subject to } Ax + Bz = c
+\end{align*}\]</span>
+<p>where <span class="math inline">\(x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}\)</span> – though we will later consider cases where <span class="math inline">\(x\)</span> and <span class="math inline">\(z\)</span> are matrices. Further, we will assume <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> are convex. The <em>augmented lagrangian</em> is constructed as follows:</p>
 <p><span class="math display">\[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]</span></p>
 <p>where <span class="math inline">\(y \in \mathbb{R}^{p}\)</span> is the lagrange multiplier. The optimal value is</p>
 <p><span class="math display">\[ p^{*} = inf\left\{ f(x) + g(z) | Ax + Bz = c \right\} \]</span></p>
-<p>Clearly, the minimization problem under the augmented lagrangian (RE-WORK) is equivalent to that of the usual lagrangian since any feasible point <span class="math inline">\((x, z)\)</span> satisfies the constraint <span class="math inline">\(\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0\)</span>.</p>
-<p>The ADMM algorithm consists of the following repeated iterations:</p>
+<p>Clearly, the minimization under the augmented lagrangian is equivalent to that of the usual lagrangian since any feasible point <span class="math inline">\((x, z)\)</span> satisfies the constraint <span class="math inline">\(\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0\)</span>.</p>
+<p>The alternating direct method of multipliers (ADMM) algorithm consists of the following repeated iterations:</p>
 <span class="math display">\[\begin{align}
   x^{k + 1} &amp;:= \arg\min_{x}L_{\rho}(x, z^{k}, y^{k}) \\
   z^{k + 1} &amp;:= \arg\min_{z}L_{\rho}(z^{k + 1}, z, y^{k}) \\
@@ -175,16 +180,16 @@ $(document).ready(function () {
 <p>We now consider the case where <span class="math inline">\(X_{1}, ..., X_{n}\)</span> are iid <span class="math inline">\(N_{p}(\mu, \Sigma)\)</span> and we are tasked with estimating the precision matrix, denoted <span class="math inline">\(\Omega \equiv \Sigma^{-1}\)</span>. The maximum likelihood estimator for <span class="math inline">\(\Omega\)</span> is</p>
 <p><span class="math display">\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) \right\} \]</span></p>
 <p>where <span class="math inline">\(S = \sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n\)</span>. It is straight forward to show that when the solution exists, <span class="math inline">\(\hat{\Omega} = S^{-1}\)</span>.</p>
-<p>We can further construct a penalized likelihood estimator by adding a penalty term, <span class="math inline">\(P_{\lambda}\left( \Omega \right)\)</span>, to the likelihood:</p>
-<p><span class="math display">\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P_{\lambda}\left( \Omega \right) \right\} \]</span></p>
-<p>Throughout the rest of this document we will take <span class="math inline">\(P_{\lambda}\left( \Omega \right)\)</span> to be <span class="math inline">\(P_{\lambda}\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]\)</span> so that the full penalized likelihood is as follows:</p>
+<p>We can construct a <em>penalized</em> likelihood estimator by adding a penalty term, <span class="math inline">\(P\left( \Omega \right)\)</span>, to the likelihood:</p>
+<p><span class="math display">\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P\left( \Omega \right) \right\} \]</span></p>
+<p>Throughout the rest of this document we will take <span class="math inline">\(P\left( \Omega \right)\)</span> to be <span class="math inline">\(P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]\)</span> so that the full penalized likelihood is as follows:</p>
 <p><span class="math display">\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]</span></p>
-<p>where <span class="math inline">\(0 \leq \alpha \leq 1\)</span>, <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(0 &lt; \eta &lt; 2\)</span>, <span class="math inline">\(\left\|\cdot \right\|_{F}^{2}\)</span> is the Frobenius norm and we define <span class="math inline">\(\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|\)</span>. This penalty is closely related to the elastic-net penalty explored by Hui Zou and Trevor Hastie <span class="citation">(Zou and Hastie 2005)</span>. Clearly, when <span class="math inline">\(\alpha = 0\)</span> this reduces to a ridge-type penalty and when <span class="math inline">\(\alpha = 1\)</span> this reduces to a lasso-type penalty.</p>
-<p>By letting <span class="math inline">\(f\)</span> be equal to the non-penalized likelihood and <span class="math inline">\(g\)</span> equal to <span class="math inline">\(P_{\lambda}\left( \Omega \right)\)</span>, our goal is to minimize the full augmented lagrangian where the constraint is that <span class="math inline">\(\Omega - Z\)</span> is equal to zero:</p>
+<p>where <span class="math inline">\(0 \leq \alpha \leq 1\)</span>, <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(\left\|\cdot \right\|_{F}^{2}\)</span> is the Frobenius norm and we define <span class="math inline">\(\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|\)</span>. This <em>elastic-net</em> penalty was explored by Hui Zou and Trevor Hastie <span class="citation">(Zou and Hastie 2005)</span> and is identical to the penalty used in the popular penalized regression package <code>glmnet</code>. Clearly, when <span class="math inline">\(\alpha = 0\)</span> the elastic-net reduces to a ridge-type penalty and when <span class="math inline">\(\alpha = 1\)</span> this reduces to a lasso-type penalty.</p>
+<p>By letting <span class="math inline">\(f\)</span> be equal to the non-penalized likelihood and <span class="math inline">\(g\)</span> equal to <span class="math inline">\(P\left( \Omega \right)\)</span>, our goal is to minimize the full augmented lagrangian where the constraint is that <span class="math inline">\(\Omega - Z\)</span> is equal to zero:</p>
 <p><span class="math display">\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + Tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]</span></p>
 <p>The ADMM algorithm for regularized precision matrix estimation is</p>
 <span class="math display">\[\begin{align}
-  \Omega^{k + 1} &amp;= \arg\min_{S\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
   Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
   \Lambda^{k + 1} &amp;= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align}\]</span>
@@ -209,36 +214,36 @@ $(document).ready(function () {
   z^{k + 1} &amp;:= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
   u^{k + 1} &amp;:= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
 \end{align}\]</span>
-<p>Note that there are limitations to using this method. For instance, because the dual variable is scaled by <span class="math inline">\(\rho\)</span> (the step size), this form limits one to using a constant step size (without making further adjustments to <span class="math inline">\(U^{k}\)</span>) – a limitation that could prolong the convergence rate.</p>
+<p>Note that there are limitations to using this method. For instance, because the dual variable is scaled by <span class="math inline">\(\rho\)</span> (the step size), this form limits one to using a constant step size (without making further adjustments to <span class="math inline">\(U^{k}\)</span>) – a limitation that could prolong the convergence rate. Because of this, we will only consider the non-condensed form for the remainder of this report.</p>
 <p><br></p>
 </div>
 <div id="algorithm" class="section level2">
 <h2>Algorithm</h2>
 <span class="math display">\[\begin{align*}
-  \Omega^{k + 1} &amp;= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
-  Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
-  U^{k + 1} &amp;= U^{k} + \Omega^{k + 1} - Z^{k + 1}
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  \Lambda^{k + 1} &amp;= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align*}\]</span>
 <p><br></p>
 <ol style="list-style-type: decimal">
-<li>Decompose <span class="math inline">\(S + \rho(U^{k} - Z^{k}) = VQV^{T}\)</span>.</li>
+<li>Decompose <span class="math inline">\(S + \Lambda^{k} - \rho Z^{k} = VQV^{T}\)</span>.</li>
 </ol>
 <p><span class="math display">\[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + \left( Q^{2} + 4\rho I_{p} \right)^{1/2} \right]V^{T} \]</span></p>
 <ol start="2" style="list-style-type: decimal">
 <li>Elementwise soft-thresholding for all <span class="math inline">\(i = 1,..., p\)</span> and <span class="math inline">\(j = 1,..., p\)</span>.</li>
 </ol>
 <span class="math display">\[\begin{align*}
-Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\Omega_{ij}^{k + 1} + U_{ij}^{k}\right)\left( \rho\left| \Omega_{ij}^{k + 1} + U_{ij}^{k} \right| - \lambda\eta\alpha \right)_{+} \\
-&amp;= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left( \rho(\Omega_{ij}^{k + 1} + U_{ij}^{k}\right), \lambda\eta\alpha)
+Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&amp;= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right), \lambda\alpha\right)
 \end{align*}\]</span>
 <ol start="3" style="list-style-type: decimal">
-<li>Update <span class="math inline">\(U\)</span>.</li>
+<li>Update <span class="math inline">\(\Lambda\)</span>.</li>
 </ol>
-<p><span class="math display">\[ U^{k + 1} = U^{k} + \Omega^{k + 1} - Z^{k + 1} \]</span></p>
+<p><span class="math display">\[ \Lambda^{k + 1} = \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right) \]</span></p>
 <p><br></p>
 <div id="proof-of-1" class="section level3">
 <h3>Proof of (1):</h3>
-<p>(Work in progress.)</p>
+<p><span class="math display">\[ \Omega^{k + 1} = \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]</span></p>
 <p><br> <strong>Code snippet</strong>:</p>
 <p>Note this is not the actual code. The real code is written in c++.</p>
 <p><br></p>
@@ -271,7 +276,7 @@ RIDGEsigma = function(S, lam) {
 </div>
 <div id="proof-of-2" class="section level3">
 <h3>Proof of (2)</h3>
-<p>(Work in progress.)</p>
+<p><span class="math display">\[ Z^{k + 1} = \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]</span></p>
 <p><br> <strong>Code snippet</strong>:</p>
 <p>Note this is not the actual code. The real code is written in c++.</p>
 <p><br></p>
@@ -341,8 +346,11 @@ ADMMsigma = function(X = NULL, S = NULL,
 <div id="installation" class="section level2">
 <h2>Installation</h2>
 <p><br></p>
-<pre class="r"><code># The easiest way to install is from the
-# development version from GitHub:
+<pre class="r"><code># The easiest way to install is from CRAN
+install.packages(&quot;ADMMsigma&quot;)
+
+# You can also install the development
+# version from GitHub:
 # install.packages('devtools')
 devtools::install_github(&quot;MGallow/ADMMsigma&quot;)</code></pre>
 <p><br></p>
@@ -364,13 +372,8 @@ devtools::install_github(&quot;MGallow/ADMMsigma&quot;)</code></pre>
 
 # generate data from a dense matrix first
 # compute covariance matrix
-S = matrix(0, nrow = 5, ncol = 5)
-
-for (i in 1:5) {
-    for (j in 1:5) {
-        S[i, j] = 0.9^(i != j)
-    }
-}
+S = matrix(0.9, nrow = 5, ncol = 5)
+diag(S) = 1
 
 # generate 100 x 5 matrix with rows drawn
 # from iid N_p(0, S)
@@ -492,10 +495,10 @@ X = Z %*% S.sqrt
 # glasso (for comparison)
 microbenchmark(glasso(s = S, rho = 0.1))</code></pre>
 <pre><code>## Unit: milliseconds
-##                      expr      min       lq     mean   median      uq
-##  glasso(s = S, rho = 0.1) 48.80055 52.02388 55.68276 54.13802 56.7352
+##                      expr      min       lq     mean   median       uq
+##  glasso(s = S, rho = 0.1) 52.07916 55.74502 61.31078 58.58079 62.44823
 ##       max neval
-##  111.7276   100</code></pre>
+##  136.9781   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma - default tolerance
 microbenchmark(ADMMsigma(S = S, lam = 0.1, 
     alpha = 1, tol1 = 1e-04, tol2 = 1e-04))</code></pre>
@@ -503,38 +506,37 @@ microbenchmark(ADMMsigma(S = S, lam = 0.1,
 ##                                                                expr
 ##  ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-04, tol2 = 1e-04)
 ##       min       lq     mean   median       uq      max neval
-##  40.69197 42.39953 45.68361 43.35004 44.68985 196.9627   100</code></pre>
+##  40.51115 41.32151 44.49199 42.05847 43.33646 200.9093   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma - tolerance 1e-8
 microbenchmark(ADMMsigma(S = S, lam = 0.1, 
     alpha = 1, tol1 = 1e-08, tol2 = 1e-08))</code></pre>
 <pre><code>## Unit: milliseconds
 ##                                                                expr
 ##  ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-08, tol2 = 1e-08)
-##       min       lq     mean   median       uq      max neval
-##  185.4459 190.6627 203.2355 196.2351 207.8961 330.5183   100</code></pre>
+##      min       lq     mean   median       uq      max neval
+##  185.483 187.2749 189.2196 188.5429 189.8913 204.9226   100</code></pre>
 <pre class="r"><code># benchmark ADMMsigma CV - default
 # parameter grid
 microbenchmark(ADMMsigma(X), times = 5)</code></pre>
 <pre><code>## Unit: seconds
-##          expr      min       lq     mean   median       uq     max neval
-##  ADMMsigma(X) 47.70256 48.83088 51.39916 49.76412 55.32702 55.3712     5</code></pre>
+##          expr      min       lq     mean   median       uq      max neval
+##  ADMMsigma(X) 47.32147 47.37952 47.51611 47.45536 47.60571 47.81848     5</code></pre>
 <pre class="r"><code># benchmark ADMMsigma parallel CV
-microbenchmark(ADMMsigma(X, parallel = TRUE), 
-    times = 5)</code></pre>
+microbenchmark(ADMMsigma(X, cores = 3), times = 5)</code></pre>
 <pre><code>## Unit: seconds
-##                           expr      min       lq     mean   median
-##  ADMMsigma(X, parallel = TRUE) 28.85864 29.26799 29.54569 29.84408
-##        uq      max neval
-##  29.87182 29.88594     5</code></pre>
+##                     expr      min       lq     mean   median       uq
+##  ADMMsigma(X, cores = 3) 28.99269 29.13971 29.26893 29.29184 29.36798
+##       max neval
+##  29.55245     5</code></pre>
 <pre class="r"><code># benchmark ADMMsigma CV - likelihood
 # convergence criteria
 microbenchmark(ADMMsigma(X, crit = &quot;loglik&quot;), 
     times = 5)</code></pre>
 <pre><code>## Unit: seconds
 ##                           expr      min       lq     mean   median
-##  ADMMsigma(X, crit = &quot;loglik&quot;) 76.00644 76.01432 76.11806 76.17237
-##        uq      max neval
-##  76.17759 76.21955     5</code></pre>
+##  ADMMsigma(X, crit = &quot;loglik&quot;) 75.04157 75.61216 78.67943 76.76124
+##        uq     max neval
+##  82.42306 83.5591     5</code></pre>
 <p><br></p>
 <p><br></p>
 <!-- \begin{thebibliography}{9} -->

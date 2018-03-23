@@ -9,15 +9,14 @@ using namespace Rcpp;
 
 
 //' @title Ridge-penalized precision matrix estimation (c++)
-//' @description Ridge-penalized Gaussian likelihood precision matrix estimation. Augmented from Adam Rothman's STAT 8931 code.
+//' @description Ridge penalized matrix estimation via closed-form solution. Augmented from Adam Rothman's STAT 8931 code.
 //'
-//' @param S sample covariance matrix (denominator n)
-//' @param lam tuning parameter for penalty
-//' @return matrix of omega hat
+//' @param S sample covariance matrix (denominator n).
+//' @param lam tuning parameter for ridge penalty.
+//' 
+//' @return estimated Omega
+//' 
 //' @keywords internal
-//' @examples
-//' n = nrow(X)
-//' RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
 //'
 // [[Rcpp::export]]
 arma::mat RIDGEsigmac(const arma::mat &S, double lam){
@@ -43,27 +42,47 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 
 
 
-//' @title ADMM penalized precision matrix estimation (c++)
-//' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
+//' @title Penalized precision matrix estimation via ADMM (c++)
+//' 
+//' @description Penalized precision matrix estimation using the ADMM algorithm
+//' 
+//' @details For details on the implementation of 'ADMMsigma', see the vignette
+//' \url{https://mgallow.github.io/ADMMsigma/}.
 //'
-//' @param S option to specify sample covariance matrix (denominator n)
+//' @param S pxp sample covariance matrix (denominator n).
 //' @param initZ initialization matrix for Z2
 //' @param initY initialization matrix for Y
-//' @param lam tuning parameter for penalty
-//' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
-//' @param diagonal option to penalize diagonal elements. Defaults to false
-//' @param rho initial step size for ADMM
-//' @param mu factor for primal and residual norms
-//' @param tau1 adjustment for rho
-//' @param tau2 adjustment for rho
-//' @param crit criterion for convergence c("ADMM", "grad", "lik"). Option crit != "ADMM" will use tol1 as tolerance. Defaults to "ADMM"
-//' @param tol1 absolute tolerance. Defaults to 1e-4
-//' @param tol2 relative tolerance. Defaults to 1e-4
-//' @param maxit maximum number of iterations
-//' @return iterations, lam, omega
+//' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+//' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+//' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+//' @param rho initial step size for ADMM algorithm.
+//' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+//' @param tau1 factor in which to increase step size \code{rho}
+//' @param tau2 factor in which to decrease step size \code{rho}
+//' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+//' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+//' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+//' @param maxit maximum number of iterations.
+//' 
+//' @return returns list of returns which includes:
+//' \item{Iterations}{number of iterations.}
+//' \item{lam}{optimal tuning parameters.}
+//' \item{alpha}{optimal tuning parameter.}
+//' \item{Omega}{estimated penalized precision matrix.}
+//' \item{Z2}{estimated Z matrix.}
+//' \item{Y}{estimated Y matrix.}
+//' 
+//' @references
+//' \itemize{
+//' \item 
+//' For more information on the ADMM algorithm, see: \cr
+//' Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
+//' \url{https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+//' }
+//' 
+//' @author Matt Galloway \email{gall0441@@umn.edu}
+//' 
 //' @keywords internal
-//' @examples
-//' ADMMsigmac(X, lam = 0.1)
 //'
 // [[Rcpp::export]]
 List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){

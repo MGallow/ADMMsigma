@@ -7,22 +7,21 @@
 CV_RIDGEsigmac(X, lam, K = 3L, quiet = TRUE)
 }
 \arguments{
-\item{X}{matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector}
+\item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
-\item{lam}{tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)}
+\item{lam}{tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
-\item{K}{specify the number of folds for cross validation}
+\item{K}{specify the number of folds for cross validation.}
 
-\item{quiet}{specify whether the function returns progress of CV or not}
+\item{quiet}{specify whether the function returns progress of CV or not.}
 }
 \value{
-iterations, lam, S, Omega, and cv.errors
+list of returns includes:
+\item{lam}{optimal tuning parameter.}
+\item{cv.error}{cross validation error for optimal parameters.}
+\item{cv.errors}{cross validation errors.}
 }
 \description{
 Cross validation function for RIDGEsigma.
-}
-\examples{
-CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
-
 }
 \keyword{internal}

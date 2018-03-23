@@ -2,49 +2,66 @@
 % Please edit documentation in R/RcppExports.R
 \name{ADMMsigmac}
 \alias{ADMMsigmac}
-\title{ADMM penalized precision matrix estimation (c++)}
+\title{Penalized precision matrix estimation via ADMM (c++)}
 \usage{
 ADMMsigmac(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2,
   mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
   tol2 = 1e-04, maxit = 1000L)
 }
 \arguments{
-\item{S}{option to specify sample covariance matrix (denominator n)}
+\item{S}{pxp sample covariance matrix (denominator n).}
 
 \item{initY}{initialization matrix for Y}
 
-\item{lam}{tuning parameter for penalty}
+\item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
-\item{alpha}{elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge}
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
 
-\item{diagonal}{option to penalize diagonal elements. Defaults to false}
+\item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
-\item{rho}{initial step size for ADMM}
+\item{rho}{initial step size for ADMM algorithm.}
 
-\item{mu}{factor for primal and residual norms}
+\item{mu}{factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.}
 
-\item{tau1}{adjustment for rho}
+\item{tau1}{factor in which to increase step size \code{rho}}
 
-\item{tau2}{adjustment for rho}
+\item{tau2}{factor in which to decrease step size \code{rho}}
 
-\item{crit}{criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'}
+\item{crit}{criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.}
 
-\item{tol1}{absolute tolerance. Defaults to 1e-4}
+\item{tol1}{absolute convergence tolerance. Defaults to 1e-4.}
 
-\item{tol2}{relative tolerance. Defaults to 1e-4}
+\item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
-\item{maxit}{maximum number of iterations}
+\item{maxit}{maximum number of iterations.}
 
 \item{initZ}{initialization matrix for Z2}
 }
 \value{
-iterations, lam, omega
+returns list of returns which includes:
+\item{Iterations}{number of iterations.}
+\item{lam}{optimal tuning parameters.}
+\item{alpha}{optimal tuning parameter.}
+\item{Omega}{estimated penalized precision matrix.}
+\item{Z2}{estimated Z matrix.}
+\item{Y}{estimated Y matrix.}
 }
 \description{
-Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
+Penalized precision matrix estimation using the ADMM algorithm
 }
-\examples{
-ADMMsigmac(X, lam = 0.1)
-
+\details{
+For details on the implementation of 'ADMMsigma', see the vignette
+\url{https://mgallow.github.io/ADMMsigma/}.
+}
+\references{
+\itemize{
+\item 
+For more information on the ADMM algorithm, see: \cr
+Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
+\url{https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+}
+}
+\author{
+Matt Galloway \email{gall0441@umn.edu}
 }
 \keyword{internal}

@@ -1,28 +1,97 @@
 ## Matt Galloway
 
 
-#' @title ADMM penalized precision matrix estimation (using ADMMsigmac)
-#' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
-#' @param X data matrix
-#' @param S option to specify sample covariance matrix (denominator n)
-#' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-#' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge. Defaults to seq(-1, 1, 0.1)
-#' @param diagonal option to penalize diagonal elements. Defaults to FALSE
-#' @param rho initial step size for ADMM
-#' @param mu factor for primal and residual norms
-#' @param tau1 adjustment for rho
-#' @param tau2 adjustment for rho
-#' @param crit criterion for convergence c('ADMM', 'grad', 'loglik'). Option crit != 'ADMM' will use tol1 as tolerance. Default is 'ADMM'
-#' @param tol1 absolute tolerance. Defaults to 1e-4
-#' @param tol2 relative tolerance. Defaults to 1e-4
-#' @param maxit maximum number of iterations
-#' @param K specify the number of folds for cross validation
-#' @param cores option to run CV in parallel. Defaults to cores = 1
-#' @param quiet specify whether the function returns progress of CV or not
-#' @return iterations, lam, omega, and gradient
+#' @title Penalized precision matrix estimation via ADMM
+#' 
+#' @description Penalized precision matrix estimation using the ADMM algorithm.
+#' Consider the case where \eqn{X_{1}, ..., X_{n}} are iid \eqn{N_{p}(\mu,
+#' \Sigma)} and we are tasked with estimating the precision matrix,
+#' denoted \eqn{\Omega \equiv \Sigma^{-1}}. This function solves the
+#' following optimization problem:
+#' \describe{
+#' \item{Objective:}{
+#' \eqn{\hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}
+#' \left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) +
+#' \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} +
+#' \alpha\left\| \Omega \right\|_{1} \right] \right\}}}
+#' }
+#' where \eqn{0 \leq \alpha \leq 1}, \eqn{\lambda > 0},
+#' \eqn{\left\|\cdot \right\|_{F}^{2}} is the Frobenius norm and we define
+#' \eqn{\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|}.
+#' This elastic net penalty is identical to the penalty used in the popular penalize
+#' regression package \code{glmnet}. Clearly, when \eqn{\alpha = 0} the elastic-net
+#' reduces to a ridge-type penalty and when \eqn{\alpha = 1} this reduces to a
+#' lasso-type penalty.
+#' 
+#' @details For details on the implementation of 'ADMMsigma', see the vignette
+#' \url{https://mgallow.github.io/ADMMsigma/}.
+#' 
+#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
+#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+#' @param rho initial step size for ADMM algorithm.
+#' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+#' @param tau1 factor in which to increase step size \code{rho}
+#' @param tau2 factor in which to decrease step size \code{rho}
+#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+#' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+#' @param maxit maximum number of iterations.
+#' @param K specify the number of folds for cross validation.
+#' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
+#' @param quiet specify whether the function returns progress of CV or not.
+#' 
+#' @return returns class object \code{ADMMsigma} which includes:
+#' \item{Iterations}{number of iterations}
+#' \item{Tuning}{optimal tuning parameters (lam and alpha).}
+#' \item{Lambdas}{grid of lambda values for CV.}
+#' \item{Alphas}{grid of alpha values for CV.}
+#' \item{maxit}{maximum number of iterations.}
+#' \item{Omega}{estimated penalized precision matrix.}
+#' \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
+#' \item{Gradient}{gradient of optimization function (penalized gaussian likelihood).}
+#' \item{CV.error}{cross validation errors.}
+#' 
+#' @references
+#' \itemize{
+#' \item 
+#' For more information on the ADMM algorithm, see: \cr
+#' Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
+#' \url{https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+#' }
+#' 
+#' @author Matt Galloway \email{gall0441@@umn.edu}
+#' 
+#' @seealso \code{\link{plot.ADMMsigma}}, \code{\link{RIDGEsigma}}
+#' 
 #' @export
+#' 
 #' @examples
-#' ADMM_sigma(X, lam = 0.1, rho = 10)
+#' # generate data from a dense matrix
+#' # first compute covariance matrix
+#' S = matrix(0.9, nrow = 5, ncol = 5)
+#' diag(S) = 1
+#'
+#' # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+#' Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
+#' out = eigen(S, symmetric = TRUE)
+#' S.sqrt = out$vectors %*% diag(out$values^0.5)
+#' S.sqrt = S.sqrt %*% t(out$vectors)
+#' X = Z %*% S.sqrt
+#'
+#' # elastic-net type penalty (use CV for optimal lambda and alpha)
+#' ADMMsigma(X)
+#'
+#' # ridge penalty (use CV for optimal lambda)
+#' ADMMsigma(X, alpha = 0)
+#'
+#' # lasso penalty (lam = 0.1)
+#' ADMMsigma(X, lam = 0.1, alpha = 1)
+#'
+#' # produce CV heat map for ADMMsigma
+#' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
@@ -40,8 +109,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, 
-        K) > 0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 
+        0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -145,12 +214,14 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 
 #' @title Print ADMMsigma object
-#' @param x ADMMsigma class object
+#' @description prints ADMMsigma object and suppresses output if needed.
+#' @param x class object ADMMsigma
+#' @param ... additional arguments.
 #' @keywords internal
 #' @export
 print.ADMMsigma = function(x, ...) {
     
-    # print warning if maxit reach
+    # print warning if maxit reached
     if (x$maxit <= x$Iterations) {
         print("Maximum iterations reached...!")
     }
@@ -176,10 +247,27 @@ print.ADMMsigma = function(x, ...) {
 
 
 #' @title Plot ADMMsigma object
-#' @description produces a heat plot for the cross validation errors
-#' @param x ADMMsigma class object
-#' @param footnote option to print footnote of optimal values
+#' @description produces a heat plot for the cross validation errors, if available.
+#' @param x class object ADMMsigma.
+#' @param footnote option to print footnote of optimal values.
+#' @param ... additional arguments.
 #' @export
+#' @examples
+#' # generate data from a dense matrix
+#' # first compute covariance matrix
+#' S = matrix(0.9, nrow = 5, ncol = 5)
+#' diag(S) = 1
+#'
+#' # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+#' Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
+#' out = eigen(S, symmetric = TRUE)
+#' S.sqrt = out$vectors %*% diag(out$values^0.5)
+#' S.sqrt = S.sqrt %*% t(out$vectors)
+#' X = Z %*% S.sqrt
+#'
+#' # produce CV heat map for ADMMsigma
+#' plot(ADMMsigma(X))
+
 plot.ADMMsigma = function(x, footnote = TRUE, ...) {
     
     # check
@@ -188,9 +276,10 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
     }
     
     # augment values for heat map (helps visually)
-    cv = expand.grid(lam = x$Lambdas, alpha = x$Alphas)
-    cv$Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
-        1)
+    lam = x$Lambdas
+    cv = expand.grid(lam = lam, alpha = x$Alphas)
+    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
+    cv = cbind(cv, Errors)
     
     # design color palette
     bluetowhite <- c("#000E29", "white")
@@ -209,9 +298,9 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", 
-                round(x$Tuning[1], 3), ", alpha = ", round(x$Tuning[2], 
-                  3), sep = ""))
+            caption = paste("**Optimal: log10(lam) = ", round(x$Tuning[1], 
+                3), ", alpha = ", round(x$Tuning[2], 3), 
+                sep = ""))
         
     }
     

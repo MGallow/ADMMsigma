@@ -2,37 +2,38 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @title K fold (c++)
-#' @description creates vector of shuffled indices
-#'
-#' @param n number of eleemtns
-#' @param K number of folds
-#' @return returns vector
+#' @description creates vector of shuffled indices.
+#' @param n number of elements.
+#' @param K number of folds.
 #' @keywords internal
-#' @examples
-#' kfold(10, 3)
 #'
 NULL
 
 #' @title CV ADMM penalized precision matrix estimation (c++)
-#' @description Cross validation function for ADMM_sigma.
+#' @description Cross validation function for ADMMsigma.
 #'
-#' @param X matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector
-#' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-#' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
-#' @param diagonal option to penalize diagonal elements. Defaults to true
-#' @param rho initial step size for ADMM
-#' @param mu factor for primal and residual norms
-#' @param tau1 adjustment for rho
-#' @param tau2 adjustment for rho
-#' @param crit criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'
-#' @param tol1 absolute tolerance. Defaults to 1e-4
-#' @param tol2 relative tolerance. Defaults to 1e-4
-#' @param maxit maximum number of iterations
-#' @param K specify the number of folds for cross validation
-#' @param quiet specify whether the function returns progress of CV or not
-#' @return iterations, lam, S, Omega, and cv.errors
+#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+#' @param rho initial step size for ADMM algorithm.
+#' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+#' @param tau1 factor in which to increase step size \code{rho}
+#' @param tau2 factor in which to decrease step size \code{rho}
+#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+#' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+#' @param maxit maximum number of iterations.
+#' @param K specify the number of folds for cross validation.
+#' @param quiet specify whether the function returns progress of CV or not.
+#' 
+#' @return list of returns includes:
+#' \item{lam}{optimal tuning parameter.}
+#' \item{alpha}{optimal tuning parameter.}
+#' \item{cv.error}{cross validation error for optimal parameters.}
+#' \item{cv.errors}{cross validation errors.}
+#' 
 #' @keywords internal
-#' @examples CV_ADMMsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
 CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
     .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
@@ -40,14 +41,18 @@ CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau
 
 #' @title CV ridge penalized precision matrix estimation (c++)
 #' @description Cross validation function for RIDGEsigma.
+#' 
+#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param lam tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param K specify the number of folds for cross validation.
+#' @param quiet specify whether the function returns progress of CV or not.
+#' 
+#' @return list of returns includes:
+#' \item{lam}{optimal tuning parameter.}
+#' \item{cv.error}{cross validation error for optimal parameters.}
+#' \item{cv.errors}{cross validation errors.}
 #'
-#' @param X matrix or data frame. This is the n x p column matrix where the rows are a realization of n independent copies of a p-variate random vector
-#' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-#' @param K specify the number of folds for cross validation
-#' @param quiet specify whether the function returns progress of CV or not
-#' @return iterations, lam, S, Omega, and cv.errors
 #' @keywords internal
-#' @examples CV_RIDGEsigmac(X, lam = seq(0.1, 3, 0.1))
 #'
 CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
     .Call('_ADMMsigma_CV_RIDGEsigmac', PACKAGE = 'ADMMsigma', X, lam, K, quiet)
@@ -56,21 +61,24 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
 #' @description Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.
 #'
-#' @param S_train matrix or data frame. This is pxp sample covariance for training data
-#' @param S_valid matrix or data frame. This is pxp sample covariance for validation data
-#' @param lam tuning parameter for penalty. Defaults to 10^seq(-5, 5, 0.5)
-#' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
-#' @param diagonal option to penalize diagonal elements. Defaults to false
-#' @param rho initial step size for ADMM
-#' @param mu factor for primal and residual norms
-#' @param tau1 adjustment for rho
-#' @param tau2 adjustment for rho
-#' @param crit criterion for convergence c('ADMM', 'grad', 'lik'). Option crit != 'ADMM' will use tol1 as tolerance. Defaults to 'ADMM'
-#' @param tol1 absolute tolerance. Defaults to 1e-4
-#' @param tol2 relative tolerance. Defaults to 1e-4
-#' @param maxit maximum number of iterations
-#' @param quiet specify whether the function returns progress of CV or not
-#' @return iterations, lam, S, Omega, and cv.errors
+#' @param S_train pxp sample covariance matrix for training data (denominator n).
+#' @param S_valid pxp sample covariance matrix for validation data (denominator n).
+#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+#' @param rho initial step size for ADMM algorithm.
+#' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+#' @param tau1 factor in which to increase step size \code{rho}
+#' @param tau2 factor in which to decrease step size \code{rho}
+#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+#' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+#' @param maxit maximum number of iterations.
+#' @param K specify the number of folds for cross validation.
+#' @param quiet specify whether the function returns progress of CV or not.
+#' 
+#' @return cross validation errors
+#' 
 #' @keywords internal
 #'
 CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
@@ -78,41 +86,60 @@ CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho =
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)
-#' @description Ridge-penalized Gaussian likelihood precision matrix estimation. Augmented from Adam Rothman's STAT 8931 code.
+#' @description Ridge penalized matrix estimation via closed-form solution. Augmented from Adam Rothman's STAT 8931 code.
 #'
-#' @param S sample covariance matrix (denominator n)
-#' @param lam tuning parameter for penalty
-#' @return matrix of omega hat
+#' @param S sample covariance matrix (denominator n).
+#' @param lam tuning parameter for ridge penalty.
+#' 
+#' @return estimated Omega
+#' 
 #' @keywords internal
-#' @examples
-#' n = nrow(X)
-#' RIDGEsigmac(S = (n-1)/n*cov(X), lam = 0.1)
 #'
 RIDGEsigmac <- function(S, lam) {
     .Call('_ADMMsigma_RIDGEsigmac', PACKAGE = 'ADMMsigma', S, lam)
 }
 
-#' @title ADMM penalized precision matrix estimation (c++)
-#' @description Penalized Gaussian likelihood precision matrix estimation using the ADMM algorithm.
+#' @title Penalized precision matrix estimation via ADMM (c++)
+#' 
+#' @description Penalized precision matrix estimation using the ADMM algorithm
+#' 
+#' @details For details on the implementation of 'ADMMsigma', see the vignette
+#' \url{https://mgallow.github.io/ADMMsigma/}.
 #'
-#' @param S option to specify sample covariance matrix (denominator n)
+#' @param S pxp sample covariance matrix (denominator n).
 #' @param initZ initialization matrix for Z2
 #' @param initY initialization matrix for Y
-#' @param lam tuning parameter for penalty
-#' @param alpha elasticnet mixing parameter [0, 1]: 0 = ridge, 1 = lasso/bridge
-#' @param diagonal option to penalize diagonal elements. Defaults to false
-#' @param rho initial step size for ADMM
-#' @param mu factor for primal and residual norms
-#' @param tau1 adjustment for rho
-#' @param tau2 adjustment for rho
-#' @param crit criterion for convergence c("ADMM", "grad", "lik"). Option crit != "ADMM" will use tol1 as tolerance. Defaults to "ADMM"
-#' @param tol1 absolute tolerance. Defaults to 1e-4
-#' @param tol2 relative tolerance. Defaults to 1e-4
-#' @param maxit maximum number of iterations
-#' @return iterations, lam, omega
+#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
+#' @param rho initial step size for ADMM algorithm.
+#' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
+#' @param tau1 factor in which to increase step size \code{rho}
+#' @param tau2 factor in which to decrease step size \code{rho}
+#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
+#' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+#' @param maxit maximum number of iterations.
+#' 
+#' @return returns list of returns which includes:
+#' \item{Iterations}{number of iterations.}
+#' \item{lam}{optimal tuning parameters.}
+#' \item{alpha}{optimal tuning parameter.}
+#' \item{Omega}{estimated penalized precision matrix.}
+#' \item{Z2}{estimated Z matrix.}
+#' \item{Y}{estimated Y matrix.}
+#' 
+#' @references
+#' \itemize{
+#' \item 
+#' For more information on the ADMM algorithm, see: \cr
+#' Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. 'Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.' \emph{Foundations and Trends in Machine Learning} 3 (1). Now Publishers, Inc.: 1-122.\cr
+#' \url{https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf}
+#' }
+#' 
+#' @author Matt Galloway \email{gall0441@@umn.edu}
+#' 
 #' @keywords internal
-#' @examples
-#' ADMMsigmac(X, lam = 0.1)
 #'
 ADMMsigmac <- function(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
     .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)

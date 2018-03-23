@@ -7,6 +7,11 @@
 \method{print}{ADMMsigma}(x, ...)
 }
 \arguments{
-\item{x}{ADMMsigma class object}
+\item{x}{class object ADMMsigma}
+
+\item{...}{additional arguments.}
+}
+\description{
+prints ADMMsigma object and suppresses output if needed.
 }
 \keyword{internal}

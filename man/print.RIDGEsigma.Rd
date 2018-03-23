@@ -7,6 +7,11 @@
 \method{print}{RIDGEsigma}(x, ...)
 }
 \arguments{
-\item{x}{RIDGEsigma class object}
+\item{x}{class object RIDGEsigma.}
+
+\item{...}{additional arguments.}
+}
+\description{
+prints RIDGEsigma object and suppresses output if needed.
 }
 \keyword{internal}
