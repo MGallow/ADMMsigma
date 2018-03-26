@@ -57,6 +57,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       Omega = as<arma::mat>(ADMM["Omega"]);
       initZ2 = as<arma::mat>(ADMM["Z2"]);
       initY = as<arma::mat>(ADMM["Y"]);
+      rho = as<double>(ADMM["rho"]);
       
       // compute the observed negative validation loglikelihood
       arma::log_det(logdet, sgn, Omega);

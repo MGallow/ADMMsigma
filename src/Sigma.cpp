@@ -71,6 +71,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' \item{Omega}{estimated penalized precision matrix.}
 //' \item{Z2}{estimated Z matrix.}
 //' \item{Y}{estimated Y matrix.}
+//' \item{rho}{estimated rho.}
 //' 
 //' @references
 //' \itemize{
@@ -165,7 +166,8 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
                       Named("alpha") = alpha,
                       Named("Omega") = Omega,
                       Named("Z2") = Z2,
-                      Named("Y") = Y);
+                      Named("Y") = Y,
+                      Named("rho") = rho);
 
 }
 
