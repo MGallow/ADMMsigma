@@ -12,6 +12,6 @@
 \item{...}{additional arguments.}
 }
 \description{
-prints ADMMsigma object and suppresses output if needed.
+Prints ADMMsigma object and suppresses output if needed.
 }
 \keyword{internal}

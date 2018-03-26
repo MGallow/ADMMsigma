@@ -12,6 +12,6 @@
 \item{...}{additional arguments.}
 }
 \description{
-prints RIDGEsigma object and suppresses output if needed.
+Prints RIDGEsigma object and suppresses output if needed.
 }
 \keyword{internal}

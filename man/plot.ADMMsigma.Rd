@@ -9,12 +9,12 @@
 \arguments{
 \item{x}{class object ADMMsigma.}
 
-\item{footnote}{option to print footnote of optimal values.}
+\item{footnote}{option to print footnote of optimal values. Defaults to TRUE.}
 
 \item{...}{additional arguments.}
 }
 \description{
-produces a heat plot for the cross validation errors, if available.
+Produces a heat plot for the cross validation errors, if available.
 }
 \examples{
 # generate data from a dense matrix

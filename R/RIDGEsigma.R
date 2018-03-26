@@ -3,7 +3,7 @@
 
 #' @title Ridge penalized precision matrix estimation
 #' 
-#' @description Ridge penalized matrix estimation via closed-form solution. If you are only interested in the ridge penalty, this function will be faster and provide a more precise estimate than using \code{ADMMsigma}. \cr
+#' @description Ridge penalized matrix estimation via closed-form solution. If one is only interested in the ridge penalty, this function will be faster and provide a more precise estimate than using \code{ADMMsigma}. \cr
 #' Consider the case where
 #' \eqn{X_{1}, ..., X_{n}} are iid \eqn{N_{p}(\mu, \Sigma)}
 #' and we are tasked with estimating the precision matrix,
@@ -13,12 +13,12 @@
 #' \item{Objective:}{
 #' \eqn{\hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}
 #' \left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) +
-#' \frac{\lambda}{2}\left\| \Omega \right|_{F}^{2} \right\}}}
+#' \frac{\lambda}{2}\left\| \Omega \right\|_{F}^{2} \right\}}}
 #' }
 #' where \eqn{\lambda > 0} and \eqn{\left\|\cdot \right\|_{F}^{2}} is the Frobenius
 #' norm.
 #'
-#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param X option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 #' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
 #' @param lam tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param K specify the number of folds for cross validation.
@@ -58,8 +58,8 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 3, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    K = 3, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -129,7 +129,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 
 #' @title Print RIDGEsigma object
-#' @description prints RIDGEsigma object and suppresses output if needed.
+#' @description Prints RIDGEsigma object and suppresses output if needed.
 #' @param x class object RIDGEsigma.
 #' @param ... additional arguments.
 #' @keywords internal
@@ -153,9 +153,9 @@ print.RIDGEsigma = function(x, ...) {
 
 
 #' @title Plot RIDGEsigma object
-#' @description produces a heat plot for the cross validation errors, if available.
+#' @description Produces a heat plot for the cross validation errors, if available.
 #' @param x class object RIDGEsigma
-#' @param footnote option to print footnote of optimal values.
+#' @param footnote option to print footnote of optimal values. Defaults to TRUE.
 #' @param ... additional arguments.
 #' @export
 #' @examples

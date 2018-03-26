@@ -8,7 +8,7 @@ RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3,
   quiet = TRUE)
 }
 \arguments{
-\item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
+\item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
@@ -28,7 +28,7 @@ returns class object \code{RIDGEsigma} which includes:
 \item{CV.error}{cross validation errors.}
 }
 \description{
-Ridge penalized matrix estimation via closed-form solution. If you are only interested in the ridge penalty, this function will be faster and provide a more precise estimate than using \code{ADMMsigma}. \cr
+Ridge penalized matrix estimation via closed-form solution. If one is only interested in the ridge penalty, this function will be faster and provide a more precise estimate than using \code{ADMMsigma}. \cr
 Consider the case where
 \eqn{X_{1}, ..., X_{n}} are iid \eqn{N_{p}(\mu, \Sigma)}
 and we are tasked with estimating the precision matrix,
@@ -38,7 +38,7 @@ following optimization problem:
 \item{Objective:}{
 \eqn{\hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}
 \left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) +
-\frac{\lambda}{2}\left\| \Omega \right|_{F}^{2} \right\}}}
+\frac{\lambda}{2}\left\| \Omega \right\|_{F}^{2} \right\}}}
 }
 where \eqn{\lambda > 0} and \eqn{\left\|\cdot \right\|_{F}^{2}} is the Frobenius
 norm.

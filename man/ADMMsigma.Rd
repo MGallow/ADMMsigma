@@ -10,7 +10,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
   cores = 1, quiet = TRUE)
 }
 \arguments{
-\item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
+\item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
@@ -70,9 +70,9 @@ following optimization problem:
 where \eqn{0 \leq \alpha \leq 1}, \eqn{\lambda > 0},
 \eqn{\left\|\cdot \right\|_{F}^{2}} is the Frobenius norm and we define
 \eqn{\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|}.
-This elastic net penalty is identical to the penalty used in the popular penalize
+This elastic net penalty is identical to the penalty used in the popular penalized
 regression package \code{glmnet}. Clearly, when \eqn{\alpha = 0} the elastic-net
-reduces to a ridge-type penalty and when \eqn{\alpha = 1} this reduces to a
+reduces to a ridge-type penalty and when \eqn{\alpha = 1} it reduces to a
 lasso-type penalty.
 }
 \details{

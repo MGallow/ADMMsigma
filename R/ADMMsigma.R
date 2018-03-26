@@ -18,15 +18,15 @@
 #' where \eqn{0 \leq \alpha \leq 1}, \eqn{\lambda > 0},
 #' \eqn{\left\|\cdot \right\|_{F}^{2}} is the Frobenius norm and we define
 #' \eqn{\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|}.
-#' This elastic net penalty is identical to the penalty used in the popular penalize
+#' This elastic net penalty is identical to the penalty used in the popular penalized
 #' regression package \code{glmnet}. Clearly, when \eqn{\alpha = 0} the elastic-net
-#' reduces to a ridge-type penalty and when \eqn{\alpha = 1} this reduces to a
+#' reduces to a ridge-type penalty and when \eqn{\alpha = 1} it reduces to a
 #' lasso-type penalty.
 #' 
 #' @details For details on the implementation of 'ADMMsigma', see the vignette
 #' \url{https://mgallow.github.io/ADMMsigma/}.
 #' 
-#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param X option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 #' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
 #' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
@@ -94,10 +94,10 @@
 #' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
-ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
-    mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
+ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, 
+    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
+    maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -109,8 +109,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 
-        0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -131,20 +130,19 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute ParallelCV
-            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, K = K, cores = cores, 
-                quiet = quiet)
+            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, diagonal = diagonal, 
+                rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, K = K, 
+                cores = cores, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         } else {
             
             # execute CV_ADMM_sigma
             ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, K = K, quiet = quiet)
+                diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+                tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, K = K, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -152,10 +150,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         # compute final estimate at best tuning parameters
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
-        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, 
-            lam = ADMM$lam, alpha = ADMM$alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, lam = ADMM$lam, 
+            alpha = ADMM$alpha, diagonal = diagonal, rho = rho, 
+            mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
+            tol2 = tol2, maxit = maxit)
         
         
     } else {
@@ -174,10 +172,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             stop("Must specify X or provide single value for lam and alpha.")
         }
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
-        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, 
-            lam = lam, alpha = alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, lam = lam, 
+            alpha = alpha, diagonal = diagonal, rho = rho, mu = mu, 
+            tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
+            tol2 = tol2, maxit = maxit)
         
     }
     
@@ -214,7 +212,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 
 #' @title Print ADMMsigma object
-#' @description prints ADMMsigma object and suppresses output if needed.
+#' @description Prints ADMMsigma object and suppresses output if needed.
 #' @param x class object ADMMsigma
 #' @param ... additional arguments.
 #' @keywords internal
@@ -247,9 +245,9 @@ print.ADMMsigma = function(x, ...) {
 
 
 #' @title Plot ADMMsigma object
-#' @description produces a heat plot for the cross validation errors, if available.
+#' @description Produces a heat plot for the cross validation errors, if available.
 #' @param x class object ADMMsigma.
-#' @param footnote option to print footnote of optimal values.
+#' @param footnote option to print footnote of optimal values. Defaults to TRUE.
 #' @param ... additional arguments.
 #' @export
 #' @examples
@@ -299,8 +297,7 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
             caption = paste("**Optimal: log10(lam) = ", round(x$Tuning[1], 
-                3), ", alpha = ", round(x$Tuning[2], 3), 
-                sep = ""))
+                3), ", alpha = ", round(x$Tuning[2], 3), sep = ""))
         
     }
     
