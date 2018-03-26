@@ -128,6 +128,7 @@ RIDGEsigmac <- function(S, lam) {
 #' \item{Omega}{estimated penalized precision matrix.}
 #' \item{Z2}{estimated Z matrix.}
 #' \item{Y}{estimated Y matrix.}
+#' \item{rho}{estimated rho.}
 #' 
 #' @references
 #' \itemize{

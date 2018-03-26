@@ -45,6 +45,7 @@ returns list of returns which includes:
 \item{Omega}{estimated penalized precision matrix.}
 \item{Z2}{estimated Z matrix.}
 \item{Y}{estimated Y matrix.}
+\item{rho}{estimated rho.}
 }
 \description{
 Penalized precision matrix estimation using the ADMM algorithm
