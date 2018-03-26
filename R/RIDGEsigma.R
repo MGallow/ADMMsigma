@@ -58,8 +58,8 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
-    K = 3, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, 
+    quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -213,8 +213,8 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
             caption = paste("**Optimal: log10(lam) = ", x$Lambda[2], 
-                sep = "")) + theme(axis.title.x = element_blank(), 
-            axis.text.x = element_blank(), axis.ticks.x = element_blank())
+                sep = "")) + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
+            axis.ticks.x = element_blank())
     }
     
 }

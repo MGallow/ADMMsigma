@@ -94,10 +94,10 @@
 #' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
-ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
-    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, 
-    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
+ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 
+    1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
+    crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, K = 5, cores = 1, 
+    quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -132,17 +132,16 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
             # execute ParallelCV
             ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, diagonal = diagonal, 
                 rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, maxit = maxit, K = K, 
-                cores = cores, quiet = quiet)
+                tol1 = tol1, tol2 = tol2, maxit = maxit, K = K, cores = cores, 
+                quiet = quiet)
             CV.error = ADMM$cv.errors
             
         } else {
             
             # execute CV_ADMM_sigma
-            ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
-                tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
-                maxit = maxit, K = K, quiet = quiet)
+            ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, diagonal = diagonal, 
+                rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, K = K, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -151,9 +150,9 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
         ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, lam = ADMM$lam, 
-            alpha = ADMM$alpha, diagonal = diagonal, rho = rho, 
-            mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-            tol2 = tol2, maxit = maxit)
+            alpha = ADMM$alpha, diagonal = diagonal, rho = rho, mu = mu, 
+            tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+            maxit = maxit)
         
         
     } else {
@@ -173,9 +172,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
         }
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
         ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, lam = lam, 
-            alpha = alpha, diagonal = diagonal, rho = rho, mu = mu, 
-            tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-            tol2 = tol2, maxit = maxit)
+            alpha = alpha, diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+            tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
         
     }
     
@@ -187,15 +185,15 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
     }
     
     # compute gradient
-    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * (1 - ADMM$alpha) * 
-        C * ADMM$Omega + ADMM$lam * ADMM$alpha * C * sign(ADMM$Omega)
+    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * (1 - ADMM$alpha) * C * 
+        ADMM$Omega + ADMM$lam * ADMM$alpha * C * sign(ADMM$Omega)
     
     # return values
     tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), ncol = 2)
     colnames(tuning) = c("log10(lam)", "alpha")
-    returns = list(Iterations = ADMM$Iterations, Tuning = tuning, 
-        Lambdas = lam, Alphas = alpha, maxit = maxit, Omega = ADMM$Omega, 
-        Sigma = qr.solve(ADMM$Omega), Gradient = grad, CV.error = CV.error)
+    returns = list(Iterations = ADMM$Iterations, Tuning = tuning, Lambdas = lam, 
+        Alphas = alpha, maxit = maxit, Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
+        Gradient = grad, CV.error = CV.error)
     
     class(returns) = "ADMMsigma"
     return(returns)
