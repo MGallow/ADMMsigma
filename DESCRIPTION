@@ -2,10 +2,10 @@ Package: ADMMsigma
 Type: Package
 Title: Penalized Precision Matrix Estimation via ADMM
 Version: 1.0
-Date: 2018-02-23
+Date: 2018-03-29
 Authors@R: person("Matt", "Galloway", email = "gall0441@umn.edu",
                   role = c("aut", "cre"))
-Description: Estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. This package is an alternative to the `glasso` package.
+Description: Estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. This package is an alternative to the 'glasso' package.
     See Boyd et al (2010) <doi:10.1561/2200000016> for details regarding the estimation method.
 URL: https://github.com/MGallow/ADMMsigma
 BugReports: https://github.com/MGallow/ADMMsigma/issues
