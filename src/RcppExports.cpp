@@ -69,6 +69,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// CVP_RIDGEsigmac
+arma::mat CVP_RIDGEsigmac(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, int K, bool quiet);
+RcppExport SEXP _ADMMsigma_CVP_RIDGEsigmac(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP KSEXP, SEXP quietSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type S_train(S_trainSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S_valid(S_validSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< bool >::type quiet(quietSEXP);
+    rcpp_result_gen = Rcpp::wrap(CVP_RIDGEsigmac(S_train, S_valid, lam, K, quiet));
+    return rcpp_result_gen;
+END_RCPP
+}
 // RIDGEsigmac
 arma::mat RIDGEsigmac(const arma::mat& S, double lam);
 RcppExport SEXP _ADMMsigma_RIDGEsigmac(SEXP SSEXP, SEXP lamSEXP) {
@@ -110,6 +125,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ADMMsigma_CV_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CV_ADMMsigmac, 14},
     {"_ADMMsigma_CV_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CV_RIDGEsigmac, 4},
     {"_ADMMsigma_CVP_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CVP_ADMMsigmac, 15},
+    {"_ADMMsigma_CVP_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CVP_RIDGEsigmac, 5},
     {"_ADMMsigma_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_RIDGEsigmac, 2},
     {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 14},
     {NULL, NULL, 0}

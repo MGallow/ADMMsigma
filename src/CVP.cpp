@@ -10,7 +10,7 @@ using namespace Rcpp;
 
 
 //' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
-//' @description Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.
+//' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with ParallelCV.
 //'
 //' @param S_train pxp sample covariance matrix for training data (denominator n).
 //' @param S_valid pxp sample covariance matrix for validation data (denominator n).
@@ -75,3 +75,58 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
 }
 
 
+
+
+
+//-------------------------------------------------------------------------------------
+
+
+
+
+
+//' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
+//' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with ParallelCV_RIDGE.
+//'
+//' @param S_train pxp sample covariance matrix for training data (denominator n).
+//' @param S_valid pxp sample covariance matrix for validation data (denominator n).
+//' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+//' @param K specify the number of folds for cross validation.
+//' @param quiet specify whether the function returns progress of CV or not.
+//' 
+//' @return cross validation errors
+//' 
+//' @keywords internal
+//'
+// [[Rcpp::export]]
+arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, int K = 5, bool quiet = true) {
+  
+  // initialization
+  int p = S_train.n_rows, l = lam.n_rows;
+  double sgn, logdet;
+  sgn = logdet = 0;
+  arma::mat Omega = arma::ones<arma::mat>(p, p);
+  arma::mat CV_error = arma::zeros<arma::colvec>(lam.n_rows);
+  
+  
+  // loop over all tuning parameters
+  for (int i = 0; i < l; i++){
+    
+    // set temporary tuning parameters
+    double lam_ = lam[i];
+    
+    // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
+    Omega = RIDGEsigmac(S_train, lam_);
+    
+    // compute the observed negative validation loglikelihood
+    arma::log_det(logdet, sgn, Omega);
+    CV_error[i] = arma::accu(Omega % S_valid) - logdet;
+    
+    // if not quiet, then print progress lambda
+    if (!quiet){
+      Rcout << "Finished lam = " << lam[i] << "\n";
+    }
+  }
+  
+  // return CV errors
+  return(CV_error);
+}

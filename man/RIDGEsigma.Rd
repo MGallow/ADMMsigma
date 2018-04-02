@@ -5,7 +5,7 @@
 \title{Ridge penalized precision matrix estimation}
 \usage{
 RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3,
-  quiet = TRUE)
+  cores = 1, quiet = TRUE)
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -15,6 +15,8 @@ RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3,
 \item{lam}{tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
 \item{K}{specify the number of folds for cross validation.}
+
+\item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
 
 \item{quiet}{specify whether the function returns progress of CV or not.}
 }

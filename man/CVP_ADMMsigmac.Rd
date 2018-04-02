@@ -43,6 +43,6 @@ CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
 cross validation errors
 }
 \description{
-Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.
+Cross validation (no folds) function for ADMMsigma. This function is to be used with ParallelCV.
 }
 \keyword{internal}

@@ -59,7 +59,7 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 }
 
 #' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
-#' @description Cross validation (no folds) function for ADMM_sigma. This function is to be used with ParallelCV.
+#' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with ParallelCV.
 #'
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
@@ -83,6 +83,23 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #'
 CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
     .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+}
+
+#' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
+#' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with ParallelCV_RIDGE.
+#'
+#' @param S_train pxp sample covariance matrix for training data (denominator n).
+#' @param S_valid pxp sample covariance matrix for validation data (denominator n).
+#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param K specify the number of folds for cross validation.
+#' @param quiet specify whether the function returns progress of CV or not.
+#' 
+#' @return cross validation errors
+#' 
+#' @keywords internal
+#'
+CVP_RIDGEsigmac <- function(S_train, S_valid, lam, K = 5L, quiet = TRUE) {
+    .Call('_ADMMsigma_CVP_RIDGEsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, K, quiet)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)

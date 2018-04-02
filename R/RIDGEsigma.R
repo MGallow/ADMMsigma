@@ -22,6 +22,7 @@
 #' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
 #' @param lam tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param K specify the number of folds for cross validation.
+#' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return returns class object \code{RIDGEsigma} which includes:
@@ -58,8 +59,8 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 
-    0.5), K = 3, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
+    5, 0.5), K = 3, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -68,8 +69,11 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (K%%1 != 0) {
+    if (all(c(K, cores)%%1 != 0)) {
         stop("Entry must be an integer!")
+    }
+    if (cores < 1) {
+        stop("Number of cores must be positive!")
     }
     
     # perform cross validation, if necessary
@@ -77,10 +81,24 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     Lambdas = lam
     if ((length(lam) > 1) & !is.null(X)) {
         
-        # execute CV_RIDGEsigma
-        RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
-        CV.error = RIDGE$cv.errors
-        lam = RIDGE$lam
+        # run CV in parallel?
+        if (cores > 1) {
+            
+            # execute ParallelCV
+            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, 
+                cores = cores, quiet = quiet)
+            CV.error = RIDGE$cv.errors
+            lam = RIDGE$lam
+            
+        } else {
+            
+            # execute CV_RIDGEsigma
+            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
+                quiet = quiet)
+            CV.error = RIDGE$cv.errors
+            lam = RIDGE$lam
+            
+        }
         
         # compute final estimate at best tuning parameters
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]

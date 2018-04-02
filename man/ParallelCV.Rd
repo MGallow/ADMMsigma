@@ -4,15 +4,13 @@
 \alias{ParallelCV}
 \title{Parallel CV (uses CV_ADMMsigmac)}
 \usage{
-ParallelCV(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
-  1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
+ParallelCV(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
+  diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
   crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, K = 5,
   cores = 1, quiet = TRUE)
 }
 \arguments{
-\item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
-
-\item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
+\item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
