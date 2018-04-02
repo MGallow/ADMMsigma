@@ -21,7 +21,8 @@ See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.
 
 <br>\vspace{0.5cm}
 
-`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. A (possibly incomplete) list of functions contained in the package can be found below:
+
+`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. A (possibly incomplete) list of functions contained in the package can be found below:
 
 * `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
 
@@ -50,29 +51,39 @@ If there are any issues/bugs, please let me know: [github](https://github.com/MG
 ```{r, message = FALSE}
 library(ADMMsigma)
 
-# generate data from a dense matrix
+# generate data from a sparse matrix
 # first compute covariance matrix
-S = matrix(0.9, nrow = 5, ncol = 5)
-diag(S) = 1
+S = matrix(0.7, nrow = 5, ncol = 5)
+for (i in 1:5){
+  for (j in 1:5){
+    S[i, j] = S[i, j]^abs(i - j)
+  }
+}
 
-# print oracle precision matrix
-(Omega = qr.solve(S))
+# print oracle precision matrix (shrinkage might be useful)
+(Omega = qr.solve(S) %>% round(3))
 
-# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(1000*5), nrow = 1000, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 
+# print sample precision matrix (perhaps a bad estimate)
+(qr.solve(cov(X)) %>% round(5))
+
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8)
 
+# lasso penalty (default tolerance)
+ADMMsigma(X, alpha = 1)
+
+# elastic-net penalty (alpha = 0.5)
+ADMMsigma(X, alpha = 0.5)
+
 # ridge penalty
 ADMMsigma(X, alpha = 0)
-
-# lasso penalty
-ADMMsigma(X, alpha = 1)
 
 # ridge penalty no ADMM
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))

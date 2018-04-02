@@ -11,7 +11,7 @@ output:
     toc: yes
     toc_depth: 2
 bibliography: lib.bib
-abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of jointly normal distributions. In addition, examples and simulation results will be provided."
+abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of jointly normal distributions. In addition, examples and simulation results will be provided."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
 #fontfamily: mathpazo
@@ -329,29 +329,39 @@ A (possibly incomplete) list of functions contained in the package can be found 
 ```{r, message = FALSE, echo = TRUE}
 library(ADMMsigma)
 
-# generate data from a dense matrix
+# generate data from a sparse matrix
 # first compute covariance matrix
-S = matrix(0.9, nrow = 5, ncol = 5)
-diag(S) = 1
+S = matrix(0.7, nrow = 5, ncol = 5)
+for (i in 1:5){
+  for (j in 1:5){
+    S[i, j] = S[i, j]^abs(i - j)
+  }
+}
 
-# print oracle precision matrix
-(Omega = qr.solve(S))
+# print oracle precision matrix (shrinkage might be useful)
+(Omega = qr.solve(S) %>% round(3))
 
-# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
 Z = matrix(rnorm(1000*5), nrow = 1000, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 
+# print sample precision matrix (perhaps a bad estimate)
+(qr.solve(cov(X)) %>% round(5))
+
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8)
 
+# lasso penalty (default tolerance)
+ADMMsigma(X, alpha = 1)
+
+# elastic-net penalty (alpha = 0.5)
+ADMMsigma(X, alpha = 0.5)
+
 # ridge penalty
 ADMMsigma(X, alpha = 0)
-
-# lasso penalty
-ADMMsigma(X, alpha = 1)
 
 # ridge penalty no ADMM
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
@@ -417,6 +427,19 @@ microbenchmark(ADMMsigma(X, crit = "loglik"), times = 5)
 ```
 
 <br>\vspace{1cm}
+
+
+## Simulations
+
+![](compound_N50_P100.png)
+
+![](compound_N1000_P10.png)
+
+![](repsKLdenseQR_N50_P100.png)
+
+![](repsKLdense_N50_P10.png)
+
+![](repsKLtridiag_N50_P100.png)
 
 <br>\newpage
 
