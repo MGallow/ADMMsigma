@@ -3,15 +3,16 @@ title: "Regularized Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 date: \today
 output:
+  html_document:
+    toc: yes
+    toc_depth: 2
   pdf_document:
     toc: yes
     toc_depth: 2
     number_sections: true
-  html_document:
-    toc: yes
-    toc_depth: 2
+    fig_caption: false
 bibliography: lib.bib
-abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. This report will provide a brief overview of the algorithm and detail how it can be utilized to estimate precision matrices of jointly normal distributions. In addition, examples and simulation results will be provided."
+abstract: "`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. This report will provide a brief overview of the algorithm, discuss the functions contained in `ADMMsigma`, and provide simulation results."
 thanks: "**Contact**: gall0441@umn.edu."
 geometry: margin = 1in
 #fontfamily: mathpazo
@@ -63,21 +64,21 @@ Suppose we want to solve the following optimization problem:
   \mbox{subject to } Ax + Bz = c
 \end{align*}
 
-where $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times m}, B \in \mathbb{R}^{p \times m}, c \in \mathbb{R}^{p}$ -- though we will later consider cases where $x$ and $z$ are matrices. Further, we will assume $f$ and $g$ are convex. The *augmented lagrangian* is constructed as follows:
+where $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times n}, B \in \mathbb{R}^{p \times m}$, and $c \in \mathbb{R}^{p}$. Following @boyd2011distributed, the optimization problem will be introduced in vector form though we will later consider cases where $x$ and $z$ are matrices. We will also assume $f$ and $g$ are convex functions. Optimization problems like this arise naturally in several statistics and machine learning applications -- particularly regularization methods. For instance, we could take $f$ to be the squared error loss, $g$ to be the $l_{2}$-norm, $c$ to be equal to zero and $A$ and $B$ to be identity matrices to solve the ridge regression optimization problem.
+
+The *augmented lagrangian* is constructed as follows:
 
 \[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]
 
-where $y \in \mathbb{R}^{p}$ is the lagrange multiplier. The optimal value is
+where $y \in \mathbb{R}^{p}$ is the lagrange multiplier and $\rho > 0$ is a scalar. Clearly any minimizer, $p^{*}$, under the augmented lagrangian is equivalent to that of the lagrangian since any feasible point $(x, z)$ satisfies the constraint $\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0$.
 
 \[ p^{*} = inf\left\{ f(x) + g(z) | Ax + Bz = c \right\} \]
 
-Clearly, the minimization under the augmented lagrangian is equivalent to that of the usual lagrangian since any feasible point $(x, z)$ satisfies the constraint $\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0$.
-
-The alternating direct method of multipliers (ADMM) algorithm consists of the following repeated iterations:
+The alternating direction method of multipliers (ADMM) algorithm consists of the following repeated iterations:
 
 \begin{align}
   x^{k + 1} &:= \arg\min_{x}L_{\rho}(x, z^{k}, y^{k}) \\
-  z^{k + 1} &:= \arg\min_{z}L_{\rho}(z^{k + 1}, z, y^{k}) \\
+  z^{k + 1} &:= \arg\min_{z}L_{\rho}(x^{k + 1}, z, y^{k}) \\
   y^{k + 1} &:= y^{k} + \rho(Ax^{k + 1} + Bz^{k + 1} - c)
 \end{align}
 
@@ -87,31 +88,31 @@ A more complete introduction to the algorithm -- specifically how it arose out o
 
 # Regularized Precision Matrix Estimation
 
-We now consider the case where $X_{1}, ..., X_{n}$ are iid $N_{p}(\mu, \Sigma)$ and we are tasked with estimating the precision matrix, denoted $\Omega \equiv \Sigma^{-1}$. The maximum likelihood estimator for $\Omega$ is
+Now consider the case where $X_{1}, ..., X_{n}$ are iid $N_{p}(\mu, \Sigma)$ random variables and we are tasked with estimating the precision matrix, denoted $\Omega \equiv \Sigma^{-1}$. The maximum likelihood estimator for $\Omega$ is
 
-\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) \right\} \]
+\[ \hat{\Omega}_{MLE} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) \right\} \]
 
-where $S = \sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n$. It is straight forward to show that when the solution exists, $\hat{\Omega} = S^{-1}$.
+where $S = \sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n$ and $\bar{X}$ is the sample mean. By setting the gradient equal to zero, we can show that when the solution exists, $\hat{\Omega}_{MLE} = S^{-1}$.
 
-We can construct a *penalized* likelihood estimator by adding a penalty term, $P\left( \Omega \right)$, to the likelihood:
+As in regression settings, we can construct a *penalized* likelihood estimator by adding a penalty term, $P\left( \Omega \right)$, to the likelihood:
 
-\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P\left( \Omega \right) \right\} \]
+\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P\left( \Omega \right) \right\} \]
 
-Throughout the rest of this document we will take $P\left( \Omega \right)$ to be $P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]$ so that the full penalized likelihood is as follows:
+$P\left( \Omega \right)$ is often of the form $P\left(\Omega \right) = \lambda\|\Omega \|_{F}^{2}$ or $P\left(\Omega \right) = \|\Omega\|_{1}$ where $\lambda > 0$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. These penalties are the ridge and lasso, respectively. We will, instead, take $P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]$ so that the full penalized likelihood is
 
-\[ \hat{\Omega}_{\lambda} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]
+\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]
 
-where $0 \leq \alpha \leq 1$, $\lambda > 0$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. This *elastic-net* penalty was explored by Hui Zou and Trevor Hastie [@zou2005regularization] and is identical to the penalty used in the popular penalized regression package `glmnet`. Clearly, when $\alpha = 0$ the elastic-net reduces to a ridge-type penalty and when $\alpha = 1$ this reduces to a lasso-type penalty.
+where $0 \leq \alpha \leq 1$. This *elastic-net* penalty was explored by Hui Zou and Trevor Hastie [@zou2005regularization] and is identical to the penalty used in the popular penalized regression package `glmnet`. Clearly, when $\alpha = 0$ the elastic-net reduces to a ridge-type penalty and when $\alpha = 1$ it reduces to a lasso-type penalty.
 
 By letting $f$ be equal to the non-penalized likelihood and $g$ equal to $P\left( \Omega \right)$, our goal is to minimize the full augmented lagrangian where the constraint is that $\Omega - Z$ is equal to zero:
 
 \[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + Tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]
 
 
-The ADMM algorithm for regularized precision matrix estimation is
+The ADMM algorithm for estimating the penalized precision matrix in this problem is
 
 \begin{align}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
   Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
   \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align}
@@ -119,9 +120,9 @@ The ADMM algorithm for regularized precision matrix estimation is
 
 <br>\vspace{1cm}
 
-## Condensed-Form ADMM
+## Scaled-Form ADMM
 
-An alternate form of the ADMM algorithm can constructed by scaling the dual variable. Let us define $R^{k} = \Omega - Z^{k}$ and $U^{k} = \Lambda^{k}/\rho$. Then
+An alternate form of the ADMM algorithm can constructed by scaling the dual variable ($\Lambda^{k}$). Let us define $R^{k} = \Omega - Z^{k}$ and $U^{k} = \Lambda^{k}/\rho$.
 
 \begin{align*}
   Tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &= Tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
@@ -129,48 +130,51 @@ An alternate form of the ADMM algorithm can constructed by scaling the dual vari
   &= \frac{\rho}{2}\left\| R^{k} + U^{k} \right\|_{F}^{2} - \frac{\rho}{2}\left\| U^{k} \right\|_{F}^{2}
 \end{align*}
 
-**The condensed-form can now be written as follows:**
+Therefore, the condensed-form ADMM algorithm can now be written as
 
 \begin{align}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
+  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
   Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
   U^{k + 1} &= U^{k} + \Omega^{k + 1} - Z^{k + 1}
 \end{align}
 
-More generally (in vector form),
+And more generally (in vector form),
 
 \begin{align}
-  x^{k + 1} &:= \arg\min_{x}\left\{ f(x) + \frac{\rho}{2}\left\| Ax + Bz^{k} - c + u^{k} \right\|_{2}^{2} \right\} \\
-  z^{k + 1} &:= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
-  u^{k + 1} &:= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
+  x^{k + 1} &= \arg\min_{x}\left\{ f(x) + \frac{\rho}{2}\left\| Ax + Bz^{k} - c + u^{k} \right\|_{2}^{2} \right\} \\
+  z^{k + 1} &= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
+  u^{k + 1} &= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
 \end{align}
 
-Note that there are limitations to using this method. For instance, because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size (without making further adjustments to $U^{k}$) -- a limitation that could prolong the convergence rate. Because of this, we will only consider the non-condensed form for the remainder of this report.
+Note that there are limitations to using this method. Because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size without making further adjustments to $U^{k}$. It has been shown in the literature that a dynamic step size can significantly reduce the number of iterations required for convergence.
 
 <br>\vspace{1cm}
 
 ## Algorithm
 
 \begin{align*}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
   Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
   \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align*}
 
 <br>\vspace{1cm}
 
-1. Decompose $S + \Lambda^{k} - \rho Z^{k} = VQV^{T}$.
+
+Initialize $Z^{0}, \Lambda^{0}$, and $\rho$. Iterate the following three steps until convergence:
+
+1. Decompose $S + \Lambda^{k} - \rho Z^{k} = VQV^{T}$ via spectral decomposition.
 
 \[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + \left( Q^{2} + 4\rho I_{p} \right)^{1/2} \right]V^{T} \]
 
 2. Elementwise soft-thresholding for all $i = 1,..., p$ and $j = 1,..., p$.
 
 \begin{align*}
-Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
-&= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right), \lambda\alpha\right)
+Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}Sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}, \lambda\alpha\right)
 \end{align*}
 
-3. Update $\Lambda$.
+3. Update $\Lambda^{k + 1}$.
 
 \[ \Lambda^{k + 1} = \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right) \]
 
@@ -179,42 +183,33 @@ Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}sign\left(\rho\Omega_{ij}^
 
 ### Proof of (1):
 
-\[ \Omega^{k + 1} = \arg\min_{\Omega}\left\{ Tr\left(\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]
+\[ \Omega^{k + 1} = \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]
+
+\begin{align*}
+  \nabla_{\Omega}&\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  &= S - \Omega^{-1} + \Lambda^{k} + \rho\left( \Omega - Z^{k} \right)
+\end{align*}
+
+Set the gradient equal to zero and decompose $\Omega = VDV^{T}$ where $D$ is a diagonal matrix with diagonal elements equal to the eigen values of $\Omega$ and $V$ is the matrix with corresponding eigen vectors as columns.
+
+\[ S + \Lambda^{k} - \rho Z^{k} = \Omega^{-1} - \rho \Omega = VD^{-1}V^{T} - \rho VDV^{T} =  V\left(D^{-1} - \rho D\right)V^{T} \]
+
+This equivalence implies that
+
+\[ \phi_{j}\left( S + \Lambda^{k} - \rho Z^{k} \right) = \frac{1}{\phi_{j}(\Omega^{k + 1})} - \rho\phi_{j}(\Omega^{k + 1}) \]
+
+where $\phi_{j}(\cdot)$ is the $j$th eigen value.
+
+\begin{align*}
+  &\Rightarrow \rho\phi_{j}^{2}(\Omega^{k + 1}) + \phi_{j}\left( S + \Lambda^{k} - \rho Z^{k} \right)\phi_{j}(\Omega^{k + 1}) - 1 = 0 \\
+  &\Rightarrow \phi_{j}(\Omega^{k + 1}) = \frac{-\phi_{j}(S + \Lambda^{k} - \rho Z^{k}) \pm \sqrt{\phi_{j}^{2}(S + \Lambda^{k} - \rho Z^{k}) + 4\rho}}{2\rho}
+\end{align*}
+
+In summary, if we decompose $S + \Lambda^{k} - \rho Z^{k} = VQV^{T}$ then
+
+\[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + (Q^{2} + 4\rho I_{p})^{1/2}\right] V^{T} \]
 
 
-
-
-<br>\vspace{1cm}
-**Code snippet**:
-
-
-Note this is not the actual code. The real code is written in c++.
-
-<br>\vspace{0.5cm}
-```{r eval = FALSE, echo = TRUE}
-
-# ridge penalized precision matrix function
-RIDGEsigma = function(S, lam){
-  
-  # dimensions
-  p = dim(S)[1]
-  
-  # gather eigen values of S (spectral decomposition)
-  e.out = eigen(S, symmetric = TRUE)
-  
-  # augment eigen values for omega hat
-  new.evs = (-e.out$val + sqrt(e.out$val^2 + 4*lam))/(2*lam)
-  
-  # compute omega hat for lambda (zero gradient equation)
-  omega = tcrossprod(e.out$vec*rep(new.evs, each = p), e.out$vec)
-  
-  # compute gradient
-  grad = S - qr.solve(omega) + lam * omega
-  
-  return(list(omega = omega, gradient = grad))
-}
-
-```
 <br>\vspace{1cm}
 
 
@@ -222,75 +217,39 @@ RIDGEsigma = function(S, lam){
 
 \[ Z^{k + 1} = \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]
 
+\begin{align*}
+  \partial&\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  &= \partial\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right]\right\} + \nabla_{\Omega}\left\{\frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  &= \lambda(1 - \alpha)Z + Sign(Z)\lambda\alpha - \Lambda^{k} - \rho\left( \Omega^{k + 1} - Z \right)
+\end{align*}
+
+where $Sign(Z)$ is the elementwise Sign operator. By setting the gradient/sub-differential equal to zero, we arrive at the following equivalence:
+
+\[ Z_{ij} = \frac{1}{\lambda(1 - \alpha) + \rho}\left( \rho \Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} - Sign(Z_{ij})\lambda\alpha \right) \]
+
+for all $i = 1,..., p$ and $j = 1,..., p$. We observe two scenarios:
+
+- If $Z_{ij} > 0$ then
+
+\[ \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} > \lambda\alpha \]
 
 
+- If $Z_{ij} < 0$ then
 
+\[ \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} < -\lambda\alpha \]
 
-<br>\vspace{1cm}
-**Code snippet**:
+This implies that $Sign(Z_{ij}) = Sign(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k})$. Putting all the pieces together, we arrive at
 
-Note this is not the actual code. The real code is written in c++.
+\begin{align*}
+Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}Sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}, \lambda\alpha\right)
+\end{align*}
 
-<br>\vspace{0.5cm}
-```{r eval = FALSE, echo = TRUE}
+where $Soft$ is the soft-thresholding function.
 
-# ADMMsigma function
-ADMMsigma = function(X = NULL, S = NULL, lam, alpha = 1, rho = 2, mu = 10, tau1 = 2, tau2 = 2, tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3){
-  
-  # compute sample covariance matrix, if necessary
-  if (is.null(S)){
-    
-    # covariance matrix
-    n = dim(X)[1]
-    S = (n - 1)/n*cov(X)
-    
-  }
-  
-  # allocate memory
-  p = dim(S)[1]
-  criterion = TRUE
-  iter = lik = s = r = eps1 = eps2 = 0
-  new.Z = Y = Omega = matrix(0, nrow = p, ncol = p)
-  
-  # loop until convergence
-  while (criterion && (iter <= maxit)){
-    
-    # ridge equation (1)
-    # gather eigen values (spectral decomposition)
-    Z = new.Z
-    Omega = sigma_ridge(S + Y - rho*Z, lam = rho)$omega
-    
-    # penalty equation (2)
-    # soft-thresholding
-    new.Z = soft(Y + rho*Omega, lam*alpha)/(lam*(1 - alpha) + rho)
-    
-    # update U (3)
-    Y = Y + rho*(Omega - new.Z)
-    
-    # calculate new rho
-    s = sqrt(sum((rho*(new.Z - Z))^2))
-    r = sqrt(sum((Omega - new.Z)^2))
-    rho = rho*(tau1*(r > mu*s) + (s > mu*r)/tau2 + (s/mu <= r & r <= mu*s))
-    iter = iter + 1
-    
-    # stopping criterion
-    eps1 = p*tol1 + tol2*max(sqrt(sum(Omega^2)), sqrt(sum(new.Z^2)))
-    eps2 = p*tol1 + tol2*sqrt(sum(Y^2))
-    criterion = (r >= eps1 || s >= eps2)
-  
-  }
-  return(list(Iterations = iter, Omega = Omega))
-}
+<br><br>\newpage
 
-
-```
-<br>\vspace{1cm}
-
-
-
-<br>\vspace{1cm}
-
-# R Package
+# `ADMMsigma` R Package
 
 ## Installation
 
@@ -307,7 +266,7 @@ devtools::install_github("MGallow/ADMMsigma")
 
 If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
 
-<br>\vspace{1cm}
+<br>\vspace{0.5cm}
 
 A (possibly incomplete) list of functions contained in the package can be found below:
 
@@ -320,10 +279,11 @@ A (possibly incomplete) list of functions contained in the package can be found 
 * `plot.RIDGEsigma()` produces a heat map for cross validation errors
 
 
-<br>
+<br>\vspace{1cm}
 
 ## Usage
 
+We will first generate data from a sparse, tri-diagonal precision matrix and denote it as Omega.
 
 <br>\vspace{0.5cm}
 ```{r, message = FALSE, echo = TRUE}
@@ -347,18 +307,62 @@ out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
+# snap shot of data
+head(X)
 
-# print sample precision matrix (perhaps a bad estimate)
-(qr.solve(cov(X)) %>% round(5))
+```
+<br>\vspace{0.5cm}
+
+As described earlier in the report, the maximum likelihood estimator (MLE) for Omega is the inverse of the sample precision matrix $S^{-1} = \left[\sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n \right]^{-1}$:
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# print inverse of sample precision matrix (perhaps a bad estimate)
+(qr.solve(cov(X)*(nrow(X) - 1)/nrow(X)) %>% round(5))
+
+
+```
+<br>\vspace{0.5cm}
+
+However, because Omega (known as the *oracle*) is sparse, a shrinkage estimator will perhaps perform better than the sample estimator. Below we construct various penalized estimators:
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
 
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8)
 
+```
+<br>\vspace{0.5cm}
+
+**LASSO:**
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
 # lasso penalty (default tolerance)
 ADMMsigma(X, alpha = 1)
 
+
+```
+<br>\vspace{0.5cm}
+
+**ELASTIC-NET:**
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
 # elastic-net penalty (alpha = 0.5)
 ADMMsigma(X, alpha = 0.5)
+
+```
+<br>\newpage
+
+**RIDGE:**
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
 
 # ridge penalty
 ADMMsigma(X, alpha = 0)
@@ -366,17 +370,164 @@ ADMMsigma(X, alpha = 0)
 # ridge penalty no ADMM
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 
+```
+<br>\newpage
+
+This package also has the capability to provide heat maps for the cross validation errors. The more bright (white) areas of the heat map pertain to more optimal tuning parameters.
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
 # produce CV heat map for ADMMsigma
 ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot
+
+```
+<br>\newpage
+
+```{r, message = FALSE, echo = TRUE}
 
 # produce CV heat map for RIDGEsigma
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
 
 ```
-<br>\vspace{1cm}
+<br><br>\vspace{1cm}
 
+
+## Simulations
+
+In the simulations below we generated data from a number of oracle precision matrices with various structures. For each data-generating procedure, the `ADMMsigma()` function was run using 5-fold cross validation. After 20 replications, the cross validation errors were totalled and the optimal tuning parameters were selected (results in the top figure). These results are compared with the Kullback Leibler (KL) losses between the estimates and the oracle precision matrix (bottom figure). We can see below that our cross validation procedure choosing tuning parameters close to the optimal parameters.
+
+<br>\newpage
+
+### Compound Symmetric: P = 100, N = 50
+
+![](images/compound_N50_P100.png)
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE, eval = FALSE}
+
+# oracle precision matrix
+Omega = matrix(0.9, ncol = 100, nrow = 100)
+diag(Omega = 1)
+
+# generate covariance matrix
+S = qr.solve(Omega)
+
+# generate data
+Z = matrix(rnorm(100*50), nrow = 50, ncol = 100)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+```
+
+<br>\newpage
+
+### Compound Symmetric: P = 10, N = 1000
+
+![](images/compound_N1000_P10.png)
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE, eval = FALSE}
+
+# oracle precision matrix
+Omega = matrix(0.9, ncol = 10, nrow = 10)
+diag(Omega = 1)
+
+# generate covariance matrix
+S = qr.solve(Omega)
+
+# generate data
+Z = matrix(rnorm(10*1000), nrow = 1000, ncol = 10)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+```
+
+<br>\newpage
+
+### Dense: P = 100, N = 50
+
+![](images/repsKLdenseQR_N50_P100.png)
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE, eval = FALSE, tidy = FALSE}
+
+# generate eigen values
+eigen = c(rep(1000, 5, rep(1, 100 - 5)))
+
+# randomly generate orthogonal basis (via QR)
+Q = matrix(rnorm(100*100), nrow = 100, ncol = 100) %>% qr %>% qr.Q
+
+# generate covariance matrix
+S = Q %*% diag(eigen) %*% t(Q)
+
+# generate data
+Z = matrix(rnorm(100*50), nrow = 50, ncol = 100)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+```
+
+<br>\newpage
+
+### Dense: P = 10, N = 50
+
+![](images/repsKLdense_N50_P10.png)
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE, eval = FALSE, tidy = FALSE}
+
+# generate eigen values
+eigen = c(rep(1000, 5, rep(1, 10 - 5)))
+
+# randomly generate orthogonal basis (via QR)
+Q = matrix(rnorm(10*10), nrow = 10, ncol = 10) %>% qr %>% qr.Q
+
+# generate covariance matrix
+S = Q %*% diag(eigen) %*% t(Q)
+
+# generate data
+Z = matrix(rnorm(10*50), nrow = 50, ncol = 10)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+```
+
+<br>\newpage
+
+### Tridiagonal: P = 100, N = 50
+
+![](images/repsKLtridiag_N50_P100.png)
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE, eval = FALSE, tidy = FALSE}
+
+# generate covariance matrix
+# (can confirm inverse is tri-diagonal)
+S = matrix(0, nrow = 100, ncol = 100)
+for (i in 1:100){
+  for (j in 1:100){
+    S[i, j] = 0.7^abs(i - j)
+  }
+}
+
+# generate data
+Z = matrix(rnorm(10*50), nrow = 50, ncol = 10)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+```
+
+<br><br>\newpage
 
 ## Benchmark
+
+Below we benchmark the various functions contained in `ADMMsigma`. We can see that `ADMMsigma` (at the default tolerance) offers comparable computation time to the popular `glasso` R package.
 
 ### Computer Specs:
 
@@ -424,22 +575,10 @@ microbenchmark(ADMMsigma(X, cores = 3), times = 5)
 # benchmark ADMMsigma CV - likelihood convergence criteria
 microbenchmark(ADMMsigma(X, crit = "loglik"), times = 5)
 
+# benchmark RIDGEsigma CV
+microbenchmark(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)), times = 5)
+
 ```
-
-<br>\vspace{1cm}
-
-
-## Simulations
-
-![](compound_N50_P100.png)
-
-![](compound_N1000_P10.png)
-
-![](repsKLdenseQR_N50_P100.png)
-
-![](repsKLdense_N50_P10.png)
-
-![](repsKLtridiag_N50_P100.png)
 
 <br>\newpage
 
