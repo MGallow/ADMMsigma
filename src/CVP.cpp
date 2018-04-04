@@ -63,7 +63,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       double alpha_ = alpha[i];
       double lam_ = lam[j];
       
-      // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
+      // compute the penalized likelihood precision matrix estimator at the ith value in lam:
       List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
       maxit = adjmaxit;

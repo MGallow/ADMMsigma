@@ -74,12 +74,13 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   //int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows, startmaxit = maxit;
   int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows;
   //double sgn, logdet, startrho;
-  double sgn, logdet;
+  double sgn, logdet, alpha_, lam_;
   sgn = logdet = 0;
   //startrho = rho;
   arma::mat Omega, initZ2, initY, CV_errors, CV_error;
   initZ2 = initY = arma::zeros<arma::mat>(p, p);
-  CV_errors = CV_error = arma::zeros<arma::mat>(a, l);
+  //CV_errors = CV_error = arma::zeros<arma::mat>(a, l);
+  CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -106,9 +107,11 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 
     
     // loop over all tuning parameters
-    CV_error = arma::zeros<arma::mat>(a, l);
+    //CV_error = arma::zeros<arma::mat>(a, l);
+    CV_error = arma::zeros<arma::mat>(l, a);
     
-    for (int i = 0; i < a; i++){
+    //for (int i = 0; i < a; i++){
+    for (int i = 0; i < l; i++){
       
       // re-initialize values for each alpha, if adjmaxit < maxit
       // this prevents poor one-step estimators
@@ -118,11 +121,14 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
       //   maxit = startmaxit;
       // }
       
-      for (int j = 0; j < l; j++){
+      //for (int j = 0; j < l; j++){
+      for (int j = 0; j < a; j++){
         
         // set temporary tuning parameters
-        double alpha_ = alpha[i];
-        double lam_ = lam[j];
+        //alpha_ = alpha[i];
+        //lam_ = lam[j];
+        lam_ = lam[i];
+        alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
         List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
@@ -165,10 +171,14 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   CV_errors = CV_errors/K;
   double error = CV_errors.min();
   arma::uword ind = CV_errors.index_min();
-  int alpha_ind = ind % CV_errors.n_rows;
-  int lam_ind = floor(ind/CV_errors.n_rows);
-  double best_alpha = alpha[alpha_ind];
+  // int alpha_ind = ind % CV_errors.n_rows;
+  // int lam_ind = floor(ind/CV_errors.n_rows);
+  // double best_alpha = alpha[alpha_ind];
+  // double best_lam = lam[lam_ind];
+  int lam_ind = ind % CV_errors.n_rows;
+  int alpha_ind = floor(ind/CV_errors.n_rows);
   double best_lam = lam[lam_ind];
+  double best_alpha = alpha[alpha_ind];
 
   
   // return list of coefficients
