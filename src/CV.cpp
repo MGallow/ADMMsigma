@@ -76,7 +76,6 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   sgn = logdet = 0;
   initrho = rho;
   arma::mat Omega, initOmega, initZ2, initY, CV_errors, CV_error;
-  //CV_errors = CV_error = arma::zeros<arma::mat>(a, l);
   CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
   
   // designate folds and shuffle -- ensures randomized folds
@@ -109,17 +108,12 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 
     
     // loop over all tuning parameters
-    //CV_error = arma::zeros<arma::mat>(a, l);
     CV_error = arma::zeros<arma::mat>(l, a);
     
-    //for (int i = 0; i < a; i++){
     for (int i = 0; i < l; i++){
-      //for (int j = 0; j < l; j++){
       for (int j = 0; j < a; j++){
         
         // set temporary tuning parameters
-        //alpha_ = alpha[i];
-        //lam_ = lam[j];
         lam_ = lam[i];
         alpha_ = alpha[j];
         
@@ -162,10 +156,6 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   CV_errors = CV_errors/K;
   double error = CV_errors.min();
   arma::uword ind = CV_errors.index_min();
-  //int alpha_ind = ind % CV_errors.n_rows;
-  //int lam_ind = floor(ind/CV_errors.n_rows);
-  //double best_alpha = alpha[alpha_ind];
-  //double best_lam = lam[lam_ind];
   int lam_ind = ind % CV_errors.n_rows;
   int alpha_ind = floor(ind/CV_errors.n_rows);
   double best_lam = lam[lam_ind];
