@@ -76,7 +76,6 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   sgn = logdet = 0;
   initrho = rho;
   arma::mat Omega, initZ2, initY, CV_errors, CV_error;
-  //initZ2 = initY = arma::zeros<arma::mat>(p, p);
   //CV_errors = CV_error = arma::zeros<arma::mat>(a, l);
   CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
   
