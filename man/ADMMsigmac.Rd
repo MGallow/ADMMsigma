@@ -33,7 +33,7 @@ ADMMsigmac(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2,
 
 \item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
-\item{maxit}{maximum number of iterations.}
+\item{maxit}{maximum number of iterations. Defaults to 1e3.}
 
 \item{initZ}{initialization matrix for Z2}
 }

@@ -59,8 +59,8 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 3, cores = 1, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    K = 3, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -85,16 +85,15 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, 
-                cores = cores, quiet = quiet)
+            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, cores = cores, 
+                quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
         } else {
             
             # execute CV_RIDGEsigma
-            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
-                quiet = quiet)
+            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             

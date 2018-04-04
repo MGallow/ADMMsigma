@@ -62,7 +62,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-//' @param maxit maximum number of iterations.
+//' @param maxit maximum number of iterations. Defaults to 1e3.
 //' 
 //' @return returns list of returns which includes:
 //' \item{Iterations}{number of iterations.}

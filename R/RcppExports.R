@@ -23,8 +23,10 @@ NULL
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
+#' @param maxit maximum number of iterations. Defaults to 1e3.
+#' @param adjmaxit adjusted maximum number of iterations. This option allows the user to adjust the maximum number of iterations after the first tuning parameter during cross validation. This option is designed to be used in conjunction with \code{warm} starts. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
+#' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return list of returns includes:
@@ -35,8 +37,8 @@ NULL
 #' 
 #' @keywords internal
 #'
-CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, adjmaxit = 1e3L, K = 5L, start = "warm", quiet = TRUE) {
+    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, quiet)
 }
 
 #' @title CV ridge penalized precision matrix estimation (c++)
@@ -73,16 +75,18 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
+#' @param maxit maximum number of iterations. Defaults to 1e3.
+#' @param adjmaxit adjusted maximum number of iterations. This option allows the user to adjust the maximum number of iterations after the first tuning parameter during cross validation. This option is designed to be used in conjunction with \code{warm} starts. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
+#' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return cross validation errors
 #' 
 #' @keywords internal
 #'
-CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, adjmaxit = 1e3L, K = 5L, start = "warm", quiet = TRUE) {
+    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, quiet)
 }
 
 #' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
@@ -136,7 +140,7 @@ RIDGEsigmac <- function(S, lam) {
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
+#' @param maxit maximum number of iterations. Defaults to 1e3.
 #' 
 #' @return returns list of returns which includes:
 #' \item{Iterations}{number of iterations.}

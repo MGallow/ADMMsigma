@@ -6,7 +6,8 @@
 \usage{
 CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
   tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04,
-  maxit = 1000L, K = 5L, quiet = TRUE)
+  maxit = 1000L, adjmaxit = 1000L, K = 5L, start = "warm",
+  quiet = TRUE)
 }
 \arguments{
 \item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -31,9 +32,13 @@ CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
 
 \item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
-\item{maxit}{maximum number of iterations.}
+\item{maxit}{maximum number of iterations. Defaults to 1e3.}
+
+\item{adjmaxit}{adjusted maximum number of iterations. This option allows the user to adjust the maximum number of iterations after the first tuning parameter during cross validation. This option is designed to be used in conjunction with \code{warm} starts. Defaults to NULL.}
 
 \item{K}{specify the number of folds for cross validation.}
+
+\item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{quiet}{specify whether the function returns progress of CV or not.}
 }

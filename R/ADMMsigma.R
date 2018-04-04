@@ -38,8 +38,10 @@
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
+#' @param maxit maximum number of iterations. Defaults to 1e3.
+#' @param adjmaxit adjusted maximum number of iterations. This option allows the user to adjust the maximum number of iterations after the first tuning parameter during cross validation. This option is designed to be used in conjunction with \code{warm} starts. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
+#' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
@@ -94,10 +96,10 @@
 #' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
-ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
-    mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
+ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, 
+    tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
+    adjmaxit = NULL, K = 5, start = "warm", cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -109,8 +111,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 
-        0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -122,6 +123,12 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!crit %in% c("ADMM", "loglik", "grad")) {
         stop("Invalid criteria. Must be one of c(ADMM, loglik, grad)")
     }
+    if (!start %in% c("warm", "cold")) {
+        stop("Invalid start. Must be one of c(warm, cold)")
+    }
+    if (is.null(adjmaxit)) {
+        adjmaxit = maxit
+    }
     
     # perform cross validation, if necessary
     CV.error = NULL
@@ -131,20 +138,20 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute ParallelCV
-            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, K = K, cores = cores, 
-                quiet = quiet)
+            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, diagonal = diagonal, 
+                rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
+                K = K, start = start, cores = cores, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         } else {
             
             # execute CV_ADMM_sigma
             ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, K = K, quiet = quiet)
+                diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+                tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
+                quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -152,10 +159,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         # compute final estimate at best tuning parameters
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
-        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, 
-            lam = ADMM$lam, alpha = ADMM$alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, lam = ADMM$lam, 
+            alpha = ADMM$alpha, diagonal = diagonal, rho = rho, mu = mu, 
+            tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+            maxit = maxit)
         
         
     } else {
@@ -174,10 +181,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             stop("Must specify X or provide single value for lam and alpha.")
         }
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
-        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, 
-            lam = lam, alpha = alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+        ADMM = ADMMsigmac(S = S, initZ2 = init, initY = init, lam = lam, 
+            alpha = alpha, diagonal = diagonal, rho = rho, mu = mu, 
+            tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+            maxit = maxit)
         
     }
     
@@ -299,8 +306,7 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
             caption = paste("**Optimal: log10(lam) = ", round(x$Tuning[1], 
-                3), ", alpha = ", round(x$Tuning[2], 3), 
-                sep = ""))
+                3), ", alpha = ", round(x$Tuning[2], 3), sep = ""))
         
     }
     
