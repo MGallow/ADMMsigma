@@ -83,7 +83,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       
       // if not quiet, then print progress lambda
       if (!quiet){
-        Rcout << "Finished lam = " << lam[i] << "\n";
+        Rcout << "Finished lam = " << alpha[i] << "\n";
       }
     }
   }
