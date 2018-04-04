@@ -47,8 +47,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // CVP_ADMMsigmac
-arma::mat CVP_ADMMsigmac(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, int maxit, int adjmaxit, int K, std::string start, bool quiet);
-RcppExport SEXP _ADMMsigma_CVP_ADMMsigmac(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP startSEXP, SEXP quietSEXP) {
+arma::mat CVP_ADMMsigmac(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, int maxit, int adjmaxit, std::string start, bool quiet);
+RcppExport SEXP _ADMMsigma_CVP_ADMMsigmac(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP startSEXP, SEXP quietSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -66,25 +66,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type tol2(tol2SEXP);
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type adjmaxit(adjmaxitSEXP);
-    Rcpp::traits::input_parameter< int >::type K(KSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< bool >::type quiet(quietSEXP);
-    rcpp_result_gen = Rcpp::wrap(CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, quiet));
+    rcpp_result_gen = Rcpp::wrap(CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, quiet));
     return rcpp_result_gen;
 END_RCPP
 }
 // CVP_RIDGEsigmac
-arma::mat CVP_RIDGEsigmac(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, int K, bool quiet);
-RcppExport SEXP _ADMMsigma_CVP_RIDGEsigmac(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP KSEXP, SEXP quietSEXP) {
+arma::mat CVP_RIDGEsigmac(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, bool quiet);
+RcppExport SEXP _ADMMsigma_CVP_RIDGEsigmac(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP quietSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type S_train(S_trainSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S_valid(S_validSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
-    Rcpp::traits::input_parameter< int >::type K(KSEXP);
     Rcpp::traits::input_parameter< bool >::type quiet(quietSEXP);
-    rcpp_result_gen = Rcpp::wrap(CVP_RIDGEsigmac(S_train, S_valid, lam, K, quiet));
+    rcpp_result_gen = Rcpp::wrap(CVP_RIDGEsigmac(S_train, S_valid, lam, quiet));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -128,8 +126,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_ADMMsigma_CV_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CV_ADMMsigmac, 16},
     {"_ADMMsigma_CV_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CV_RIDGEsigmac, 4},
-    {"_ADMMsigma_CVP_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CVP_ADMMsigmac, 17},
-    {"_ADMMsigma_CVP_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CVP_RIDGEsigmac, 5},
+    {"_ADMMsigma_CVP_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CVP_ADMMsigmac, 16},
+    {"_ADMMsigma_CVP_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CVP_RIDGEsigmac, 4},
     {"_ADMMsigma_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_RIDGEsigmac, 2},
     {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 14},
     {NULL, NULL, 0}
