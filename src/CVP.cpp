@@ -38,42 +38,33 @@ using namespace Rcpp;
 arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e3, int adjmaxit = 1e3, int K = 5, std::string start = "warm", bool quiet = true) {
   
   // initialization
-  int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows, startmaxit = maxit;
-  double sgn, logdet, startrho;
+  int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
+  double sgn, logdet, alpha_, lam_;
   sgn = logdet = 0;
-  startrho = rho;
   arma::mat Omega, initZ2, initY;
-  arma::mat CV_error = arma::zeros<arma::mat>(a, l);
+  initZ2 = initY = arma::zeros<arma::mat>(p, p);
+  arma::mat CV_error = arma::zeros<arma::mat>(l, a);
   
   
   // loop over all tuning parameters
-  for (int i = 0; i < a; i++){
-    
-    // re-initialize values for each alpha, if adjmaxit < maxit
-    // this prevents poor one-step estimators
-    if (adjmaxit < maxit){
-      initZ2 = initY = arma::zeros<arma::mat>(p, p);
-      rho = startrho;
-      maxit = startmaxit;
-    }
-    
-    for (int j = 0; j < l; j++){
+  for (int i = 0; i < l; i++){
+    for (int j = 0; j < a; j++){
       
       // set temporary tuning parameters
-      double alpha_ = alpha[i];
-      double lam_ = lam[j];
+      lam_ = lam[i];
+      alpha_ = alpha[j];
       
       // compute the penalized likelihood precision matrix estimator at the ith value in lam:
       List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
-      maxit = adjmaxit;
-      
+
       if (start == "warm"){
         
         // option to save initial values for warm starts
         initZ2 = as<arma::mat>(ADMM["Z2"]);
         initY = as<arma::mat>(ADMM["Y"]);
         rho = as<double>(ADMM["rho"]);
+        maxit = adjmaxit;
         
       }
       
@@ -120,28 +111,28 @@ arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, co
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
-  double sgn, logdet;
+  double sgn, logdet, lam_;
   sgn = logdet = 0;
   arma::mat Omega = arma::ones<arma::mat>(p, p);
-  arma::mat CV_error = arma::zeros<arma::colvec>(lam.n_rows);
+  arma::mat CV_error = arma::zeros<arma::colvec>(l);
   
   
   // loop over all tuning parameters
-  for (int j = 0; j < l; j++){
+  for (int i = 0; i < l; i++){
     
     // set temporary tuning parameters
-    double lam_ = lam[j];
+    lam_ = lam[i];
     
     // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
     Omega = RIDGEsigmac(S_train, lam_);
     
     // compute the observed negative validation loglikelihood
     arma::log_det(logdet, sgn, Omega);
-    CV_error[j] = arma::accu(Omega % S_valid) - logdet;
+    CV_error[i] = arma::accu(Omega % S_valid) - logdet;
     
     // if not quiet, then print progress lambda
     if (!quiet){
-      Rcout << "Finished lam = " << lam[j] << "\n";
+      Rcout << "Finished lam = " << lam[i] << "\n";
     }
   }
   

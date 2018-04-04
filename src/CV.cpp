@@ -71,14 +71,12 @@ arma::vec kfold(int n, int K){
 List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e3, int adjmaxit = 1e3, int K = 5, std::string start = "warm", bool quiet = true) {
 
   // initialization
-  //int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows, startmaxit = maxit;
-  int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows;
-  //double sgn, logdet, startrho;
-  double sgn, logdet, alpha_, lam_;
+  int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
+  double sgn, logdet, initrho, alpha_, lam_;
   sgn = logdet = 0;
-  //startrho = rho;
+  initrho = rho;
   arma::mat Omega, initZ2, initY, CV_errors, CV_error;
-  initZ2 = initY = arma::zeros<arma::mat>(p, p);
+  //initZ2 = initY = arma::zeros<arma::mat>(p, p);
   //CV_errors = CV_error = arma::zeros<arma::mat>(a, l);
   CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
   
@@ -87,6 +85,11 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   
   // parse data into folds and perform CV
   for (int k = 0; k < K; k++){
+    
+    // re-initialize values for each fold
+    initZ2 = initY = arma::zeros<arma::mat>(p, p);
+    rho = initrho;
+    maxit = initmaxit;
     
     // separate into training and testing data
     arma::uvec index = arma::find(folds != k);
@@ -112,15 +115,6 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
     
     //for (int i = 0; i < a; i++){
     for (int i = 0; i < l; i++){
-      
-      // re-initialize values for each alpha, if adjmaxit < maxit
-      // this prevents poor one-step estimators
-      // if (adjmaxit < maxit){
-      //   initZ2 = initY = arma::zeros<arma::mat>(p, p);
-      //   rho = startrho;
-      //   maxit = startmaxit;
-      // }
-      
       //for (int j = 0; j < l; j++){
       for (int j = 0; j < a; j++){
         
@@ -133,19 +127,16 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
         List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
         Omega = as<arma::mat>(ADMM["Omega"]);
-        initZ2 = as<arma::mat>(ADMM["Z2"]);
-        initY = as<arma::mat>(ADMM["Y"]);
-        rho = as<double>(ADMM["rho"]);
-        //maxit = adjmaxit;
 
-        // if (start == "warm"){
-        //   
-        //   // option to save initial values for warm starts
-        //   initZ2 = as<arma::mat>(ADMM["Z2"]);
-        //   initY = as<arma::mat>(ADMM["Y"]);
-        //   rho = as<double>(ADMM["rho"]);
-        //   
-        // }
+        if (start == "warm"){
+
+          // option to save initial values for warm starts
+          initZ2 = as<arma::mat>(ADMM["Z2"]);
+          initY = as<arma::mat>(ADMM["Y"]);
+          rho = as<double>(ADMM["rho"]);
+          maxit = adjmaxit;
+
+        }
         
         // compute the observed negative validation loglikelihood
         arma::log_det(logdet, sgn, Omega);
@@ -171,10 +162,10 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   CV_errors = CV_errors/K;
   double error = CV_errors.min();
   arma::uword ind = CV_errors.index_min();
-  // int alpha_ind = ind % CV_errors.n_rows;
-  // int lam_ind = floor(ind/CV_errors.n_rows);
-  // double best_alpha = alpha[alpha_ind];
-  // double best_lam = lam[lam_ind];
+  //int alpha_ind = ind % CV_errors.n_rows;
+  //int lam_ind = floor(ind/CV_errors.n_rows);
+  //double best_alpha = alpha[alpha_ind];
+  //double best_lam = lam[lam_ind];
   int lam_ind = ind % CV_errors.n_rows;
   int alpha_ind = floor(ind/CV_errors.n_rows);
   double best_lam = lam[lam_ind];
@@ -215,10 +206,10 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
   
   // initialization
   int n = X.n_rows, l = lam.n_rows;
-  double sgn, logdet;
+  double sgn, logdet, lam_;
   sgn = logdet = 0;
-  arma::mat CV_errors = arma::zeros<arma::colvec>(lam.n_rows);
-  arma::mat CV_error = arma::zeros<arma::colvec>(lam.n_rows);
+  arma::mat CV_errors = arma::zeros<arma::colvec>(l);
+  arma::mat CV_error = arma::zeros<arma::colvec>(l);
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -249,21 +240,21 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
     arma::mat Omega = arma::ones<arma::mat>(bp, bp);
     CV_error = arma::zeros<arma::colvec>(lam.n_rows);
     
-    for (int j = 0; j < l; j++){
+    for (int i = 0; i < l; i++){
       
       // set temporary tuning parameters
-      double lam_ = lam[j];
+      lam_ = lam[i];
       
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
       Omega = RIDGEsigmac(S_train, lam_);
       
       // compute the observed negative validation loglikelihood
       arma::log_det(logdet, sgn, Omega);
-      CV_error[j] = arma::accu(Omega % S_test) - logdet;
+      CV_error[i] = arma::accu(Omega % S_test) - logdet;
       
       // if not quiet, then print progress lambda
       if (!quiet){
-        Rcout << "Finished lam = " << lam[j] << "in fold" << k << "\n";
+        Rcout << "Finished lam = " << lam[i] << "in fold" << k << "\n";
       }
     }
     

@@ -84,8 +84,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     CV = CV/K
     best = which(CV == min(CV), arr.ind = TRUE)
     error = min(CV)
-    best_alpha = alpha[best[1]]
-    best_lam = lam[best[2]]
+    best_lam = lam[best[1]]
+    best_alpha = alpha[best[2]]
     
     # stop cluster
     stopCluster(cluster)
