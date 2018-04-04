@@ -24,7 +24,7 @@ NULL
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e3.
-#' @param adjmaxit adjusted maximum number of iterations. This option allows the user to adjust the maximum number of iterations after the first tuning parameter during cross validation. This option is designed to be used in conjunction with \code{warm} starts. Defaults to NULL.
+#' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param quiet specify whether the function returns progress of CV or not.
@@ -76,7 +76,7 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e3.
-#' @param adjmaxit adjusted maximum number of iterations. This option allows the user to adjust the maximum number of iterations after the first tuning parameter during cross validation. This option is designed to be used in conjunction with \code{warm} starts. Defaults to NULL.
+#' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param quiet specify whether the function returns progress of CV or not.
