@@ -4,12 +4,16 @@
 \alias{ADMMsigmac}
 \title{Penalized precision matrix estimation via ADMM (c++)}
 \usage{
-ADMMsigmac(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2,
-  mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
+ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
+  rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
   tol2 = 1e-04, maxit = 1000L)
 }
 \arguments{
 \item{S}{pxp sample covariance matrix (denominator n).}
+
+\item{initOmega}{initialization matrix for Omega}
+
+\item{initZ2}{initialization matrix for Z2}
 
 \item{initY}{initialization matrix for Y}
 
@@ -34,8 +38,6 @@ ADMMsigmac(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2,
 \item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
 \item{maxit}{maximum number of iterations. Defaults to 1e3.}
-
-\item{initZ}{initialization matrix for Z2}
 }
 \value{
 returns list of returns which includes:

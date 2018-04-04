@@ -75,7 +75,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   double sgn, logdet, initrho, alpha_, lam_;
   sgn = logdet = 0;
   initrho = rho;
-  arma::mat Omega, initZ2, initY, CV_errors, CV_error;
+  arma::mat Omega, initOmega, initZ2, initY, CV_errors, CV_error;
   //CV_errors = CV_error = arma::zeros<arma::mat>(a, l);
   CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
   
@@ -86,7 +86,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   for (int k = 0; k < K; k++){
     
     // re-initialize values for each fold
-    initZ2 = initY = arma::zeros<arma::mat>(p, p);
+    initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
     rho = initrho;
     maxit = initmaxit;
     
@@ -124,12 +124,13 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
         alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-        List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+        List ADMM = ADMMsigmac(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
         Omega = as<arma::mat>(ADMM["Omega"]);
 
         if (start == "warm"){
 
           // option to save initial values for warm starts
+          initOmega = as<arma::mat>(ADMM["Omega"]);
           initZ2 = as<arma::mat>(ADMM["Z2"]);
           initY = as<arma::mat>(ADMM["Y"]);
           rho = as<double>(ADMM["rho"]);

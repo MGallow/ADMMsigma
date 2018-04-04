@@ -126,7 +126,8 @@ RIDGEsigmac <- function(S, lam) {
 #' \url{https://mgallow.github.io/ADMMsigma/}.
 #'
 #' @param S pxp sample covariance matrix (denominator n).
-#' @param initZ initialization matrix for Z2
+#' @param initOmega initialization matrix for Omega
+#' @param initZ2 initialization matrix for Z2
 #' @param initY initialization matrix for Y
 #' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
@@ -161,7 +162,7 @@ RIDGEsigmac <- function(S, lam) {
 #' 
 #' @keywords internal
 #'
-ADMMsigmac <- function(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
-    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
+ADMMsigmac <- function(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
+    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
 }
 

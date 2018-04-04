@@ -40,8 +40,8 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
   double sgn, logdet, alpha_, lam_;
   sgn = logdet = 0;
-  arma::mat Omega, initZ2, initY;
-  initZ2 = initY = arma::zeros<arma::mat>(p, p);
+  arma::mat Omega, initOmega, initZ2, initY;
+  initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
   arma::mat CV_error = arma::zeros<arma::mat>(l, a);
   
   
@@ -54,12 +54,13 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       alpha_ = alpha[j];
       
       // compute the penalized likelihood precision matrix estimator at the ith value in lam:
-      List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+      List ADMM = ADMMsigmac(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
 
       if (start == "warm"){
         
         // option to save initial values for warm starts
+        initOmega = as<arma::mat>(ADMM["Omega"]);
         initZ2 = as<arma::mat>(ADMM["Z2"]);
         initY = as<arma::mat>(ADMM["Y"]);
         rho = as<double>(ADMM["rho"]);

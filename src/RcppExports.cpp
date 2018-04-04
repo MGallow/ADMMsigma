@@ -99,12 +99,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // ADMMsigmac
-List ADMMsigmac(const arma::mat& S, const arma::mat& initZ2, const arma::mat& initY, const double lam, const double alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, const int maxit);
-RcppExport SEXP _ADMMsigma_ADMMsigmac(SEXP SSEXP, SEXP initZ2SEXP, SEXP initYSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP) {
+List ADMMsigmac(const arma::mat& S, const arma::mat& initOmega, const arma::mat& initZ2, const arma::mat& initY, const double lam, const double alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, const int maxit);
+RcppExport SEXP _ADMMsigma_ADMMsigmac(SEXP SSEXP, SEXP initOmegaSEXP, SEXP initZ2SEXP, SEXP initYSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type initOmega(initOmegaSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type initZ2(initZ2SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type initY(initYSEXP);
     Rcpp::traits::input_parameter< const double >::type lam(lamSEXP);
@@ -118,7 +119,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type tol1(tol1SEXP);
     Rcpp::traits::input_parameter< const double >::type tol2(tol2SEXP);
     Rcpp::traits::input_parameter< const int >::type maxit(maxitSEXP);
-    rcpp_result_gen = Rcpp::wrap(ADMMsigmac(S, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit));
+    rcpp_result_gen = Rcpp::wrap(ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -129,7 +130,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ADMMsigma_CVP_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CVP_ADMMsigmac, 16},
     {"_ADMMsigma_CVP_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CVP_RIDGEsigmac, 4},
     {"_ADMMsigma_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_RIDGEsigmac, 2},
-    {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 14},
+    {"_ADMMsigma_ADMMsigmac", (DL_FUNC) &_ADMMsigma_ADMMsigmac, 15},
     {NULL, NULL, 0}
 };
 
