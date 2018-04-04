@@ -29,10 +29,9 @@
 #' @keywords internal
 
 # we define the ParallelCV function
-ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
-    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, 
-    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, K = 5, cores = 1, quiet = TRUE) {
+ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, 
+    rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
+    K = 5, cores = 1, quiet = TRUE) {
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -51,11 +50,9 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     n = dim(X)[1]
     ind = sample(n)
     k = 1:K
-    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", 
-        .inorder = FALSE) %dopar% {
+    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
-            n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]
@@ -71,9 +68,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CV_ADMMsigmac
-        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, diagonal, 
-            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
-            quiet)
+        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, 
+            tol1, tol2, maxit, quiet)
         
     }
     
@@ -88,8 +84,7 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = best_lam, alpha = best_alpha, cv.error = error, 
-        cv.errors = CV))
+    return(list(lam = best_lam, alpha = best_alpha, cv.error = error, cv.errors = CV))
     
 }
 
@@ -118,8 +113,7 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
 #' @keywords internal
 
 # we define the ParallelCV_RIDGE function
-ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 
-    0.5), K = 5, cores = 1, quiet = TRUE) {
+ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1, quiet = TRUE) {
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -138,11 +132,9 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5,
     n = dim(X)[1]
     ind = sample(n)
     k = 1:K
-    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", 
-        .inorder = FALSE) %dopar% {
+    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
-            n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]

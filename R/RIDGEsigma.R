@@ -59,8 +59,7 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 3, cores = 1, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -85,16 +84,14 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, 
-                cores = cores, quiet = quiet)
+            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, cores = cores, quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
         } else {
             
             # execute CV_RIDGEsigma
-            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
-                quiet = quiet)
+            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
@@ -130,8 +127,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
     colnames(tuning) = c("log10(lam)", "lam")
-    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
-        Sigma = qr.solve(Omega), Gradient = grad, CV.error = CV.error)
+    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, Sigma = qr.solve(Omega), 
+        Gradient = grad, CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -209,29 +206,23 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     bluetowhite <- c("#000E29", "white")
     
     # produce ggplot heat map
-    ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
-        scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + ggtitle("Heatmap of Cross-Validation Errors") + 
-        theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
-            axis.ticks.x = element_blank())
+    ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+        guide = "none") + theme_minimal() + ggtitle("Heatmap of Cross-Validation Errors") + 
+        theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
     
     if (!footnote) {
         
         # print without footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
-            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
-            theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
-                axis.ticks.x = element_blank())
+        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
+            theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
         
     } else {
         
         # print with footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
-            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], 
-                sep = "")) + theme(axis.title.x = element_blank(), 
+        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
+            caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], sep = "")) + theme(axis.title.x = element_blank(), 
             axis.text.x = element_blank(), axis.ticks.x = element_blank())
     }
     
