@@ -63,7 +63,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-//' @param maxit maximum number of iterations. Defaults to 1e3.
+//' @param maxit maximum number of iterations. Defaults to 1e4.
 //' 
 //' @return returns list of returns which includes:
 //' \item{Iterations}{number of iterations.}
@@ -87,7 +87,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
+List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e4){
 
   // allocate memory
   bool criterion = true;

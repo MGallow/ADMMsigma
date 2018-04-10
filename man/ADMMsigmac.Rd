@@ -6,7 +6,7 @@
 \usage{
 ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
   rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
-  tol2 = 1e-04, maxit = 1000L)
+  tol2 = 1e-04, maxit = 10000L)
 }
 \arguments{
 \item{S}{pxp sample covariance matrix (denominator n).}
@@ -37,7 +37,7 @@ ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
 
 \item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
-\item{maxit}{maximum number of iterations. Defaults to 1e3.}
+\item{maxit}{maximum number of iterations. Defaults to 1e4.}
 }
 \value{
 returns list of returns which includes:

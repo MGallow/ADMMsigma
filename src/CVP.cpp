@@ -24,8 +24,8 @@ using namespace Rcpp;
 //' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-//' @param maxit maximum number of iterations. Defaults to 1e3.
-//' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to NULL.
+//' @param maxit maximum number of iterations. Defaults to 1e4.
+//' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 //' @param quiet specify whether the function returns progress of CV or not.
 //' 
@@ -34,7 +34,7 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e3, int adjmaxit = 1e3, std::string start = "warm", bool quiet = true) {
+arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", bool quiet = true) {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;

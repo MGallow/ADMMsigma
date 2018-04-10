@@ -127,11 +127,18 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # compute gradient
     grad = S - qr.solve(Omega) + lam * Omega
     
+    # compute loglik
+    n = ifelse(is.null(X), nrow(S), nrow(X))
+    loglik = sum(Omega * S) - determinant(Omega, logarithm = TRUE)$modulus[1] + 
+        lam * sum((C * Omega)^2)
+    loglik = (-n/2) * loglik
+    
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
     colnames(tuning) = c("log10(lam)", "lam")
     returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
-        Sigma = qr.solve(Omega), Gradient = grad, CV.error = CV.error)
+        Sigma = qr.solve(Omega), Gradient = grad, Loglik = loglik, 
+        CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
