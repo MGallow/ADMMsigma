@@ -58,8 +58,8 @@ returns class object \code{ADMMsigma} which includes:
 \item{Z}{final sparse update of estimated penalized precision matrix.}
 \item{Y}{final dual update.}
 \item{rho}{final step size.}
-\item{Gradient}{gradient of optimization function (negative penalized log-likelihood).}
-\item{Loglik}{penalized log-likelihood}
+\item{Gradient}{gradient of penalized log-likelihood for Omega.}
+\item{Loglik}{penalized log-likelihood for Omega}
 \item{CV.error}{cross validation errors.}
 }
 \description{
