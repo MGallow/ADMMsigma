@@ -100,10 +100,11 @@
 #' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
-ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
-    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, 
-    tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 10000, 
-    adjmaxit = NULL, K = 5, start = "warm", cores = 1, quiet = TRUE) {
+ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
+    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
+    mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
+    tol2 = 1e-04, maxit = 10000, adjmaxit = NULL, K = 5, 
+    start = "warm", cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -115,7 +116,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, 
+        K) > 0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -142,9 +144,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
         if (cores > 1) {
             
             # execute ParallelCV
-            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, diagonal = diagonal, 
-                rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
+            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
+                diagonal = diagonal, rho = rho, mu = mu, 
+                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
+                tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
                 K = K, start = start, cores = cores, quiet = quiet)
             CV.error = ADMM$cv.errors
             
@@ -152,10 +155,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
             
             # execute CV_ADMM_sigma
             ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
-                tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
-                maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
-                quiet = quiet)
+                diagonal = diagonal, rho = rho, mu = mu, 
+                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
+                tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
+                K = K, start = start, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -164,9 +167,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
         S = cov(X) * (dim(X)[1] - 1)/dim(X)[1]
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
         ADMM = ADMMsigmac(S = S, initOmega = init, initZ2 = init, 
-            initY = init, lam = ADMM$lam, alpha = ADMM$alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
-            tol1 = tol1, tol2 = tol2, maxit = maxit)
+            initY = init, lam = ADMM$lam, alpha = ADMM$alpha, 
+            diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+            tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+            maxit = maxit)
         
         
     } else {
@@ -187,8 +191,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
         ADMM = ADMMsigmac(S = S, initOmega = init, initZ2 = init, 
             initY = init, lam = lam, alpha = alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
-            tol1 = tol1, tol2 = tol2, maxit = maxit)
+            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
+            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
         
     }
     
@@ -206,8 +210,9 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
     # compute loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
     loglik = (-n/2) * (sum(ADMM$Omega * S) - determinant(ADMM$Omega, 
-        logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - ADMM$alpha)/2 * 
-        sum((C * ADMM$Omega)^2) + ADMM$alpha * sum(abs(C * ADMM$Omega))))
+        logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - 
+        ADMM$alpha)/2 * sum((C * ADMM$Omega)^2) + ADMM$alpha * 
+        sum(abs(C * ADMM$Omega))))
     
     
     # return values
@@ -215,8 +220,9 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
     colnames(tuning) = c("log10(lam)", "alpha")
     returns = list(Iterations = ADMM$Iterations, Tuning = tuning, 
         Lambdas = lam, Alphas = alpha, maxit = maxit, Omega = ADMM$Omega, 
-        Sigma = qr.solve(ADMM$Omega), Z = ADMM$Z2, Y = ADMM$Y, rho = ADMM$rho, 
-        Gradient = grad, Loglik = loglik, CV.error = CV.error)
+        Sigma = qr.solve(ADMM$Omega), Z = ADMM$Z2, Y = ADMM$Y, 
+        rho = ADMM$rho, Gradient = grad, Loglik = loglik, 
+        CV.error = CV.error)
     
     class(returns) = "ADMMsigma"
     return(returns)
@@ -317,8 +323,9 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", round(x$Tuning[1], 
-                3), ", alpha = ", round(x$Tuning[2], 3), sep = ""))
+            caption = paste("**Optimal: log10(lam) = ", 
+                round(x$Tuning[1], 3), ", alpha = ", round(x$Tuning[2], 
+                  3), sep = ""))
         
     }
     
