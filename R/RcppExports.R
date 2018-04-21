@@ -20,7 +20,7 @@ NULL
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 #' @param tau1 factor in which to increase step size \code{rho}
 #' @param tau2 factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -72,7 +72,7 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 #' @param tau1 factor in which to increase step size \code{rho}
 #' @param tau2 factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -129,14 +129,14 @@ RIDGEsigmac <- function(S, lam) {
 #' @param initOmega initialization matrix for Omega
 #' @param initZ2 initialization matrix for Z2
 #' @param initY initialization matrix for Y
-#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param lam tuning parameter for elastic net penalty.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.
 #' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param rho initial step size for ADMM algorithm.
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
-#' @param tau1 factor in which to increase step size \code{rho}
-#' @param tau2 factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param tau1 factor in which to increase step size \code{rho}.
+#' @param tau2 factor in which to decrease step size \code{rho}.
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.

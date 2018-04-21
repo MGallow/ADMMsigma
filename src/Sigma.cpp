@@ -60,7 +60,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 //' @param tau1 factor in which to increase step size \code{rho}.
 //' @param tau2 factor in which to decrease step size \code{rho}.
-//' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -95,8 +95,7 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
   int iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
-  arma::mat Z2, Z, Y, Omega, grad, C;
-  grad = arma::zeros<arma::mat>(p, p);
+  arma::mat Z2, Z, Y, Omega, C;
   C = arma::ones<arma::mat>(p, p);
   Omega = initOmega;
   Z2 = initZ2;
@@ -136,17 +135,11 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
     }
 
     // stopping criterion
-    if (crit == "grad"){
+    if (crit == "loglik"){
 
-      // compute gradient
-      grad = S - Omega.i() + lam*(1 - alpha)*C % Omega + lam*alpha*C % arma::sign(Omega);
-      criterion = (arma::norm(grad, "inf") >= tol1);
-
-    } else if (crit == "loglik"){
-
-      // compute likelihood
+      // compute likelihood (close enough)
       arma::log_det(logdet, sgn, Omega);
-      lik2 = arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega)));
+      lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
       criterion = (std::abs(lik2 - lik) >= tol1);
       lik = lik2;
 

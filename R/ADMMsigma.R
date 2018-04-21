@@ -35,7 +35,7 @@
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 #' @param tau1 factor in which to increase step size \code{rho}
 #' @param tau2 factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -46,7 +46,8 @@
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return returns class object \code{ADMMsigma} which includes:
-#' \item{Iterations}{number of iterations}
+#' \item{Call}{function call.}
+#' \item{Iterations}{number of iterations.}
 #' \item{Tuning}{optimal tuning parameters (lam and alpha).}
 #' \item{Lambdas}{grid of lambda values for CV.}
 #' \item{Alphas}{grid of alpha values for CV.}
@@ -56,7 +57,6 @@
 #' \item{Z}{final sparse update of estimated penalized precision matrix.}
 #' \item{Y}{final dual update.}
 #' \item{rho}{final step size.}
-#' \item{Gradient}{gradient of penalized log-likelihood for Omega.}
 #' \item{Loglik}{penalized log-likelihood for Omega}
 #' \item{CV.error}{cross validation errors.}
 #' 
@@ -101,10 +101,11 @@
 
 # we define the ADMM covariance estimation function
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
-    mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, 
-    tol2 = 1e-04, maxit = 10000, adjmaxit = NULL, K = 5, 
-    start = "warm", cores = 1, quiet = TRUE) {
+    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, 
+    rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", 
+        "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 10000, 
+    adjmaxit = NULL, K = 5, start = c("warm", "cold"), 
+    cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -116,7 +117,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, 
+        K) > 0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -125,18 +127,17 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (cores < 1) {
         stop("Number of cores must be positive!")
     }
-    if (!crit %in% c("ADMM", "loglik", "grad")) {
-        stop("Invalid criteria. Must be one of c(ADMM, loglik, grad)")
-    }
-    if (!start %in% c("warm", "cold")) {
-        stop("Invalid start. Must be one of c(warm, cold)")
-    }
     if (is.null(adjmaxit)) {
         adjmaxit = maxit
     }
     
-    # perform cross validation, if necessary
+    # match values
+    crit = match.arg(crit)
+    start = match.arg(start)
+    call = match.call()
     CV.error = NULL
+    
+    # perform cross validation, if necessary
     if ((length(lam) > 1 || length(alpha) > 1) & !is.null(X)) {
         
         # run CV in parallel?
@@ -145,9 +146,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             # execute ParallelCV
             ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
                 diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
-                K = K, start = start, cores = cores, quiet = quiet)
+                tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, 
+                adjmaxit = adjmaxit, K = K, start = start, 
+                cores = cores, quiet = quiet)
             CV.error = ADMM$cv.errors
             
         } else {
@@ -155,9 +157,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             # execute CV_ADMM_sigma
             ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
                 diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
-                K = K, start = start, quiet = quiet)
+                tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, 
+                adjmaxit = adjmaxit, K = K, start = start, 
+                quiet = quiet)
             CV.error = ADMM$cv.errors
             
         }
@@ -202,11 +205,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         C = 1 - diag(ncol(S))
     }
     
-    # compute gradient
-    grad = S - qr.solve(ADMM$Omega) + ADMM$lam * (1 - ADMM$alpha) * C * ADMM$Omega + ADMM$lam * 
-        ADMM$alpha * C * sign(ADMM$Omega)
-    
-    # compute loglik
+    # compute penalized loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
     loglik = (-n/2) * (sum(ADMM$Omega * S) - determinant(ADMM$Omega, 
         logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - 
@@ -217,10 +216,11 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # return values
     tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), ncol = 2)
     colnames(tuning) = c("log10(lam)", "alpha")
-    returns = list(Iterations = ADMM$Iterations, Tuning = tuning, 
-        Lambdas = lam, Alphas = alpha, maxit = maxit, Omega = ADMM$Omega, 
-        Sigma = qr.solve(ADMM$Omega), Z = ADMM$Z2, Y = ADMM$Y, 
-        rho = ADMM$rho, Gradient = grad, Loglik = loglik, CV.error = CV.error)
+    returns = list(Call = call, Iterations = ADMM$Iterations, 
+        Tuning = tuning, Lambdas = lam, Alphas = alpha, 
+        maxit = maxit, Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
+        Z = ADMM$Z2, Y = ADMM$Y, rho = ADMM$rho, Loglik = loglik, 
+        CV.error = CV.error)
     
     class(returns) = "ADMMsigma"
     return(returns)
@@ -249,18 +249,23 @@ print.ADMMsigma = function(x, ...) {
         print("Maximum iterations reached...!")
     }
     
+    # print call
+    cat("\nCall:\n", paste(deparse(x$Call), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+    
     # print iterations
-    cat("\nIterations:\n")
-    print.default(x$Iterations, quote = FALSE)
+    cat("\nIterations: ", paste(x$Iterations, sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print optimal tuning parameters
     cat("\nTuning parameters:\n")
-    print.default(round(x$Tuning, 3), print.gap = 2L, quote = FALSE)
+    print.default(round(x$Tuning, 3), print.gap = 2L, 
+        quote = FALSE)
     
     # print Omega if dim <= 10
-    if (nrow(x$Omega) <= 10) {
+    if (nrow(x$Z) <= 10) {
         cat("\nOmega:\n")
-        print.default(round(x$Omega, 5))
+        print.default(round(x$Z, 5))
     } else {
         cat("\n(...output suppressed due to large dimension!)\n")
     }
@@ -301,7 +306,8 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
     # augment values for heat map (helps visually)
     lam = x$Lambdas
     cv = expand.grid(lam = lam, alpha = x$Alphas)
-    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
+    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
+        1)
     cv = cbind(cv, Errors)
     
     # design color palette
@@ -311,8 +317,9 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
     if (!footnote) {
         
         # print without footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors")
+        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
+            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors")
         
     } else {
         

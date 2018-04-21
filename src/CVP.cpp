@@ -21,7 +21,7 @@ using namespace Rcpp;
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 //' @param tau1 factor in which to increase step size \code{rho}
 //' @param tau2 factor in which to decrease step size \code{rho}
-//' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -68,9 +68,9 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
         
       }
       
-      // compute the observed negative validation loglikelihood
+      // compute the observed negative validation loglikelihood (close enough)
       arma::log_det(logdet, sgn, Omega);
-      CV_error(i, j) = arma::accu(Omega % S_valid) - logdet;
+      CV_error(i, j) = (p/2)*(arma::accu(Omega % S_valid) - logdet);
       
       // if not quiet, then print progress lambda
       if (!quiet){
@@ -125,9 +125,9 @@ arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, co
     // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
     Omega = RIDGEsigmac(S_train, lam_);
     
-    // compute the observed negative validation loglikelihood
+    // compute the observed negative validation loglikelihood (close enough)
     arma::log_det(logdet, sgn, Omega);
-    CV_error[i] = arma::accu(Omega % S_valid) - logdet;
+    CV_error[i] = (p/2)*(arma::accu(Omega % S_valid) - logdet);
     
     // if not quiet, then print progress lambda
     if (!quiet){

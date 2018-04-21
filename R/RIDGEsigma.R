@@ -59,7 +59,8 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores = 1, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
+    5, 0.5), K = 3, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -75,23 +76,28 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores
         stop("Number of cores must be positive!")
     }
     
-    # perform cross validation, if necessary
+    # match values
+    call = match.call()
     CV.error = NULL
     Lambdas = lam
+    
+    # perform cross validation, if necessary
     if ((length(lam) > 1) & !is.null(X)) {
         
         # run CV in parallel?
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, cores = cores, quiet = quiet)
+            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, 
+                K = K, cores = cores, quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
         } else {
             
             # execute CV_RIDGEsigma
-            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
+            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
+                quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
@@ -124,7 +130,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores
     # compute gradient
     grad = S - qr.solve(Omega) + lam * Omega
     
-    # compute loglik
+    # compute penalized loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
     loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, 
         logarithm = TRUE)$modulus[1] + lam * sum(Omega^2))
@@ -132,9 +138,9 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
     colnames(tuning) = c("log10(lam)", "lam")
-    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
-        Sigma = qr.solve(Omega), Gradient = grad, Loglik = loglik, 
-        CV.error = CV.error)
+    returns = list(Call = call, Lambda = tuning, Lambdas = Lambdas, 
+        Omega = Omega, Sigma = qr.solve(Omega), Gradient = grad, 
+        Loglik = loglik, CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -157,9 +163,14 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores
 #' @export
 print.RIDGEsigma = function(x, ...) {
     
+    # print call
+    cat("\nCall:\n", paste(deparse(x$Call), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
+    
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
-    print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
+    print.default(round(x$Lambda, 3), print.gap = 2L, 
+        quote = FALSE)
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -205,7 +216,8 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     # augment values for heat map (helps visually)
     lam = x$Lambdas
     cv = expand.grid(lam = lam, alpha = 0)
-    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
+    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
+        1)
     cv = cbind(cv, Errors)
     
     # design color palette
@@ -215,16 +227,21 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     if (!footnote) {
         
         # print without footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
-            theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
+        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
+            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
+            theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
+                axis.ticks.x = element_blank())
         
     } else {
         
         # print with footnote
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], sep = "")) + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
-      
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
+            caption = paste("**Optimal: log10(lam) = ", 
+                x$Lambda[1], sep = "")) + theme(axis.title.x = element_blank(), 
+            axis.text.x = element_blank(), axis.ticks.x = element_blank())
+        
     }
 }

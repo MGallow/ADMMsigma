@@ -17,9 +17,9 @@ ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
 
 \item{initY}{initialization matrix for Y}
 
-\item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{tuning parameter for elastic net penalty.}
 
-\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
@@ -27,11 +27,11 @@ ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
 
 \item{mu}{factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.}
 
-\item{tau1}{factor in which to increase step size \code{rho}}
+\item{tau1}{factor in which to increase step size \code{rho}.}
 
-\item{tau2}{factor in which to decrease step size \code{rho}}
+\item{tau2}{factor in which to decrease step size \code{rho}.}
 
-\item{crit}{criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.}
+\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
 
 \item{tol1}{absolute convergence tolerance. Defaults to 1e-4.}
 

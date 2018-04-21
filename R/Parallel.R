@@ -12,7 +12,7 @@
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 #' @param tau1 factor in which to increase step size \code{rho}
 #' @param tau2 factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e3.
@@ -32,10 +32,14 @@
 
 # we define the ParallelCV function
 ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
-    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, 
-    tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, adjmaxit = NULL, K = 5, start = "warm", 
-    cores = 1, quiet = TRUE) {
+    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
+    mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", "loglik"), 
+    tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, adjmaxit = NULL, 
+    K = 5, start = c("warm", "cold"), cores = 1, quiet = TRUE) {
+    
+    # match values
+    crit = match.arg(crit)
+    start = match.arg(start)
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -54,9 +58,11 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     n = dim(X)[1]
     ind = sample(n)
     k = 1:K
-    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", .inorder = FALSE) %dopar% {
+    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", 
+        .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
+            n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]
@@ -89,7 +95,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = best_lam, alpha = best_alpha, cv.error = error, cv.errors = CV))
+    return(list(lam = best_lam, alpha = best_alpha, cv.error = error, 
+        cv.errors = CV))
     
 }
 
@@ -118,7 +125,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
 #' @keywords internal
 
 # we define the ParallelCV_RIDGE function
-ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1, quiet = TRUE) {
+ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 
+    5, 0.5), K = 5, cores = 1, quiet = TRUE) {
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -137,9 +145,11 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1
     n = dim(X)[1]
     ind = sample(n)
     k = 1:K
-    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", .inorder = FALSE) %dopar% {
+    CV = foreach(k, .packages = "ADMMsigma", .combine = "+", 
+        .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
+            n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]

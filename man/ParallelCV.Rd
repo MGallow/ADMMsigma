@@ -6,8 +6,9 @@
 \usage{
 ParallelCV(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
   diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
-  crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000,
-  adjmaxit = NULL, K = 5, start = "warm", cores = 1, quiet = TRUE)
+  crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 1000,
+  adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1,
+  quiet = TRUE)
 }
 \arguments{
 \item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -26,7 +27,7 @@ ParallelCV(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
 
 \item{tau2}{factor in which to decrease step size \code{rho}}
 
-\item{crit}{criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.}
+\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
 
 \item{tol1}{absolute convergence tolerance. Defaults to 1e-4.}
 
