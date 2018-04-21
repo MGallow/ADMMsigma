@@ -4,7 +4,7 @@
 \alias{CVP_RIDGEsigmac}
 \title{CV (no folds) RIDGE penalized precision matrix estimation (c++)}
 \usage{
-CVP_RIDGEsigmac(S_train, S_valid, lam, K = 5L, quiet = TRUE)
+CVP_RIDGEsigmac(S_train, S_valid, lam, quiet = TRUE)
 }
 \arguments{
 \item{S_train}{pxp sample covariance matrix for training data (denominator n).}
@@ -12,8 +12,6 @@ CVP_RIDGEsigmac(S_train, S_valid, lam, K = 5L, quiet = TRUE)
 \item{S_valid}{pxp sample covariance matrix for validation data (denominator n).}
 
 \item{lam}{tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
-
-\item{K}{specify the number of folds for cross validation.}
 
 \item{quiet}{specify whether the function returns progress of CV or not.}
 }

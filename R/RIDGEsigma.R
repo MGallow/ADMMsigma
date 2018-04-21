@@ -124,11 +124,17 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3, cores
     # compute gradient
     grad = S - qr.solve(Omega) + lam * Omega
     
+    # compute loglik
+    n = ifelse(is.null(X), nrow(S), nrow(X))
+    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, 
+        logarithm = TRUE)$modulus[1] + lam * sum(Omega^2))
+    
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
     colnames(tuning) = c("log10(lam)", "lam")
-    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, Sigma = qr.solve(Omega), 
-        Gradient = grad, CV.error = CV.error)
+    returns = list(Lambda = tuning, Lambdas = Lambdas, Omega = Omega, 
+        Sigma = qr.solve(Omega), Gradient = grad, Loglik = loglik, 
+        CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -206,10 +212,6 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     bluetowhite <- c("#000E29", "white")
     
     # produce ggplot heat map
-    ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-        guide = "none") + theme_minimal() + ggtitle("Heatmap of Cross-Validation Errors") + 
-        theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
-    
     if (!footnote) {
         
         # print without footnote
@@ -220,10 +222,9 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     } else {
         
         # print with footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], sep = "")) + theme(axis.title.x = element_blank(), 
-            axis.text.x = element_blank(), axis.ticks.x = element_blank())
+        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
+            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], sep = "")) + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
+      
     }
-    
 }

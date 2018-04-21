@@ -23,8 +23,10 @@ NULL
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
+#' @param maxit maximum number of iterations. Defaults to 1e4.
+#' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 #' @param K specify the number of folds for cross validation.
+#' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return list of returns includes:
@@ -35,8 +37,8 @@ NULL
 #' 
 #' @keywords internal
 #'
-CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, start = "warm", quiet = TRUE) {
+    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, quiet)
 }
 
 #' @title CV ridge penalized precision matrix estimation (c++)
@@ -73,16 +75,17 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
-#' @param K specify the number of folds for cross validation.
+#' @param maxit maximum number of iterations. Defaults to 1e4.
+#' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
+#' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return cross validation errors
 #' 
 #' @keywords internal
 #'
-CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, K, quiet)
+CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, start = "warm", quiet = TRUE) {
+    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, quiet)
 }
 
 #' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
@@ -91,15 +94,14 @@ CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho =
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
 #' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param K specify the number of folds for cross validation.
 #' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return cross validation errors
 #' 
 #' @keywords internal
 #'
-CVP_RIDGEsigmac <- function(S_train, S_valid, lam, K = 5L, quiet = TRUE) {
-    .Call('_ADMMsigma_CVP_RIDGEsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, K, quiet)
+CVP_RIDGEsigmac <- function(S_train, S_valid, lam, quiet = TRUE) {
+    .Call('_ADMMsigma_CVP_RIDGEsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, quiet)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)
@@ -124,7 +126,8 @@ RIDGEsigmac <- function(S, lam) {
 #' \url{https://mgallow.github.io/ADMMsigma/}.
 #'
 #' @param S pxp sample covariance matrix (denominator n).
-#' @param initZ initialization matrix for Z2
+#' @param initOmega initialization matrix for Omega
+#' @param initZ2 initialization matrix for Z2
 #' @param initY initialization matrix for Y
 #' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
@@ -136,7 +139,7 @@ RIDGEsigmac <- function(S, lam) {
 #' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 #' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-#' @param maxit maximum number of iterations.
+#' @param maxit maximum number of iterations. Defaults to 1e4.
 #' 
 #' @return returns list of returns which includes:
 #' \item{Iterations}{number of iterations.}
@@ -159,7 +162,7 @@ RIDGEsigmac <- function(S, lam) {
 #' 
 #' @keywords internal
 #'
-ADMMsigmac <- function(S, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e3L) {
-    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
+ADMMsigmac <- function(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L) {
+    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
 }
 

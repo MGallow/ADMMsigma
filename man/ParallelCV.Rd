@@ -6,8 +6,8 @@
 \usage{
 ParallelCV(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
   diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
-  crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, K = 5,
-  cores = 1, quiet = TRUE)
+  crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04, maxit = 1000,
+  adjmaxit = NULL, K = 5, start = "warm", cores = 1, quiet = TRUE)
 }
 \arguments{
 \item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -32,9 +32,13 @@ ParallelCV(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
 
 \item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
 
-\item{maxit}{maximum number of iterations.}
+\item{maxit}{maximum number of iterations. Defaults to 1e3.}
+
+\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.}
 
 \item{K}{specify the number of folds for cross validation.}
+
+\item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
 

@@ -53,8 +53,10 @@ arma::vec kfold(int n, int K){
 //' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-//' @param maxit maximum number of iterations.
+//' @param maxit maximum number of iterations. Defaults to 1e4.
+//' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param K specify the number of folds for cross validation.
+//' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 //' @param quiet specify whether the function returns progress of CV or not.
 //' 
 //' @return list of returns includes:
@@ -66,21 +68,26 @@ arma::vec kfold(int n, int K){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3, int K = 5, bool quiet = true) {
+List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", bool quiet = true) {
 
   // initialization
-  int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows;
-  double sgn, logdet;
+  int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
+  double sgn, logdet, initrho, alpha_, lam_;
   sgn = logdet = 0;
-  arma::mat Omega, initZ2, initY, CV_errors, CV_error;
-  initZ2 = initY = arma::zeros<arma::mat>(p, p);
-  CV_errors = CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
+  initrho = rho;
+  arma::mat Omega, initOmega, initZ2, initY, CV_errors, CV_error;
+  CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
   
   // parse data into folds and perform CV
   for (int k = 0; k < K; k++){
+    
+    // re-initialize values for each fold
+    initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
+    rho = initrho;
+    maxit = initmaxit;
     
     // separate into training and testing data
     arma::uvec index = arma::find(folds != k);
@@ -101,30 +108,37 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 
     
     // loop over all tuning parameters
-    CV_error = arma::zeros<arma::mat>(lam.n_rows, alpha.n_rows);
+    CV_error = arma::zeros<arma::mat>(l, a);
     
     for (int i = 0; i < l; i++){
       for (int j = 0; j < a; j++){
         
         // set temporary tuning parameters
-        double lam_ = lam[i];
-        double alpha_ = alpha[j];
+        lam_ = lam[i];
+        alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-        List ADMM = ADMMsigmac(S_train, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+        List ADMM = ADMMsigmac(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
         Omega = as<arma::mat>(ADMM["Omega"]);
-        initZ2 = as<arma::mat>(ADMM["Z2"]);
-        initY = as<arma::mat>(ADMM["Y"]);
-        rho = as<double>(ADMM["rho"]);
+
+        if (start == "warm"){
+
+          // option to save initial values for warm starts
+          initOmega = as<arma::mat>(ADMM["Omega"]);
+          initZ2 = as<arma::mat>(ADMM["Z2"]);
+          initY = as<arma::mat>(ADMM["Y"]);
+          rho = as<double>(ADMM["rho"]);
+          maxit = adjmaxit;
+
+        }
         
         // compute the observed negative validation loglikelihood
-        //arma::log_det(logdet, sgn, as<arma::mat>(Omega));
         arma::log_det(logdet, sgn, Omega);
         CV_error(i, j) = arma::accu(Omega % S_test) - logdet;
         
         // if not quiet, then print progress lambda
         if (!quiet){
-          Rcout << "Finished lam = " << lam[i] << "in fold" << k << "\n";
+          Rcout << "Finished lam = " << alpha[i] << "in fold" << k << "\n";
         }
       }
     }
@@ -182,10 +196,10 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
   
   // initialization
   int n = X.n_rows, l = lam.n_rows;
-  double sgn, logdet;
+  double sgn, logdet, lam_;
   sgn = logdet = 0;
-  arma::mat CV_errors = arma::zeros<arma::colvec>(lam.n_rows);
-  arma::mat CV_error = arma::zeros<arma::colvec>(lam.n_rows);
+  arma::mat CV_errors = arma::zeros<arma::colvec>(l);
+  arma::mat CV_error = arma::zeros<arma::colvec>(l);
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -219,7 +233,7 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
     for (int i = 0; i < l; i++){
       
       // set temporary tuning parameters
-      double lam_ = lam[i];
+      lam_ = lam[i];
       
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
       Omega = RIDGEsigmac(S_train, lam_);

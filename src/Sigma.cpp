@@ -50,19 +50,20 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' \url{https://mgallow.github.io/ADMMsigma/}.
 //'
 //' @param S pxp sample covariance matrix (denominator n).
-//' @param initZ initialization matrix for Z2
+//' @param initOmega initialization matrix for Omega
+//' @param initZ2 initialization matrix for Z2
 //' @param initY initialization matrix for Y
-//' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-//' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+//' @param lam tuning parameter for elastic net penalty.
+//' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.
 //' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 //' @param rho initial step size for ADMM algorithm.
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
-//' @param tau1 factor in which to increase step size \code{rho}
-//' @param tau2 factor in which to decrease step size \code{rho}
+//' @param tau1 factor in which to increase step size \code{rho}.
+//' @param tau2 factor in which to decrease step size \code{rho}.
 //' @param crit criterion for convergence (\code{ADMM}, \code{grad}, or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM}.
 //' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol2 relative convergence tolerance. Defaults to 1e-4.
-//' @param maxit maximum number of iterations.
+//' @param maxit maximum number of iterations. Defaults to 1e4.
 //' 
 //' @return returns list of returns which includes:
 //' \item{Iterations}{number of iterations.}
@@ -86,7 +87,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e3){
+List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e4){
 
   // allocate memory
   bool criterion = true;
@@ -95,8 +96,9 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
   arma::mat Z2, Z, Y, Omega, grad, C;
-  Omega = grad = arma::zeros<arma::mat>(p, p);
+  grad = arma::zeros<arma::mat>(p, p);
   C = arma::ones<arma::mat>(p, p);
+  Omega = initOmega;
   Z2 = initZ2;
   Y = initY;
   
@@ -106,16 +108,19 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
   }
 
   // loop until convergence
-  while (criterion && (iter <= maxit)){
+  while (criterion && (iter < maxit)){
 
-    // ridge equation (1)
-    // gather eigen values (spectral decomposition)
+    // update values
+    iter++;
     Z = Z2;
-    Omega = RIDGEsigmac(S + Y - rho*Z, rho);
-
-    // penalty equation (2)
+    
+    // penalty equation (1)
     // soft-thresholding
     Z2 = softmatrixc(Y + rho*Omega, lam*alpha*C)/(lam*(1 - alpha)*C + rho);
+    
+    // ridge equation (2)
+    // gather eigen values (spectral decomposition)
+    Omega = RIDGEsigmac(S + Y - rho*Z2, rho);
 
     // update Y (3)
     Y += rho*(Omega - Z2);
@@ -129,7 +134,6 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initZ2, const arma::mat &in
     if (s > mu*r){
       rho *= 1/tau2;
     }
-    iter++;
 
     // stopping criterion
     if (crit == "grad"){
