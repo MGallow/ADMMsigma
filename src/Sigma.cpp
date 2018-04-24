@@ -53,7 +53,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @param initOmega initialization matrix for Omega
 //' @param initZ2 initialization matrix for Z2
 //' @param initY initialization matrix for Y
-//' @param lam tuning parameter for elastic net penalty.
+//' @param lam postive tuning parameter for elastic net penalty.
 //' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.
 //' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 //' @param rho initial step size for ADMM algorithm.

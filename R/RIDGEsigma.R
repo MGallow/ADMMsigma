@@ -20,7 +20,7 @@
 #'
 #' @param X option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 #' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
-#' @param lam tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param K specify the number of folds for cross validation.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
 #' @param quiet specify whether the function returns progress of CV or not.
@@ -79,7 +79,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # match values
     call = match.call()
     CV.error = NULL
-    Lambdas = lam
+    Lambdas = lam = sort(lam)
     
     # perform cross validation, if necessary
     if ((length(lam) > 1) & !is.null(X)) {

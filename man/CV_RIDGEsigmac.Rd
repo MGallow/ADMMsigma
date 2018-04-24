@@ -9,7 +9,7 @@ CV_RIDGEsigmac(X, lam, K = 3L, quiet = TRUE)
 \arguments{
 \item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
-\item{lam}{tuning parameter for ridge penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
 
 \item{K}{specify the number of folds for cross validation.}
 

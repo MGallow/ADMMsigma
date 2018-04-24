@@ -5,8 +5,8 @@
 #' @description Parallel implementation of cross validation.
 #'
 #' @param X nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
-#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
 #' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param rho initial step size for ADMM algorithm.
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
@@ -40,6 +40,7 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     # match values
     crit = match.arg(crit)
     start = match.arg(start)
+    lam = sort(lam)
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -112,7 +113,7 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
 #' @description Parallel implementation of cross validation for RIDGEsigma.
 #'
 #' @param X nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
-#' @param lam tuning parameter for elastic net penalty. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param K specify the number of folds for cross validation.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
 #' @param quiet specify whether the function returns progress of CV or not.
@@ -144,6 +145,7 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5,
     # use cluster for each fold in CV
     n = dim(X)[1]
     ind = sample(n)
+    lam = sort(lam)
     k = 1:K
     CV = foreach(k, .packages = "ADMMsigma", .combine = "+", 
         .inorder = FALSE) %dopar% {

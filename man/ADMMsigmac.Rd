@@ -17,7 +17,7 @@ ADMMsigmac(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
 
 \item{initY}{initialization matrix for Y}
 
-\item{lam}{tuning parameter for elastic net penalty.}
+\item{lam}{postive tuning parameter for elastic net penalty.}
 
 \item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.}
 
