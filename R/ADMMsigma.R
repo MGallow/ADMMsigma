@@ -251,7 +251,7 @@ print.ADMMsigma = function(x, ...) {
     }
     
     # print call
-    cat("\nCall:\n", paste(deparse(x$Call), sep = "\n", 
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
         collapse = "\n"), "\n", sep = "")
     
     # print iterations
@@ -262,6 +262,10 @@ print.ADMMsigma = function(x, ...) {
     cat("\nTuning parameters:\n")
     print.default(round(x$Tuning, 3), print.gap = 2L, 
         quote = FALSE)
+    
+    # print loglik
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), 
+        sep = "\n", collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Z) <= 10) {
