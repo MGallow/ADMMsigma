@@ -15,12 +15,12 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 
-double softc(double s, double tau) {
+double softc(const double &s, const double &tau) {
 
   // soft-thresholding
   double d = 0;
   if (s > 0 && s > tau) return(s - tau);
-  if (s < 0 && -s > tau) return(s + tau);
+  else if (s < 0 && -s > tau) return(s + tau);
   else return(d);
 
 }
@@ -40,22 +40,20 @@ double softc(double s, double tau) {
 //' @keywords internal
 //'
 
-arma::mat softmatrixc(const arma::mat &S, const arma::mat &Tau) {
+void softmatrixc(arma::mat &S, const arma::mat &Tau) {
 
   // initialize
   int n = S.n_rows, p = S.n_cols;
-  arma::mat D = arma::ones<arma::mat>(n, p);
 
-  // soft threshold each element
+  // loop over all elements
   for (int i = 0; i < n; ++i){
     for (int j = 0; j < p; ++j){
 
-      D(i, j) = softc(S(i, j), Tau(i, j));
+      // soft threshold each element
+      S(i, j) = softc(S(i, j), Tau(i, j));
 
     }
   }
-
-  return(D);
 
 }
 

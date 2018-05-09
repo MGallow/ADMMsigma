@@ -15,7 +15,7 @@ using namespace Rcpp;
 //' @param K number of folds.
 //' @keywords internal
 //'
-arma::vec kfold(int n, int K){
+arma::vec kfold(const int &n, const int &K){
   
   // create sequence 1:n
   arma::vec indices = arma::linspace<arma::vec>(1, n, n);
@@ -75,8 +75,12 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   double sgn, logdet, initrho, alpha_, lam_;
   sgn = logdet = 0;
   initrho = rho;
-  arma::mat Omega, initOmega, initZ2, initY, CV_errors, CV_error;
-  CV_errors = CV_error = arma::zeros<arma::mat>(l, a);
+  arma::mat X_train, X_test, S_train, S_test;
+  arma::mat Omega, initOmega, initZ2, initY, CV_errors, CV_error, zeros, zerosla;
+  arma::uvec index, index_;
+  arma::rowvec X_bar;
+  CV_errors = zerosla = arma::zeros<arma::mat>(l, a);
+  zeros = arma::zeros<arma::mat>(p, p);
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -85,30 +89,30 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   for (int k = 0; k < K; k++){
     
     // re-initialize values for each fold
-    initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
+    initOmega = initZ2 = initY = zeros;
     rho = initrho;
     maxit = initmaxit;
     
     // separate into training and testing data
-    arma::uvec index = arma::find(folds != k);
-    arma::uvec index_ = arma::find(folds == k);
+    index = arma::find(folds != k);
+    index_ = arma::find(folds == k);
     
     // training set
-    arma::mat X_train = X.rows(index);
-    arma::rowvec X_bar = arma::mean(X_train, 0);
-    X_train = X_train - arma::ones<arma::colvec>(X_train.n_rows)*X_bar;
+    X_train = X.rows(index);
+    X_bar = arma::mean(X_train, 0);
+    X_train -= arma::ones<arma::colvec>(X_train.n_rows)*X_bar;
     
     // validation set
-    arma::mat X_test = X.rows(index_);
-    X_test = X_test - arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
+    X_test = X.rows(index_);
+    X_test -= arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
     
     // sample covariances
-    arma::mat S_train = arma::cov(X_train, 1);
-    arma::mat S_test = arma::cov(X_test, 1);
+    S_train = arma::cov(X_train, 1);
+    S_test = arma::cov(X_test, 1);
 
     
     // loop over all tuning parameters
-    CV_error = arma::zeros<arma::mat>(l, a);
+    CV_error = zerosla;
     
     for (int i = 0; i < l; i++){
       for (int j = 0; j < a; j++){
@@ -195,11 +199,16 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {
   
   // initialization
-  int n = X.n_rows, l = lam.n_rows;
+  int n = X.n_rows, p = X.n_cols, l = lam.n_rows;
   double sgn, logdet, lam_;
   sgn = logdet = 0;
-  arma::mat CV_errors = arma::zeros<arma::colvec>(l);
-  arma::mat CV_error = arma::zeros<arma::colvec>(l);
+  arma::uvec index, index_;
+  arma::mat X_train, X_test, S_train, S_test, Omega, zeros;
+  arma::colvec CV_errors, CV_error, zerosl;
+  arma::rowvec X_bar;
+  CV_errors = zerosl = arma::zeros<arma::colvec>(l);
+  zeros = arma::zeros<arma::mat>(p, p);
+  
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -208,27 +217,25 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
   for (int k = 0; k < K; k++){
     
     // separate into training and testing data
-    arma::uvec index = arma::find(folds != k);
-    arma::uvec index_ = arma::find(folds == k);
+    index = arma::find(folds != k);
+    index_ = arma::find(folds == k);
     
     // training set
-    arma::mat X_train = X.rows(index);
-    arma::rowvec X_bar = arma::mean(X_train, 0);
-    X_train = X_train - arma::ones<arma::colvec>(X_train.n_rows)*X_bar;
+    X_train = X.rows(index);
+    X_bar = arma::mean(X_train, 0);
+    X_train -= arma::ones<arma::colvec>(X_train.n_rows)*X_bar;
     
     // validation set
-    arma::mat X_test = X.rows(index_);
-    X_test = X_test - arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
+    X_test = X.rows(index_);
+    X_test -= arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
     
     // sample covariances
-    arma::mat S_train = arma::cov(X_train, 1);
-    arma::mat S_test = arma::cov(X_test, 1);
+    S_train = arma::cov(X_train, 1);
+    S_test = arma::cov(X_test, 1);
     
     
     // loop over all tuning parameters
-    int bp = X_train.n_cols;
-    arma::mat Omega = arma::ones<arma::mat>(bp, bp);
-    CV_error = arma::zeros<arma::colvec>(lam.n_rows);
+    CV_error = zerosl;
     
     for (int i = 0; i < l; i++){
       

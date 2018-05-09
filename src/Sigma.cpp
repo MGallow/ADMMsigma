@@ -88,42 +88,48 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //'
 // [[Rcpp::export]]
 List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e4){
-
+  
   // allocate memory
   bool criterion = true;
   int p = S.n_cols;
   int iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
-  arma::mat Z2, Z, Y, Omega, C;
+  arma::mat Z2, Z, Y, Omega, C, Tau, Taum;
   C = arma::ones<arma::mat>(p, p);
   Omega = initOmega;
   Z2 = initZ2;
   Y = initY;
   
   // option to penalize diagonal elements
-  if (diagonal){
+  if (!diagonal){
     C -= arma::eye<arma::mat>(p, p);
   }
-
+  
+  // save values
+  Tau = lam*alpha*C;
+  Taum = lam*C - Tau;
+  
   // loop until convergence
   while (criterion && (iter < maxit)){
-
+    
     // update values
     iter++;
     Z = Z2;
     
     // penalty equation (1)
     // soft-thresholding
-    Z2 = softmatrixc(Y + rho*Omega, lam*alpha*C)/(lam*(1 - alpha)*C + rho);
+    Z2 = Y + rho*Omega;
+    softmatrixc(Z2, Tau);
+    Z2 *= 1/(Taum + rho);
     
     // ridge equation (2)
     // gather eigen values (spectral decomposition)
     Omega = RIDGEsigmac(S + Y - rho*Z2, rho);
-
+    
     // update Y (3)
     Y += rho*(Omega - Z2);
-
+    
     // calculate new rho
     s = arma::norm(rho*(Z2 - Z), "fro");
     r = arma::norm(Omega - Z2, "fro");
@@ -133,31 +139,31 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
     if (s > mu*r){
       rho *= 1/tau2;
     }
-
+    
     // stopping criterion
     if (crit == "loglik"){
-
+      
       // compute likelihood (close enough)
       arma::log_det(logdet, sgn, Omega);
       lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
       criterion = (std::abs(lik2 - lik) >= tol1);
       lik = lik2;
-
+      
     } else {
-
+      
       // ADMM criterion
       eps1 = p*tol1 + tol2*std::max(arma::norm(Omega, "fro"), arma::norm(Z2, "fro"));
       eps2 = p*tol1 + tol2*arma::norm(Y, "fro");
       criterion = (r >= eps1 || s >= eps2);
-
+      
     }
-
+    
     // R_CheckUserInterrupt
     if (iter % 1000 == 0){
       R_CheckUserInterrupt();
     }
   }
-
+  
   return List::create(Named("Iterations") = iter,
                       Named("lam") = lam,
                       Named("alpha") = alpha,
@@ -165,6 +171,6 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
                       Named("Z2") = Z2,
                       Named("Y") = Y,
                       Named("rho") = rho);
-
+  
 }
 
