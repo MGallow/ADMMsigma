@@ -121,7 +121,7 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
     // soft-thresholding
     Z2 = Y + rho*Omega;
     softmatrixc(Z2, Tau);
-    Z2 *= 1/(Taum + rho);
+    Z2 /= (Taum + rho);
     
     // ridge equation (2)
     // gather eigen values (spectral decomposition)

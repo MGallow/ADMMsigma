@@ -56,6 +56,3 @@ void softmatrixc(arma::mat &S, const arma::mat &Tau) {
   }
 
 }
-
-
-
