@@ -31,11 +31,11 @@
 #' @keywords internal
 
 # we define the ParallelCV function
-ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
-    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
-    mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", "loglik"), 
-    tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, adjmaxit = NULL, 
-    K = 5, start = c("warm", "cold"), cores = 1, quiet = TRUE) {
+ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 
+    1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
+    crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
+    adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1, 
+    quiet = TRUE) {
     
     # match values
     crit = match.arg(crit)
@@ -80,8 +80,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
         
         # run foreach loop on CV_ADMMsigmac
         CVP_ADMMsigmac(S.train, S.valid, lam, alpha, diagonal, 
-            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
-            adjmaxit, start, quiet)
+            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, 
+            start, quiet)
         
     }
     
@@ -126,8 +126,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
 #' @keywords internal
 
 # we define the ParallelCV_RIDGE function
-ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 5, cores = 1, quiet = TRUE) {
+ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
+    K = 5, cores = 1, quiet = TRUE) {
     
     # make cluster and register cluster
     num_cores = detectCores()

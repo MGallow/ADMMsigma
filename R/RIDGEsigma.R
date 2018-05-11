@@ -59,8 +59,8 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 3, cores = 1, quiet = TRUE) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 
+    0.5), K = 3, cores = 1, quiet = TRUE) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -88,16 +88,15 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, 
-                K = K, cores = cores, quiet = quiet)
+            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, 
+                cores = cores, quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
         } else {
             
             # execute CV_RIDGEsigma
-            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, 
-                quiet = quiet)
+            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
@@ -132,8 +131,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     
     # compute penalized loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
-    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, 
-        logarithm = TRUE)$modulus[1] + lam * sum(Omega^2))
+    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, logarithm = TRUE)$modulus[1] + 
+        lam * sum(Omega^2))
     
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
@@ -164,17 +163,16 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 print.RIDGEsigma = function(x, ...) {
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
-    print.default(round(x$Lambda, 3), print.gap = 2L, 
-        quote = FALSE)
+    print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), 
-        sep = "\n", collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -220,8 +218,7 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
     # augment values for heat map (helps visually)
     lam = x$Lambdas
     cv = expand.grid(lam = lam, alpha = 0)
-    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
-        1)
+    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
     cv = cbind(cv, Errors)
     
     # design color palette
@@ -243,8 +240,8 @@ plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", 
-                x$Lambda[1], sep = "")) + theme(axis.title.x = element_blank(), 
+            caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], 
+                sep = "")) + theme(axis.title.x = element_blank(), 
             axis.text.x = element_blank(), axis.ticks.x = element_blank())
         
     }
