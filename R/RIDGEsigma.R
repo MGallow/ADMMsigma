@@ -23,7 +23,8 @@
 #' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param K specify the number of folds for cross validation.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
+
 #' 
 #' @return returns class object \code{RIDGEsigma} which includes:
 #' \item{Lambda}{optimal tuning parameter.}
@@ -60,7 +61,7 @@
 
 # we define the ADMM covariance estimation function
 RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 
-    0.5), K = 3, cores = 1, quiet = TRUE) {
+    0.5), K = 3, cores = 1, trace = c("none", "progress", "print")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -78,6 +79,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     
     # match values
     call = match.call()
+    trace = match.arg(trace)
     CV.error = NULL
     Lambdas = lam = sort(lam)
     
@@ -89,14 +91,14 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
             
             # execute ParallelCV
             RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, 
-                cores = cores, quiet = quiet)
+                cores = cores, trace = trace)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             
         } else {
             
             # execute CV_RIDGEsigma
-            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, quiet = quiet)
+            RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, trace = trace)
             CV.error = RIDGE$cv.errors
             lam = RIDGE$lam
             

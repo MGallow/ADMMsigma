@@ -8,7 +8,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
   1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
   crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 10000,
   adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1,
-  quiet = TRUE)
+  trace = c("progress", "print", "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -45,7 +45,7 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
 
 \item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
 
-\item{quiet}{specify whether the function returns progress of CV or not.}
+\item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
 returns class object \code{ADMMsigma} which includes:

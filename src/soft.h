@@ -4,9 +4,9 @@
 #include <RcppArmadillo.h>
 #include <Rcpp.h>
 
-double softc(double s, double tau);
+double softc(const double &s, const double &tau);
 
-arma::mat softmatrixc(const arma::mat &S, const arma::mat &Tau);
+void softmatrixc(arma::mat &S, const arma::mat &Tau);
 
 
 #endif

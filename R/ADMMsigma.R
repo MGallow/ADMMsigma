@@ -43,7 +43,8 @@
 #' @param K specify the number of folds for cross validation.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
+
 #' 
 #' @return returns class object \code{ADMMsigma} which includes:
 #' \item{Call}{function call.}
@@ -104,7 +105,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
     mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", "loglik"), 
     tol1 = 1e-04, tol2 = 1e-04, maxit = 10000, adjmaxit = NULL, 
-    K = 5, start = c("warm", "cold"), cores = 1, quiet = TRUE) {
+    K = 5, start = c("warm", "cold"), cores = 1, trace = c("progress", 
+        "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -133,6 +135,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     # match values
     crit = match.arg(crit)
     start = match.arg(start)
+    trace = match.arg(trace)
     call = match.call()
     lam = sort(lam)
     CV.error = NULL
@@ -148,7 +151,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
                 diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
                 tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
                 maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
-                cores = cores, quiet = quiet)
+                cores = cores, trace = trace)
             CV.error = ADMM$cv.errors
             
         } else {
@@ -158,7 +161,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
                 diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
                 tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
                 maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
-                quiet = quiet)
+                trace = trace)
             CV.error = ADMM$cv.errors
             
         }

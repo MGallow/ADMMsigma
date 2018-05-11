@@ -2,6 +2,7 @@
 
 #include <RcppArmadillo.h>
 #include <Rcpp.h>
+#include <progress.hpp>
 #include "Sigma.h"
 
 using namespace Rcpp;
@@ -27,14 +28,14 @@ using namespace Rcpp;
 //' @param maxit maximum number of iterations. Defaults to 1e4.
 //' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
-//' @param quiet specify whether the function returns progress of CV or not.
+//' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 //' 
 //' @return cross validation errors
 //' 
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", bool quiet = true) {
+arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
@@ -43,6 +44,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
   arma::mat Omega, initOmega, initZ2, initY;
   initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
   arma::mat CV_error = arma::zeros<arma::mat>(l, a);
+  Progress progress(l*a, trace == "progress");
   
   
   // loop over all tuning parameters
@@ -72,9 +74,13 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       arma::log_det(logdet, sgn, Omega);
       CV_error(i, j) = (p/2)*(arma::accu(Omega % S_valid) - logdet);
       
+      // update progress bar
+      if (trace == "progress"){
+        progress.increment();
+      
       // if not quiet, then print progress lambda
-      if (!quiet){
-        Rcout << "Finished lam = " << alpha[i] << "\n";
+      } else if (trace == "print"){
+        Rcout << "Finished lam = " << lam[i] << "\n";
       }
     }
   }
@@ -99,14 +105,14 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
 //' @param S_train pxp sample covariance matrix for training data (denominator n).
 //' @param S_valid pxp sample covariance matrix for validation data (denominator n).
 //' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-//' @param quiet specify whether the function returns progress of CV or not.
+//' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 //' 
 //' @return cross validation errors
 //' 
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, bool quiet = true) {
+arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, std::string trace = "none") {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
@@ -114,6 +120,7 @@ arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, co
   sgn = logdet = 0;
   arma::mat Omega = arma::ones<arma::mat>(p, p);
   arma::mat CV_error = arma::zeros<arma::colvec>(l);
+  Progress progress(l, trace == "progress");
   
   
   // loop over all tuning parameters
@@ -129,8 +136,12 @@ arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, co
     arma::log_det(logdet, sgn, Omega);
     CV_error[i] = (p/2)*(arma::accu(Omega % S_valid) - logdet);
     
+    // update progress bar
+    if (trace == "progress"){
+      progress.increment();
+    
     // if not quiet, then print progress lambda
-    if (!quiet){
+    } else if (trace == "print"){
       Rcout << "Finished lam = " << lam[i] << "\n";
     }
   }

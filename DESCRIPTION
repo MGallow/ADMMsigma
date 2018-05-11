@@ -20,8 +20,10 @@ Imports: stats,
     foreach,
     ggplot2
 Depends: Rcpp (>= 0.12.10),
+    RcppProgress (>= 0.1),
     doParallel
 LinkingTo: Rcpp,
-    RcppArmadillo
+    RcppArmadillo,
+    RcppProgress
 Suggests: testthat
 SystemRequirements: GNU make

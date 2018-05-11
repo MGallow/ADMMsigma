@@ -7,7 +7,7 @@
 CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
   tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04,
   maxit = 10000L, adjmaxit = 10000L, K = 5L, start = "warm",
-  quiet = TRUE)
+  trace = "progress")
 }
 \arguments{
 \item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -40,7 +40,7 @@ CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
 
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
-\item{quiet}{specify whether the function returns progress of CV or not.}
+\item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
 list of returns includes:

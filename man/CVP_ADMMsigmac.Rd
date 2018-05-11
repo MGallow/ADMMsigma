@@ -7,7 +7,7 @@
 CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
   mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
   tol2 = 1e-04, maxit = 10000L, adjmaxit = 10000L, start = "warm",
-  quiet = TRUE)
+  trace = "progress")
 }
 \arguments{
 \item{S_train}{pxp sample covariance matrix for training data (denominator n).}
@@ -40,7 +40,7 @@ CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
 
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
-\item{quiet}{specify whether the function returns progress of CV or not.}
+\item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
 cross validation errors
