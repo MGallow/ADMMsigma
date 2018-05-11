@@ -32,7 +32,9 @@
 #' \item{Omega}{estimated penalized precision matrix.}
 #' \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
 #' \item{Gradient}{gradient of optimization function (penalized gaussian likelihood).}
-#' \item{CV.error}{cross validation errors.}
+#' \item{MIN.error}{minimum average cross validation error for optimal parameters.}
+#' \item{AVG.error}{average cross validation error across all folds.}
+#' \item{CV.error}{cross validation errors (negative validation likelihood).}
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
@@ -60,8 +62,7 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 
-    0.5), K = 3, cores = 1, trace = c("none", "progress", "print")) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1, trace = c("none", "progress", "print")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -80,7 +81,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     # match values
     call = match.call()
     trace = match.arg(trace)
-    CV.error = NULL
+    MIN.error = AVG.error = CV.error = NULL
     Lambdas = lam = sort(lam)
     
     # perform cross validation, if necessary
@@ -90,16 +91,19 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, 
-                cores = cores, trace = trace)
-            CV.error = RIDGE$cv.errors
+            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, K = K, cores = cores, trace = trace)
+            MIN.error = RIDGE$min.error
+            AVG.error = RIDGE$avg.error
+            CV.error = RIDGE$cv.error
             lam = RIDGE$lam
             
         } else {
             
             # execute CV_RIDGEsigma
             RIDGE = CV_RIDGEsigmac(X = X, lam = lam, K = K, trace = trace)
-            CV.error = RIDGE$cv.errors
+            MIN.error = RIDGE$min.error
+            AVG.error = RIDGE$avg.error
+            CV.error = RIDGE$cv.error
             lam = RIDGE$lam
             
         }
@@ -133,15 +137,13 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
     
     # compute penalized loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
-    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, logarithm = TRUE)$modulus[1] + 
-        lam * sum(Omega^2))
+    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, logarithm = TRUE)$modulus[1] + lam * sum(Omega^2))
     
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
     colnames(tuning) = c("log10(lam)", "lam")
-    returns = list(Call = call, Lambda = tuning, Lambdas = Lambdas, 
-        Omega = Omega, Sigma = qr.solve(Omega), Gradient = grad, 
-        Loglik = loglik, CV.error = CV.error)
+    returns = list(Call = call, Lambda = tuning, Lambdas = Lambdas, Omega = Omega, Sigma = qr.solve(Omega), Gradient = grad, 
+        Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, CV.error = CV.error)
     
     class(returns) = "RIDGEsigma"
     return(returns)
@@ -165,16 +167,14 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5,
 print.RIDGEsigma = function(x, ...) {
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
-        "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), "\n", sep = "")
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
     print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -191,6 +191,7 @@ print.RIDGEsigma = function(x, ...) {
 #' @title Plot RIDGEsigma object
 #' @description Produces a heat plot for the cross validation errors, if available.
 #' @param x class object RIDGEsigma
+#' @param type produce either 'heatmap' or 'line' graph
 #' @param footnote option to print footnote of optimal values. Defaults to TRUE.
 #' @param ... additional arguments.
 #' @export
@@ -210,41 +211,50 @@ print.RIDGEsigma = function(x, ...) {
 #' # produce CV heat map for RIDGEsigma
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
-plot.RIDGEsigma = function(x, footnote = TRUE, ...) {
+plot.RIDGEsigma = function(x, type = c("heatmap", "line"), footnote = TRUE, ...) {
     
     # check
+    type = match.arg(type)
     if (is.null(x$CV.error)) {
         stop("No cross validation errors to plot!")
     }
     
-    # augment values for heat map (helps visually)
-    lam = x$Lambdas
-    cv = expand.grid(lam = lam, alpha = 0)
-    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
-    cv = cbind(cv, Errors)
-    
-    # design color palette
-    bluetowhite <- c("#000E29", "white")
-    
-    # produce ggplot heat map
-    if (!footnote) {
+    if (type == "line") {
         
-        # print without footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
-            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
-            theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
-                axis.ticks.x = element_blank())
+        # gather values to plot
+        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), Errors = as.data.frame.table(x$CV.error)$Freq)
+        
+        # produce line graph with boxplots
+        graph = ggplot(cv, aes(as.factor(log10(lam)), Errors)) + geom_jitter(width = 0.2, color = "navy blue") + geom_boxplot() + 
+            theme_minimal() + labs(title = "Cross-Validation Errors", y = "Error", x = "log10(lam)")
         
     } else {
         
-        # print with footnote
-        ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
-            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], 
-                sep = "")) + theme(axis.title.x = element_blank(), 
+        # augment values for heat map (helps visually)
+        lam = x$Lambdas
+        cv = expand.grid(lam = lam, alpha = 0)
+        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 1)
+        cv = cbind(cv, Errors)
+        
+        # design color palette
+        bluetowhite <- c("#000E29", "white")
+        
+        # produce ggplot heat map
+        graph = ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + theme(axis.title.x = element_blank(), 
             axis.text.x = element_blank(), axis.ticks.x = element_blank())
+        
+    }
+    
+    if (footnote) {
+        
+        # produce with footnote
+        graph + labs(caption = paste("**Optimal: log10(lam) = ", x$Lambda[1], sep = ""))
+        
+    } else {
+        
+        # produce without footnote
+        graph
         
     }
 }

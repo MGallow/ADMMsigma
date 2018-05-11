@@ -63,8 +63,9 @@ arma::vec kfold(const int &n, const int &K){
 //' @return list of returns includes:
 //' \item{lam}{optimal tuning parameter.}
 //' \item{alpha}{optimal tuning parameter.}
-//' \item{cv.error}{cross validation error for optimal parameters.}
-//' \item{cv.errors}{cross validation errors.}
+//' \item{min.error}{minimum average cross validation error for optimal parameters.}
+//' \item{avg.error}{average cross validation error across all folds.}
+//' \item{cv.error}{cross validation errors (negative validation likelihood).}
 //' 
 //' @keywords internal
 //'
@@ -77,10 +78,11 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   sgn = logdet = 0;
   initrho = rho;
   arma::mat X_train, X_test, S_train, S_test;
-  arma::mat Omega, initOmega, initZ2, initY, CV_errors, CV_error, zeros, zerosla;
+  arma::mat Omega, initOmega, initZ2, initY, AVG_error, CV_error, zeros, zerosla;
   arma::uvec index, index_;
   arma::rowvec X_bar;
-  CV_errors = zerosla = arma::zeros<arma::mat>(l, a);
+  arma::cube CV_errors = arma::zeros<arma::cube>(l, a, K);
+  AVG_error = zerosla = arma::zeros<arma::mat>(l, a);
   zeros = arma::zeros<arma::mat>(p, p);
   Progress progress(l*a*K, trace == "progress");
   
@@ -159,16 +161,16 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
     }
     
     // append CV errors
-    CV_errors += CV_error;
+    CV_errors.slice(k) = CV_error;
     
   }
   
   // determine optimal tuning parameters
-  CV_errors = CV_errors/K;
-  double error = CV_errors.min();
-  arma::uword ind = CV_errors.index_min();
-  int lam_ind = ind % CV_errors.n_rows;
-  int alpha_ind = floor(ind/CV_errors.n_rows);
+  AVG_error = arma::mean(CV_errors, 2);
+  double error = AVG_error.min();
+  arma::uword ind = AVG_error.index_min();
+  int lam_ind = ind % AVG_error.n_rows;
+  int alpha_ind = floor(ind/AVG_error.n_rows);
   double best_lam = lam[lam_ind];
   double best_alpha = alpha[alpha_ind];
 
@@ -176,8 +178,9 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   // return list of coefficients
   return List::create(Named("lam") = best_lam,
                       Named("alpha") = best_alpha,
-                      Named("cv.error") = error,
-                      Named("cv.errors") = CV_errors);
+                      Named("min.error") = error,
+                      Named("avg.error") = AVG_error,
+                      Named("cv.error") = CV_errors);
 }
 
 
@@ -198,8 +201,9 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' 
 //' @return list of returns includes:
 //' \item{lam}{optimal tuning parameter.}
-//' \item{cv.error}{cross validation error for optimal parameters.}
-//' \item{cv.errors}{cross validation errors.}
+//' \item{min.error}{minimum average cross validation error for optimal parameters.}
+//' \item{avg.error}{average cross validation error across all folds.}
+//' \item{cv.error}{cross validation errors (negative validation likelihood).}
 //'
 //' @keywords internal
 //'
@@ -211,10 +215,11 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, std:
   double sgn, logdet, lam_;
   sgn = logdet = 0;
   arma::uvec index, index_;
-  arma::mat X_train, X_test, S_train, S_test, Omega, zeros;
-  arma::colvec CV_errors, CV_error, zerosl;
+  arma::mat X_train, X_test, S_train, S_test, Omega, CV_errors, zeros;
+  arma::colvec AVG_error, CV_error, zerosl;
   arma::rowvec X_bar;
-  CV_errors = zerosl = arma::zeros<arma::colvec>(l);
+  CV_errors = arma::zeros<arma::mat>(l, K);
+  zerosl = arma::zeros<arma::colvec>(l);
   zeros = arma::zeros<arma::mat>(p, p);
   Progress progress(l*K, trace == "progress");
   
@@ -273,19 +278,20 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, std:
     }
     
     // append CV errors
-    CV_errors += CV_error;
+    CV_errors.col(k) = CV_error;
     
   }
   
   // determine optimal tuning parameters
-  CV_errors = CV_errors/K;
-  double error = CV_errors.min();
-  arma::uword ind = CV_errors.index_min();
-  int lam_ind = ind % CV_errors.n_rows;
+  AVG_error = arma::mean(CV_errors, 1);
+  double error = AVG_error.min();
+  arma::uword ind = AVG_error.index_min();
+  int lam_ind = ind % AVG_error.n_rows;
   double best_lam = lam[lam_ind];
   
   // return list of coefficients
   return List::create(Named("lam") = best_lam,
-                      Named("cv.error") = error,
-                      Named("cv.errors") = CV_errors);
+                      Named("min.error") = error,
+                      Named("avg.error") = AVG_error,
+                      Named("cv.error") = CV_errors);
 }

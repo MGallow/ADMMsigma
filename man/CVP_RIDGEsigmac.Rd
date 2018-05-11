@@ -16,7 +16,7 @@ CVP_RIDGEsigmac(S_train, S_valid, lam, trace = "none")
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
-cross validation errors
+cross validation errors (negative validation likelihood)
 }
 \description{
 Cross validation (no folds) function for RIDGEsigma. This function is to be used with ParallelCV_RIDGE.

@@ -4,10 +4,13 @@
 \alias{plot.ADMMsigma}
 \title{Plot ADMMsigma object}
 \usage{
-\method{plot}{ADMMsigma}(x, footnote = TRUE, ...)
+\method{plot}{ADMMsigma}(x, type = c("heatmap", "line"), footnote = TRUE,
+  ...)
 }
 \arguments{
 \item{x}{class object ADMMsigma.}
+
+\item{type}{produce either 'heatmap' or 'line' graph}
 
 \item{footnote}{option to print footnote of optimal values. Defaults to TRUE.}
 

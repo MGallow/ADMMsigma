@@ -36,14 +36,14 @@ CVP_ADMMsigmac(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
 
 \item{maxit}{maximum number of iterations. Defaults to 1e4.}
 
-\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.}
+\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to 1e4.}
 
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
-cross validation errors
+cross validation errors (negative validation likelihood)
 }
 \description{
 Cross validation (no folds) function for ADMMsigma. This function is to be used with ParallelCV.

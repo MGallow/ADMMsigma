@@ -4,10 +4,13 @@
 \alias{plot.RIDGEsigma}
 \title{Plot RIDGEsigma object}
 \usage{
-\method{plot}{RIDGEsigma}(x, footnote = TRUE, ...)
+\method{plot}{RIDGEsigma}(x, type = c("heatmap", "line"), footnote = TRUE,
+  ...)
 }
 \arguments{
 \item{x}{class object RIDGEsigma}
+
+\item{type}{produce either 'heatmap' or 'line' graph}
 
 \item{footnote}{option to print footnote of optimal values. Defaults to TRUE.}
 

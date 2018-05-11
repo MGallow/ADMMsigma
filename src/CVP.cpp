@@ -30,7 +30,7 @@ using namespace Rcpp;
 //' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 //' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 //' 
-//' @return cross validation errors
+//' @return cross validation errors (negative validation likelihood)
 //' 
 //' @keywords internal
 //'
@@ -107,7 +107,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
 //' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 //' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 //' 
-//' @return cross validation errors
+//' @return cross validation errors (negative validation likelihood)
 //' 
 //' @keywords internal
 //'

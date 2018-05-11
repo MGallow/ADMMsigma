@@ -4,7 +4,7 @@
 \alias{RIDGEsigma}
 \title{Ridge penalized precision matrix estimation}
 \usage{
-RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 3,
+RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 5,
   cores = 1, trace = c("none", "progress", "print"))
 }
 \arguments{
@@ -27,7 +27,9 @@ returns class object \code{RIDGEsigma} which includes:
 \item{Omega}{estimated penalized precision matrix.}
 \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
 \item{Gradient}{gradient of optimization function (penalized gaussian likelihood).}
-\item{CV.error}{cross validation errors.}
+\item{MIN.error}{minimum average cross validation error for optimal parameters.}
+\item{AVG.error}{average cross validation error across all folds.}
+\item{CV.error}{cross validation errors (negative validation likelihood).}
 }
 \description{
 Ridge penalized matrix estimation via closed-form solution. If one is only interested in the ridge penalty, this function will be faster and provide a more precise estimate than using \code{ADMMsigma}. \cr

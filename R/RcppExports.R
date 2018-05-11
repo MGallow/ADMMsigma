@@ -41,8 +41,9 @@ NULL
 #' @return list of returns includes:
 #' \item{lam}{optimal tuning parameter.}
 #' \item{alpha}{optimal tuning parameter.}
-#' \item{cv.error}{cross validation error for optimal parameters.}
-#' \item{cv.errors}{cross validation errors.}
+#' \item{min.error}{minimum average cross validation error for optimal parameters.}
+#' \item{avg.error}{average cross validation error across all folds.}
+#' \item{cv.error}{cross validation errors (negative validation likelihood).}
 #' 
 #' @keywords internal
 #'
@@ -53,8 +54,9 @@ CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau
 #' 
 #' @return list of returns includes:
 #' \item{lam}{optimal tuning parameter.}
-#' \item{cv.error}{cross validation error for optimal parameters.}
-#' \item{cv.errors}{cross validation errors.}
+#' \item{min.error}{minimum average cross validation error for optimal parameters.}
+#' \item{avg.error}{average cross validation error across all folds.}
+#' \item{cv.error}{cross validation errors (negative validation likelihood).}
 #'
 #' @keywords internal
 #'
@@ -82,7 +84,7 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, trace = "none") {
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
-#' @return cross validation errors
+#' @return cross validation errors (negative validation likelihood)
 #' 
 #' @keywords internal
 #'
@@ -98,7 +100,7 @@ CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho =
 #' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
-#' @return cross validation errors
+#' @return cross validation errors (negative validation likelihood)
 #' 
 #' @keywords internal
 #'

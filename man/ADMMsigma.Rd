@@ -61,7 +61,9 @@ returns class object \code{ADMMsigma} which includes:
 \item{Y}{final dual update.}
 \item{rho}{final step size.}
 \item{Loglik}{penalized log-likelihood for Omega}
-\item{CV.error}{cross validation errors.}
+\item{MIN.error}{minimum average cross validation error for optimal parameters.}
+\item{AVG.error}{average cross validation error across all folds.}
+\item{CV.error}{cross validation errors (negative validation likelihood).}
 }
 \description{
 Penalized precision matrix estimation using the ADMM algorithm.

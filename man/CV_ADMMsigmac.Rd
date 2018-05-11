@@ -34,7 +34,7 @@ CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
 
 \item{maxit}{maximum number of iterations. Defaults to 1e4.}
 
-\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.}
+\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to 1e4.}
 
 \item{K}{specify the number of folds for cross validation.}
 
@@ -46,8 +46,9 @@ CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
 list of returns includes:
 \item{lam}{optimal tuning parameter.}
 \item{alpha}{optimal tuning parameter.}
-\item{cv.error}{cross validation error for optimal parameters.}
-\item{cv.errors}{cross validation errors.}
+\item{min.error}{minimum average cross validation error for optimal parameters.}
+\item{avg.error}{average cross validation error across all folds.}
+\item{cv.error}{cross validation errors (negative validation likelihood).}
 }
 \description{
 Cross validation function for ADMMsigma.

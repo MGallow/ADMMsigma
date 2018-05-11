@@ -18,7 +18,8 @@ RoxygenNote: 6.0.1
 Imports: stats,
     parallel,
     foreach,
-    ggplot2
+    ggplot2,
+    dplyr
 Depends: Rcpp (>= 0.12.10),
     RcppProgress (>= 0.1),
     doParallel

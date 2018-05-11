@@ -21,8 +21,9 @@ ParallelCV_RIDGE(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1,
 \value{
 returns list of returns which includes:
 \item{lam}{optimal tuning parameter.}
-\item{cv.error}{cross validation error for optimal parameters.}
-\item{cv.errors}{cross validation errors.}
+\item{min.error}{minimum average cross validation error for optimal parameters.}
+\item{avg.error}{average cross validation error across all folds.}
+\item{cv.error}{cross validation errors (negative validation likelihood).}
 }
 \description{
 Parallel implementation of cross validation for RIDGEsigma.
