@@ -5,7 +5,7 @@
 \title{Parallel Ridge CV (uses CV_RIDGEsigmac)}
 \usage{
 ParallelCV_RIDGE(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1,
-  quiet = TRUE)
+  trace = c("none", "progress", "print"))
 }
 \arguments{
 \item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -16,7 +16,7 @@ ParallelCV_RIDGE(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1,
 
 \item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
 
-\item{quiet}{specify whether the function returns progress of CV or not.}
+\item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
 returns list of returns which includes:

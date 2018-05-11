@@ -43,7 +43,8 @@
 #' @param K specify the number of folds for cross validation.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
+
 #' 
 #' @return returns class object \code{ADMMsigma} which includes:
 #' \item{Call}{function call.}
@@ -100,12 +101,12 @@
 #' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
-ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, 
-    rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", 
-        "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 10000, 
-    adjmaxit = NULL, K = 5, start = c("warm", "cold"), 
-    cores = 1, quiet = TRUE) {
+ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 
+    0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
+    mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", "loglik"), 
+    tol1 = 1e-04, tol2 = 1e-04, maxit = 10000, adjmaxit = NULL, 
+    K = 5, start = c("warm", "cold"), cores = 1, trace = c("progress", 
+        "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -117,8 +118,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, 
-        K) > 0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 
+        0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -134,6 +135,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # match values
     crit = match.arg(crit)
     start = match.arg(start)
+    trace = match.arg(trace)
     call = match.call()
     lam = sort(lam)
     CV.error = NULL
@@ -146,22 +148,20 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             
             # execute ParallelCV
             ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, maxit = maxit, 
-                adjmaxit = adjmaxit, K = K, start = start, 
-                cores = cores, quiet = quiet)
+                diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+                tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
+                cores = cores, trace = trace)
             CV.error = ADMM$cv.errors
             
         } else {
             
             # execute CV_ADMM_sigma
             ADMM = CV_ADMMsigmac(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, maxit = maxit, 
-                adjmaxit = adjmaxit, K = K, start = start, 
-                quiet = quiet)
+                diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+                tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
+                maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
+                trace = trace)
             CV.error = ADMM$cv.errors
             
         }
@@ -194,8 +194,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         init = matrix(0, nrow = ncol(S), ncol = ncol(S))
         ADMM = ADMMsigmac(S = S, initOmega = init, initZ2 = init, 
             initY = init, lam = lam, alpha = alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
+            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
+            tol1 = tol1, tol2 = tol2, maxit = maxit)
         
     }
     
@@ -209,19 +209,17 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # compute penalized loglik
     n = ifelse(is.null(X), nrow(S), nrow(X))
     loglik = (-n/2) * (sum(ADMM$Omega * S) - determinant(ADMM$Omega, 
-        logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - 
-        ADMM$alpha)/2 * sum((C * ADMM$Omega)^2) + ADMM$alpha * 
-        sum(abs(C * ADMM$Omega))))
+        logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - ADMM$alpha)/2 * 
+        sum((C * ADMM$Omega)^2) + ADMM$alpha * sum(abs(C * ADMM$Omega))))
     
     
     # return values
     tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), ncol = 2)
     colnames(tuning) = c("log10(lam)", "alpha")
     returns = list(Call = call, Iterations = ADMM$Iterations, 
-        Tuning = tuning, Lambdas = lam, Alphas = alpha, 
-        maxit = maxit, Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
-        Z = ADMM$Z2, Y = ADMM$Y, rho = ADMM$rho, Loglik = loglik, 
-        CV.error = CV.error)
+        Tuning = tuning, Lambdas = lam, Alphas = alpha, maxit = maxit, 
+        Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), Z = ADMM$Z2, 
+        Y = ADMM$Y, rho = ADMM$rho, Loglik = loglik, CV.error = CV.error)
     
     class(returns) = "ADMMsigma"
     return(returns)
@@ -251,21 +249,20 @@ print.ADMMsigma = function(x, ...) {
     }
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print iterations
-    cat("\nIterations: ", paste(x$Iterations, sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nIterations: ", paste(x$Iterations, sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print optimal tuning parameters
     cat("\nTuning parameters:\n")
-    print.default(round(x$Tuning, 3), print.gap = 2L, 
-        quote = FALSE)
+    print.default(round(x$Tuning, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), 
-        sep = "\n", collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Z) <= 10) {
@@ -311,8 +308,7 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
     # augment values for heat map (helps visually)
     lam = x$Lambdas
     cv = expand.grid(lam = lam, alpha = x$Alphas)
-    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 
-        1)
+    Errors = 1/(c(x$CV.error) + abs(min(x$CV.error)) + 1)
     cv = cbind(cv, Errors)
     
     # design color palette
@@ -332,9 +328,8 @@ plot.ADMMsigma = function(x, footnote = TRUE, ...) {
         ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
             scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
                 guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors", 
-            caption = paste("**Optimal: log10(lam) = ", 
-                round(x$Tuning[1], 3), ", alpha = ", round(x$Tuning[2], 
-                  3), sep = ""))
+            caption = paste("**Optimal: log10(lam) = ", round(x$Tuning[1], 
+                3), ", alpha = ", round(x$Tuning[2], 3), sep = ""))
         
     }
     

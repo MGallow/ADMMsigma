@@ -20,7 +20,7 @@
 #' @param K specify the number of folds for cross validation.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return returns list of returns which includes:
 #' \item{lam}{optimal tuning parameter.}
@@ -31,11 +31,11 @@
 #' @keywords internal
 
 # we define the ParallelCV function
-ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
-    alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, 
-    mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", "loglik"), 
-    tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, adjmaxit = NULL, 
-    K = 5, start = c("warm", "cold"), cores = 1, quiet = TRUE) {
+ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 
+    1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
+    crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
+    adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1, 
+    trace = c("progress", "print", "none")) {
     
     # match values
     crit = match.arg(crit)
@@ -80,8 +80,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
         
         # run foreach loop on CV_ADMMsigmac
         CVP_ADMMsigmac(S.train, S.valid, lam, alpha, diagonal, 
-            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
-            adjmaxit, start, quiet)
+            rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, 
+            start, trace)
         
     }
     
@@ -116,7 +116,7 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
 #' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 #' @param K specify the number of folds for cross validation.
 #' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return returns list of returns which includes:
 #' \item{lam}{optimal tuning parameter.}
@@ -126,8 +126,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
 #' @keywords internal
 
 # we define the ParallelCV_RIDGE function
-ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 5, cores = 1, quiet = TRUE) {
+ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
+    K = 5, cores = 1, trace = c("none", "progress", "print")) {
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -167,7 +167,7 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5,
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CV_ADMMsigmac
-        CVP_RIDGEsigmac(S.train, S.valid, lam, quiet)
+        CVP_RIDGEsigmac(S.train, S.valid, lam, trace)
         
     }
     

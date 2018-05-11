@@ -9,6 +9,15 @@
 #'
 NULL
 
+#' @title CV ridge penalized precision matrix estimation (c++)
+#' @description Cross validation function for RIDGEsigma.
+#' 
+#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param K specify the number of folds for cross validation.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
+NULL
+
 #' @title CV ADMM penalized precision matrix estimation (c++)
 #' @description Cross validation function for ADMMsigma.
 #'
@@ -27,7 +36,7 @@ NULL
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 #' @param K specify the number of folds for cross validation.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return list of returns includes:
 #' \item{lam}{optimal tuning parameter.}
@@ -37,17 +46,10 @@ NULL
 #' 
 #' @keywords internal
 #'
-CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, start = "warm", quiet = TRUE) {
-    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, quiet)
+CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, start = "warm", trace = "progress") {
+    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, trace)
 }
 
-#' @title CV ridge penalized precision matrix estimation (c++)
-#' @description Cross validation function for RIDGEsigma.
-#' 
-#' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
-#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param K specify the number of folds for cross validation.
-#' @param quiet specify whether the function returns progress of CV or not.
 #' 
 #' @return list of returns includes:
 #' \item{lam}{optimal tuning parameter.}
@@ -56,8 +58,8 @@ CV_ADMMsigmac <- function(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau
 #'
 #' @keywords internal
 #'
-CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
-    .Call('_ADMMsigma_CV_RIDGEsigmac', PACKAGE = 'ADMMsigma', X, lam, K, quiet)
+CV_RIDGEsigmac <- function(X, lam, K = 3L, trace = "none") {
+    .Call('_ADMMsigma_CV_RIDGEsigmac', PACKAGE = 'ADMMsigma', X, lam, K, trace)
 }
 
 #' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
@@ -78,14 +80,14 @@ CV_RIDGEsigmac <- function(X, lam, K = 3L, quiet = TRUE) {
 #' @param maxit maximum number of iterations. Defaults to 1e4.
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return cross validation errors
 #' 
 #' @keywords internal
 #'
-CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, start = "warm", quiet = TRUE) {
-    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, quiet)
+CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, start = "warm", trace = "progress") {
+    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, trace)
 }
 
 #' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
@@ -94,14 +96,14 @@ CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho =
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
 #' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param quiet specify whether the function returns progress of CV or not.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return cross validation errors
 #' 
 #' @keywords internal
 #'
-CVP_RIDGEsigmac <- function(S_train, S_valid, lam, quiet = TRUE) {
-    .Call('_ADMMsigma_CVP_RIDGEsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, quiet)
+CVP_RIDGEsigmac <- function(S_train, S_valid, lam, trace = "none") {
+    .Call('_ADMMsigma_CVP_RIDGEsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, trace)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)

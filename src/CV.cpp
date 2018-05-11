@@ -2,6 +2,7 @@
 
 #include <RcppArmadillo.h>
 #include <Rcpp.h>
+#include <progress.hpp>
 #include "Sigma.h"
 
 using namespace Rcpp;
@@ -57,7 +58,7 @@ arma::vec kfold(const int &n, const int &K){
 //' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param K specify the number of folds for cross validation.
 //' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
-//' @param quiet specify whether the function returns progress of CV or not.
+//' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 //' 
 //' @return list of returns includes:
 //' \item{lam}{optimal tuning parameter.}
@@ -68,7 +69,7 @@ arma::vec kfold(const int &n, const int &K){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", bool quiet = true) {
+List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", std::string trace = "progress") {
 
   // initialization
   int n = X.n_rows, p = X.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
@@ -81,6 +82,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
   arma::rowvec X_bar;
   CV_errors = zerosla = arma::zeros<arma::mat>(l, a);
   zeros = arma::zeros<arma::mat>(p, p);
+  Progress progress(l*a*K, trace == "progress");
   
   // designate folds and shuffle -- ensures randomized folds
   arma::vec folds = kfold(n, K);
@@ -140,14 +142,19 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
         arma::log_det(logdet, sgn, Omega);
         CV_error(i, j) = (p/2)*(arma::accu(Omega % S_test) - logdet);
         
+        // update progress bar
+        if (trace == "progress"){
+          progress.increment();
+
         // if not quiet, then print progress lambda
-        if (!quiet){
-          Rcout << "Finished lam = " << alpha[i] << "in fold" << k << "\n";
+        } else if (trace == "print"){
+          Rcout << "Finished lam = " << lam[i] << " in fold " << k << "\n";
         }
       }
     }
     
-    if (!quiet){
+    // if not quiet, then print progress fold
+    if (trace == "print"){
       Rcout << "Finished fold" << k << "\n";
     }
     
@@ -186,7 +193,8 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 //' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 //' @param K specify the number of folds for cross validation.
-//' @param quiet specify whether the function returns progress of CV or not.
+//' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
+
 //' 
 //' @return list of returns includes:
 //' \item{lam}{optimal tuning parameter.}
@@ -196,7 +204,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::colvec &lam, const arma::colv
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool quiet = true) {
+List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, std::string trace = "none") {
   
   // initialization
   int n = X.n_rows, p = X.n_cols, l = lam.n_rows;
@@ -208,6 +216,7 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
   arma::rowvec X_bar;
   CV_errors = zerosl = arma::zeros<arma::colvec>(l);
   zeros = arma::zeros<arma::mat>(p, p);
+  Progress progress(l*K, trace == "progress");
   
   
   // designate folds and shuffle -- ensures randomized folds
@@ -249,13 +258,17 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::colvec &lam, int K = 3, bool
       arma::log_det(logdet, sgn, Omega);
       CV_error[i] = (n/2)*(arma::accu(Omega % S_test) - logdet);
       
+      // update progress bar
+      if (trace == "progress"){
+        progress.increment();
+      
       // if not quiet, then print progress lambda
-      if (!quiet){
-        Rcout << "Finished lam = " << lam[i] << "in fold" << k << "\n";
+      } else if (trace == "print"){
+        Rcout << "Finished lam = " << lam[i] << " in fold " << k << "\n";
       }
     }
     
-    if (!quiet){
+    if (trace == "print"){
       Rcout << "Finished fold" << k << "\n";
     }
     
