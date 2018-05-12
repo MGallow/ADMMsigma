@@ -32,9 +32,12 @@
 #' @keywords internal
 
 # we define the ParallelCV function
-ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, 
-    tau2 = 2, crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, adjmaxit = NULL, K = 5, start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", "print", "none")) {
+ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 
+    0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, 
+    rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", 
+        "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
+    adjmaxit = NULL, K = 5, start = c("warm", "cold"), 
+    cores = 1, trace = c("progress", "print", "none")) {
     
     # match values
     crit = match.arg(crit)
@@ -58,9 +61,11 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1)
     # use cluster for each fold in CV
     n = dim(X)[1]
     ind = sample(n)
-    CV = foreach(k = 1:K, .packages = "ADMMsigma", .inorder = FALSE) %dopar% {
+    CV = foreach(k = 1:K, .packages = "ADMMsigma", 
+        .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
+            n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]
@@ -76,13 +81,15 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1)
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CV_ADMMsigmac
-        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, 
-            start, trace)
+        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, 
+            diagonal, rho, mu, tau1, tau2, crit, tol1, 
+            tol2, maxit, adjmaxit, start, trace)
         
     }
     
     # determine optimal tuning parameters
-    CV = array(as.numeric(unlist(CV)), dim = c(length(lam), length(alpha), K))
+    CV = array(as.numeric(unlist(CV)), dim = c(length(lam), 
+        length(alpha), K))
     AVG = apply(CV, c(1, 2), mean)
     best = which(AVG == min(AVG), arr.ind = TRUE)
     error = min(AVG)
@@ -93,7 +100,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1)
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = best_lam, alpha = best_alpha, min.error = error, avg.error = AVG, cv.error = CV))
+    return(list(lam = best_lam, alpha = best_alpha, 
+        min.error = error, avg.error = AVG, cv.error = CV))
     
 }
 
@@ -123,7 +131,9 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1)
 #' @keywords internal
 
 # we define the ParallelCV_RIDGE function
-ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1, trace = c("none", "progress", "print")) {
+ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 
+    5, 0.5), K = 5, cores = 1, trace = c("none", "progress", 
+    "print")) {
     
     # make cluster and register cluster
     num_cores = detectCores()
@@ -142,27 +152,33 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1
     n = dim(X)[1]
     ind = sample(n)
     lam = sort(lam)
-    CV = foreach(k = 1:K, .packages = "ADMMsigma", .combine = "cbind", .inorder = FALSE) %dopar% {
-        
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
-        
-        # training set
-        X.train = X[-leave.out, , drop = FALSE]
-        X_bar = apply(X.train, 2, mean)
-        X.train = scale(X.train, center = X_bar, scale = FALSE)
-        
-        # validation set
-        X.valid = X[leave.out, , drop = FALSE]
-        X.valid = scale(X.valid, center = X_bar, scale = FALSE)
-        
-        # sample covariances
-        S.train = crossprod(X.train)/(dim(X.train)[1])
-        S.valid = crossprod(X.valid)/(dim(X.valid)[1])
-        
-        # run foreach loop on CV_ADMMsigmac
-        CVP_RIDGEsigmac(S.train, S.valid, lam, trace)
-        
-    }
+    CV = foreach(k = 1:K, .packages = "ADMMsigma", 
+        .combine = "cbind", .inorder = FALSE) %dopar% 
+        {
+            
+            leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
+                n/K)]
+            
+            # training set
+            X.train = X[-leave.out, , drop = FALSE]
+            X_bar = apply(X.train, 2, mean)
+            X.train = scale(X.train, center = X_bar, 
+                scale = FALSE)
+            
+            # validation set
+            X.valid = X[leave.out, , drop = FALSE]
+            X.valid = scale(X.valid, center = X_bar, 
+                scale = FALSE)
+            
+            # sample covariances
+            S.train = crossprod(X.train)/(dim(X.train)[1])
+            S.valid = crossprod(X.valid)/(dim(X.valid)[1])
+            
+            # run foreach loop on CV_ADMMsigmac
+            CVP_RIDGEsigmac(S.train, S.valid, lam, 
+                trace)
+            
+        }
     
     # determine optimal tuning parameters
     AVG = as.matrix(apply(CV, 1, mean))
@@ -174,6 +190,7 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = best_lam, min.error = error, avg.error = AVG, cv.error = CV))
+    return(list(lam = best_lam, min.error = error, 
+        avg.error = AVG, cv.error = CV))
     
 }

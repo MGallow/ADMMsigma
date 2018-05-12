@@ -4,10 +4,10 @@
 \alias{CV_ADMMsigmac}
 \title{CV ADMM penalized precision matrix estimation (c++)}
 \usage{
-CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
-  tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04, tol2 = 1e-04,
-  maxit = 10000L, adjmaxit = 10000L, K = 5L, start = "warm",
-  trace = "progress")
+CV_ADMMsigmac(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2,
+  mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
+  tol2 = 1e-04, maxit = 10000L, adjmaxit = 10000L, K = 5L,
+  start = "warm", trace = "progress")
 }
 \arguments{
 \item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -17,6 +17,8 @@ CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
 \item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
+
+\item{path}{option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.}
 
 \item{rho}{initial step size for ADMM algorithm.}
 
@@ -46,6 +48,7 @@ CV_ADMMsigmac(X, lam, alpha, diagonal = FALSE, rho = 2, mu = 10,
 list of returns includes:
 \item{lam}{optimal tuning parameter.}
 \item{alpha}{optimal tuning parameter.}
+\item{path}{array containing the solution path. Solutions will be ordered in ascending alpha values for each lambda.}
 \item{min.error}{minimum average cross validation error for optimal parameters.}
 \item{avg.error}{average cross validation error across all folds.}
 \item{cv.error}{cross validation errors (negative validation likelihood).}

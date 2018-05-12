@@ -4,8 +4,8 @@
 \alias{RIDGEsigma}
 \title{Ridge penalized precision matrix estimation}
 \usage{
-RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 5,
-  cores = 1, trace = c("none", "progress", "print"))
+RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), path = FALSE,
+  K = 5, cores = 1, trace = c("none", "progress", "print"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -13,6 +13,8 @@ RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), K = 5,
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
 \item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+
+\item{path}{option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.}
 
 \item{K}{specify the number of folds for cross validation.}
 
@@ -26,6 +28,7 @@ returns class object \code{RIDGEsigma} which includes:
 \item{Lambdas}{grid of lambda values for CV.}
 \item{Omega}{estimated penalized precision matrix.}
 \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
+\item{Path}{array containing the solution path. Solutions are ordered dense to sparse.}
 \item{Gradient}{gradient of optimization function (penalized gaussian likelihood).}
 \item{MIN.error}{minimum average cross validation error for optimal parameters.}
 \item{AVG.error}{average cross validation error across all folds.}

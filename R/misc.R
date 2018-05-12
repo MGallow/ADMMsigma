@@ -6,6 +6,8 @@
 #' @importFrom parallel makeCluster
 #' @importFrom parallel stopCluster
 #' @importFrom doParallel registerDoParallel
+#' @importFrom dplyr summarise
+#' @importFrom dplyr group_by
 #' @import foreach
 #' @import ggplot2
 NULL

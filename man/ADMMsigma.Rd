@@ -5,10 +5,10 @@
 \title{Penalized precision matrix estimation via ADMM}
 \usage{
 ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
-  1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2,
-  crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 10000,
-  adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1,
-  trace = c("progress", "print", "none"))
+  1, 0.1), diagonal = FALSE, path = FALSE, rho = 2, mu = 10, tau1 = 2,
+  tau2 = 2, crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04,
+  maxit = 10000, adjmaxit = NULL, K = 5, start = c("warm", "cold"),
+  cores = 1, trace = c("progress", "print", "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -20,6 +20,8 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
 \item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
+
+\item{path}{option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores must be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.}
 
 \item{rho}{initial step size for ADMM algorithm.}
 
@@ -57,6 +59,7 @@ returns class object \code{ADMMsigma} which includes:
 \item{maxit}{maximum number of iterations.}
 \item{Omega}{estimated penalized precision matrix.}
 \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
+\item{Path}{array containing the solution path. Solutions will be ordered in ascending alpha values for each lambda.}
 \item{Z}{final sparse update of estimated penalized precision matrix.}
 \item{Y}{final dual update.}
 \item{rho}{final step size.}

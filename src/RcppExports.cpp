@@ -7,15 +7,17 @@
 using namespace Rcpp;
 
 // CV_ADMMsigmac
-List CV_ADMMsigmac(const arma::mat& X, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, int maxit, int adjmaxit, int K, std::string start, std::string trace);
-RcppExport SEXP _ADMMsigma_CV_ADMMsigmac(SEXP XSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP startSEXP, SEXP traceSEXP) {
+List CV_ADMMsigmac(const arma::mat& X, const arma::mat& S, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, bool path, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, int maxit, int adjmaxit, int K, std::string start, std::string trace);
+RcppExport SEXP _ADMMsigma_CV_ADMMsigmac(SEXP XSEXP, SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP pathSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP startSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< bool >::type diagonal(diagonalSEXP);
+    Rcpp::traits::input_parameter< bool >::type path(pathSEXP);
     Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
     Rcpp::traits::input_parameter< const double >::type mu(muSEXP);
     Rcpp::traits::input_parameter< const double >::type tau1(tau1SEXP);
@@ -28,21 +30,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type K(KSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CV_ADMMsigmac(X, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, trace));
+    rcpp_result_gen = Rcpp::wrap(CV_ADMMsigmac(X, S, lam, alpha, diagonal, path, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, trace));
     return rcpp_result_gen;
 END_RCPP
 }
 // CV_RIDGEsigmac
-List CV_RIDGEsigmac(const arma::mat& X, const arma::colvec& lam, int K, std::string trace);
-RcppExport SEXP _ADMMsigma_CV_RIDGEsigmac(SEXP XSEXP, SEXP lamSEXP, SEXP KSEXP, SEXP traceSEXP) {
+List CV_RIDGEsigmac(const arma::mat& X, const arma::mat& S, const arma::colvec& lam, bool path, int K, std::string trace);
+RcppExport SEXP _ADMMsigma_CV_RIDGEsigmac(SEXP XSEXP, SEXP SSEXP, SEXP lamSEXP, SEXP pathSEXP, SEXP KSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
+    Rcpp::traits::input_parameter< bool >::type path(pathSEXP);
     Rcpp::traits::input_parameter< int >::type K(KSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CV_RIDGEsigmac(X, lam, K, trace));
+    rcpp_result_gen = Rcpp::wrap(CV_RIDGEsigmac(X, S, lam, path, K, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -125,8 +129,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ADMMsigma_CV_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CV_ADMMsigmac, 16},
-    {"_ADMMsigma_CV_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CV_RIDGEsigmac, 4},
+    {"_ADMMsigma_CV_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CV_ADMMsigmac, 18},
+    {"_ADMMsigma_CV_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CV_RIDGEsigmac, 6},
     {"_ADMMsigma_CVP_ADMMsigmac", (DL_FUNC) &_ADMMsigma_CVP_ADMMsigmac, 16},
     {"_ADMMsigma_CVP_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_CVP_RIDGEsigmac, 4},
     {"_ADMMsigma_RIDGEsigmac", (DL_FUNC) &_ADMMsigma_RIDGEsigmac, 2},
