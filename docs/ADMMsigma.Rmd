@@ -289,7 +289,7 @@ We will first generate data from a sparse, tri-diagonal precision matrix and den
 ```{r, message = FALSE, echo = TRUE}
 library(ADMMsigma)
 
-# generate data from a sparse matrix
+#  generate data from a sparse matrix
 # first compute covariance matrix
 S = matrix(0.7, nrow = 5, ncol = 5)
 for (i in 1:5){
@@ -302,7 +302,7 @@ for (i in 1:5){
 (Omega = qr.solve(S) %>% round(3))
 
 # generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
-Z = matrix(rnorm(1000*5), nrow = 1000, ncol = 5)
+Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
@@ -386,8 +386,24 @@ ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot
 
 ```{r, message = FALSE, echo = TRUE}
 
+# produce line graph for CV errors for ADMMsigma
+ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot(type = "line")
+
+```
+<br>\newpage
+
+```{r, message = FALSE, echo = TRUE}
+
 # produce CV heat map for RIDGEsigma
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
+
+```
+
+<br>\newpage
+```{r, message = FALSE, echo = TRUE}
+
+# produce line graph for CV errors for RIDGEsigma
+RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot(type = "line")
 
 ```
 <br><br>\vspace{1cm}
@@ -540,7 +556,7 @@ Below we benchmark the various functions contained in `ADMMsigma`. We can see th
 <br>\vspace{0.5cm}
 ```{r, message = FALSE, echo = TRUE}
 
-# generate data from tri-diagonal (sparse) matrix
+#  generate data from tri-diagonal (sparse) matrix
 # compute covariance matrix (can confirm inverse is tri-diagonal)
 S = matrix(0, nrow = 100, ncol = 100)
 
@@ -561,22 +577,22 @@ X = Z %*% S.sqrt
 microbenchmark(glasso(s = S, rho = 0.1))
 
 # benchmark ADMMsigma - default tolerance
-microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-4, tol2 = 1e-4))
+microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-4, tol2 = 1e-4, trace = "none"))
 
 # benchmark ADMMsigma - tolerance 1e-8
-microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-8, tol2 = 1e-8))
+microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-8, tol2 = 1e-8, trace = "none"))
 
 # benchmark ADMMsigma CV - default parameter grid
-microbenchmark(ADMMsigma(X), times = 5)
+microbenchmark(ADMMsigma(X, trace = "none"), times = 5)
 
 # benchmark ADMMsigma parallel CV
-microbenchmark(ADMMsigma(X, cores = 3), times = 5)
+microbenchmark(ADMMsigma(X, cores = 3, trace = "none"), times = 5)
 
 # benchmark ADMMsigma CV - likelihood convergence criteria
-microbenchmark(ADMMsigma(X, crit = "loglik"), times = 5)
+microbenchmark(ADMMsigma(X, crit = "loglik", trace = "none"), times = 5)
 
 # benchmark RIDGEsigma CV
-microbenchmark(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)), times = 5)
+microbenchmark(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none"), times = 5)
 
 ```
 

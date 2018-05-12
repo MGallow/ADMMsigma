@@ -250,11 +250,13 @@ plot.RIDGEsigma = function(x, type = c("heatmap",
         cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), 
             Errors = as.data.frame.table(x$CV.error)$Freq)
         
-        # produce line graph with boxplots
-        graph = ggplot(cv, aes(as.factor(log10(lam)), 
-            Errors)) + geom_jitter(width = 0.2, color = "navy blue") + 
-            geom_boxplot() + theme_minimal() + labs(title = "Cross-Validation Errors", 
-            y = "Error", x = "log10(lam)")
+        # produce line graph
+        graph = ggplot(summarise(group_by(cv, lam), 
+            Means = mean(Errors)), aes(log10(lam), 
+            Means)) + geom_jitter(width = 0.2, color = "navy blue") + 
+            theme_minimal() + geom_line(color = "red") + 
+            labs(title = "Cross-Validation Errors", 
+                y = "Error")
         
     } else {
         

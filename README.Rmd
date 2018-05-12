@@ -64,7 +64,7 @@ for (i in 1:5){
 (Omega = qr.solve(S) %>% round(3))
 
 # generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
-Z = matrix(rnorm(1000*5), nrow = 1000, ncol = 5)
+Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
@@ -91,7 +91,13 @@ RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 # produce CV heat map for ADMMsigma
 ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot
 
+# produce line graph for CV errors for ADMMsigma
+ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot(type = "line")
+
 # produce CV heat map for RIDGEsigma
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
+
+# produce line graph for CV errors for RIDGEsigma
+RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot(type = "line")
 
 ```
