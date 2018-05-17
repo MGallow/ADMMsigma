@@ -95,15 +95,12 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
   int iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
-  arma::mat Z2, Z, Y, Omega, C, Tau, Taum;
-  C = arma::ones<arma::mat>(p, p);
-  Omega = initOmega;
-  Z2 = initZ2;
-  Y = initY;
+  arma::mat Z2(initZ2), Z(initZ2), Y(initY), Omega(initOmega), C(p, p, arma::fill::ones), Tau, Taum;
+
   
   // option to penalize diagonal elements
   if (!diagonal){
-    C -= arma::eye<arma::mat>(p, p);
+    C -= arma::diagmat(C);
   }
   
   // save values

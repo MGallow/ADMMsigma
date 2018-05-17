@@ -77,13 +77,11 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &l
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
   double sgn = 0, logdet = 0, initrho = rho, alpha_, lam_;
-  arma::mat X_train, X_test, S_train, S_test;
-  arma::mat Omega, initOmega, initZ2, initY, AVG_error, CV_error, zeros, zerosla;
+  arma::mat X_train, X_test, S_train(S), S_test(S);
+  arma::mat Omega, initOmega, initZ2, initY, AVG_error, CV_error, zeros(p, p, arma::fill::zeros), zerosla;
   arma::uvec index, index_; arma::vec folds; arma::rowvec X_bar;
-  arma::cube CV_errors, Path;
-  CV_errors = arma::zeros<arma::cube>(l, a, K);
+  arma::cube CV_errors(l, a, K, arma::fill::zeros), Path;
   AVG_error = zerosla = arma::zeros<arma::mat>(l, a);
-  zeros = arma::zeros<arma::mat>(p, p);
   Progress progress(l*a*K, trace == "progress");
   
   // no need to create folds if K = 1
@@ -239,13 +237,9 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &
   // initialization
   int n, p = S.n_cols, l = lam.n_rows;
   double sgn = 0, logdet = 0, lam_;
-  arma::uvec index, index_; arma::vec folds;
-  arma::colvec AVG_error, CV_error, zerosl; arma::rowvec X_bar;
-  arma::mat X_train, X_test, S_train, S_test, Omega, CV_errors, zeros;
-  arma::cube Path;
-  CV_errors = arma::zeros<arma::mat>(l, K);
-  zerosl = arma::zeros<arma::colvec>(l);
-  zeros = arma::zeros<arma::mat>(p, p);
+  arma::uvec index, index_; arma::vec folds; arma::cube Path;
+  arma::colvec AVG_error, CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
+  arma::mat X_train, X_test, S_train, S_test, Omega, CV_errors(l, K, arma::fill::zeros), zeros(p, p, arma::fill::zeros);
   Progress progress(l*K, trace == "progress");
   
   // no need to create folds if K = 1
@@ -303,9 +297,9 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
       Omega = RIDGEsigmac(S_train, lam_);
       
-      // compute the observed negative validation loglikelihood
+      // compute the observed negative validation loglikelihood (close enough)
       arma::log_det(logdet, sgn, Omega);
-      CV_error[i] = (n/2)*(arma::accu(Omega % S_test) - logdet);
+      CV_error[i] = (p/2)*(arma::accu(Omega % S_test) - logdet);
       
       // save estimate if path = TRUE
       if (path){

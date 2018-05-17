@@ -48,7 +48,7 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5,
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        print("Only detected", num_cores, "cores...")
+        print(paste("Only detected", num_cores, "cores...", sep = " "))
     }
     if (cores > K) {
         print("Number of cores exceeds K... setting cores = K")
@@ -138,7 +138,7 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5,
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        print("Only detected", num_cores, "cores...")
+        print(paste("Only detected", num_cores, "cores...", sep = " "))
     }
     if (cores > K) {
         print("Number of cores exceeds K... setting cores = K")

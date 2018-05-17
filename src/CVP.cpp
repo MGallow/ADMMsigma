@@ -39,11 +39,10 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
-  double sgn, logdet, alpha_, lam_;
-  sgn = logdet = 0;
+  double sgn = 0, logdet = 0, alpha_, lam_;
   arma::mat Omega, initOmega, initZ2, initY;
   initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
-  arma::mat CV_error = arma::zeros<arma::mat>(l, a);
+  arma::mat CV_error(l, a, arma::fill::zeros);
   Progress progress(l*a, trace == "progress");
   
   
@@ -116,10 +115,8 @@ arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, co
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
-  double sgn, logdet, lam_;
-  sgn = logdet = 0;
-  arma::mat Omega = arma::ones<arma::mat>(p, p);
-  arma::mat CV_error = arma::zeros<arma::colvec>(l);
+  double sgn = 0, logdet = 0, lam_;
+  arma::mat Omega(p, p, arma::fill::zeros), CV_error(l, 1, arma::fill::zeros);
   Progress progress(l, trace == "progress");
   
   

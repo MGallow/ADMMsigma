@@ -141,11 +141,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (is.null(adjmaxit)) {
         adjmaxit = maxit
     }
-    if (path) {
-        K = 1
-    }
+    
     
     # match values
+    K = ifelse(path, 1, K)
     crit = match.arg(crit)
     start = match.arg(start)
     trace = match.arg(trace)
