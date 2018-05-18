@@ -5,8 +5,8 @@
 \title{Penalized precision matrix estimation via ADMM (c++)}
 \usage{
 ADMMc(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
-  rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-04,
-  tol2 = 1e-04, maxit = 10000L)
+  rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM",
+  tol_abs = 1e-04, tol_rel = 1e-04, maxit = 10000L)
 }
 \arguments{
 \item{S}{pxp sample covariance matrix (denominator n).}
@@ -27,15 +27,15 @@ ADMMc(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
 
 \item{mu}{factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.}
 
-\item{tau1}{factor in which to increase step size \code{rho}.}
+\item{tau_inc}{factor in which to increase step size \code{rho}.}
 
-\item{tau2}{factor in which to decrease step size \code{rho}.}
+\item{tau_dec}{factor in which to decrease step size \code{rho}.}
 
-\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
+\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
 
-\item{tol1}{absolute convergence tolerance. Defaults to 1e-4.}
+\item{tol_abs}{absolute convergence tolerance. Defaults to 1e-4.}
 
-\item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
+\item{tol_rel}{relative convergence tolerance. Defaults to 1e-4.}
 
 \item{maxit}{maximum number of iterations. Defaults to 1e4.}
 }

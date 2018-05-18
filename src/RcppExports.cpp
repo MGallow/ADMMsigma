@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // CV_ADMMc
-List CV_ADMMc(const arma::mat& X, const arma::mat& S, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, bool path, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, int maxit, int adjmaxit, int K, std::string start, std::string trace);
-RcppExport SEXP _ADMMsigma_CV_ADMMc(SEXP XSEXP, SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP pathSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP startSEXP, SEXP traceSEXP) {
+List CV_ADMMc(const arma::mat& X, const arma::mat& S, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, bool path, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, int maxit, int adjmaxit, int K, std::string start, std::string trace);
+RcppExport SEXP _ADMMsigma_CV_ADMMc(SEXP XSEXP, SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP pathSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP startSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,17 +20,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type path(pathSEXP);
     Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
     Rcpp::traits::input_parameter< const double >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const double >::type tau1(tau1SEXP);
-    Rcpp::traits::input_parameter< const double >::type tau2(tau2SEXP);
+    Rcpp::traits::input_parameter< const double >::type tau_inc(tau_incSEXP);
+    Rcpp::traits::input_parameter< const double >::type tau_dec(tau_decSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
-    Rcpp::traits::input_parameter< const double >::type tol1(tol1SEXP);
-    Rcpp::traits::input_parameter< const double >::type tol2(tol2SEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_abs(tol_absSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_rel(tol_relSEXP);
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type adjmaxit(adjmaxitSEXP);
     Rcpp::traits::input_parameter< int >::type K(KSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CV_ADMMc(X, S, lam, alpha, diagonal, path, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, trace));
+    rcpp_result_gen = Rcpp::wrap(CV_ADMMc(X, S, lam, alpha, diagonal, path, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, K, start, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -51,8 +51,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // CVP_ADMMc
-arma::mat CVP_ADMMc(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, int maxit, int adjmaxit, std::string start, std::string trace);
-RcppExport SEXP _ADMMsigma_CVP_ADMMc(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP startSEXP, SEXP traceSEXP) {
+arma::mat CVP_ADMMc(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, int maxit, int adjmaxit, std::string start, std::string trace);
+RcppExport SEXP _ADMMsigma_CVP_ADMMc(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP startSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -63,16 +63,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type diagonal(diagonalSEXP);
     Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
     Rcpp::traits::input_parameter< const double >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const double >::type tau1(tau1SEXP);
-    Rcpp::traits::input_parameter< const double >::type tau2(tau2SEXP);
+    Rcpp::traits::input_parameter< const double >::type tau_inc(tau_incSEXP);
+    Rcpp::traits::input_parameter< const double >::type tau_dec(tau_decSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
-    Rcpp::traits::input_parameter< const double >::type tol1(tol1SEXP);
-    Rcpp::traits::input_parameter< const double >::type tol2(tol2SEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_abs(tol_absSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_rel(tol_relSEXP);
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type adjmaxit(adjmaxitSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CVP_ADMMc(S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, trace));
+    rcpp_result_gen = Rcpp::wrap(CVP_ADMMc(S_train, S_valid, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, start, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -103,8 +103,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // ADMMc
-List ADMMc(const arma::mat& S, const arma::mat& initOmega, const arma::mat& initZ2, const arma::mat& initY, const double lam, const double alpha, bool diagonal, double rho, const double mu, const double tau1, const double tau2, std::string crit, const double tol1, const double tol2, const int maxit);
-RcppExport SEXP _ADMMsigma_ADMMc(SEXP SSEXP, SEXP initOmegaSEXP, SEXP initZ2SEXP, SEXP initYSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau1SEXP, SEXP tau2SEXP, SEXP critSEXP, SEXP tol1SEXP, SEXP tol2SEXP, SEXP maxitSEXP) {
+List ADMMc(const arma::mat& S, const arma::mat& initOmega, const arma::mat& initZ2, const arma::mat& initY, const double lam, const double alpha, bool diagonal, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, const int maxit);
+RcppExport SEXP _ADMMsigma_ADMMc(SEXP SSEXP, SEXP initOmegaSEXP, SEXP initZ2SEXP, SEXP initYSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -117,13 +117,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type diagonal(diagonalSEXP);
     Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
     Rcpp::traits::input_parameter< const double >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const double >::type tau1(tau1SEXP);
-    Rcpp::traits::input_parameter< const double >::type tau2(tau2SEXP);
+    Rcpp::traits::input_parameter< const double >::type tau_inc(tau_incSEXP);
+    Rcpp::traits::input_parameter< const double >::type tau_dec(tau_decSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
-    Rcpp::traits::input_parameter< const double >::type tol1(tol1SEXP);
-    Rcpp::traits::input_parameter< const double >::type tol2(tol2SEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_abs(tol_absSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol_rel(tol_relSEXP);
     Rcpp::traits::input_parameter< const int >::type maxit(maxitSEXP);
-    rcpp_result_gen = Rcpp::wrap(ADMMc(S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit));
+    rcpp_result_gen = Rcpp::wrap(ADMMc(S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit));
     return rcpp_result_gen;
 END_RCPP
 }

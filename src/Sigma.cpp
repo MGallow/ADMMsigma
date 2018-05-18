@@ -58,11 +58,11 @@ arma::mat RIDGEc(const arma::mat &S, double lam){
 //' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 //' @param rho initial step size for ADMM algorithm.
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
-//' @param tau1 factor in which to increase step size \code{rho}.
-//' @param tau2 factor in which to decrease step size \code{rho}.
-//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
-//' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
-//' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+//' @param tau_inc factor in which to increase step size \code{rho}.
+//' @param tau_dec factor in which to decrease step size \code{rho}.
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+//' @param tol_abs absolute convergence tolerance. Defaults to 1e-4.
+//' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
 //' 
 //' @return returns list of returns which includes:
@@ -87,7 +87,7 @@ arma::mat RIDGEc(const arma::mat &S, double lam){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e4){
+List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, const int maxit = 1e4){
   
   // allocate memory
   bool criterion = true;
@@ -131,10 +131,10 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
     s = arma::norm(rho*(Z2 - Z), "fro");
     r = arma::norm(Omega - Z2, "fro");
     if (r > mu*s){
-      rho *= tau1;
+      rho *= tau_inc;
     }
     if (s > mu*r){
-      rho *= 1/tau2;
+      rho *= 1/tau_dec;
     }
     
     // stopping criterion
@@ -143,14 +143,14 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
       // compute likelihood (close enough)
       arma::log_det(logdet, sgn, Omega);
       lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
-      criterion = (std::abs(lik2 - lik) >= tol1);
+      criterion = (std::abs(lik2 - lik) >= tol_abs);
       lik = lik2;
       
     } else {
       
       // ADMM criterion
-      eps1 = p*tol1 + tol2*std::max(arma::norm(Omega, "fro"), arma::norm(Z2, "fro"));
-      eps2 = p*tol1 + tol2*arma::norm(Y, "fro");
+      eps1 = p*tol_abs + tol_rel*std::max(arma::norm(Omega, "fro"), arma::norm(Z2, "fro"));
+      eps2 = p*tol_abs + tol_rel*arma::norm(Y, "fro");
       criterion = (r >= eps1 || s >= eps2);
       
     }

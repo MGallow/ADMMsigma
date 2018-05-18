@@ -10,11 +10,11 @@
 #' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param rho initial step size for ADMM algorithm.
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
-#' @param tau1 factor in which to increase step size \code{rho}
-#' @param tau2 factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
-#' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
-#' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+#' @param tau.inc factor in which to increase step size \code{rho}
+#' @param tau.dec factor in which to decrease step size \code{rho}
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol.abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+#' @param tol.abs absolute convergence tolerance. Defaults to 1e-4.
+#' @param tol.rel relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e3.
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to NULL.
 #' @param K specify the number of folds for cross validation.
@@ -33,15 +33,16 @@
 
 # we define the CV_ADMMc function
 CVP_ADMM = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 
-    1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, 
-    tau2 = 2, crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 1000, adjmaxit = NULL, K = 5, start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", "print", 
-        "none")) {
+    1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau.inc = 2, 
+    tau.dec = 2, crit = c("ADMM", "loglik"), tol.abs = 1e-04, 
+    tol.rel = 1e-04, maxit = 1000, adjmaxit = NULL, K = 5, 
+    start = c("warm", "cold"), cores = 1, trace = c("progress", 
+        "print", "none")) {
     
     # match values
     crit = match.arg(crit)
     start = match.arg(start)
+    trace = match.arg(trace)
     lam = sort(lam)
     alpha = sort(alpha)
     
@@ -82,9 +83,12 @@ CVP_ADMM = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
             S.valid = crossprod(X.valid)/(dim(X.valid)[1])
             
             # run foreach loop on CVP_ADMMc
-            CVP_ADMMc(S.train, S.valid, lam, alpha, diagonal, 
-                rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
-                adjmaxit, start, trace)
+            CVP_ADMMc(S_train = S.train, S_valid = S.valid, 
+                lam = lam, alpha = alpha, diagonal = diagonal, 
+                rho = rho, mu = mu, tau_inc = tau.inc, tau_dec = tau.dec, 
+                crit = crit, tol_abs = tol.abs, tol_rel = tol.rel, 
+                maxit = maxit, adjmaxit = adjmaxit, start = start, 
+                trace = trace)
             
         }
     
@@ -173,7 +177,8 @@ CVP_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CVP_RIDGEc
-        CVP_RIDGEc(S.train, S.valid, lam, trace)
+        CVP_RIDGEc(S_train = S.train, S_valid = S.valid, 
+            lam = lam, trace = trace)
         
     }
     

@@ -210,6 +210,11 @@ print.RIDGE = function(x, ...) {
 
 
 
+##-----------------------------------------------------------------------------------
+
+
+
+
 #' @title Plot RIDGE object
 #' @description Produces a heat plot for the cross validation errors, if available.
 #' @param x class object RIDGE

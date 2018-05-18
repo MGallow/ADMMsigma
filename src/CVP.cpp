@@ -20,11 +20,11 @@ using namespace Rcpp;
 //' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 //' @param rho initial step size for ADMM algorithm.
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
-//' @param tau1 factor in which to increase step size \code{rho}
-//' @param tau2 factor in which to decrease step size \code{rho}
-//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
-//' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
-//' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+//' @param tau_inc factor in which to increase step size \code{rho}
+//' @param tau_dec factor in which to decrease step size \code{rho}
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+//' @param tol_abs absolute convergence tolerance. Defaults to 1e-4.
+//' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
 //' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
@@ -35,7 +35,7 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_ADMMc(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", std::string trace = "progress") {
+arma::mat CVP_ADMMc(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
@@ -55,7 +55,7 @@ arma::mat CVP_ADMMc(const arma::mat &S_train, const arma::mat &S_valid, const ar
       alpha_ = alpha[j];
       
       // compute the penalized likelihood precision matrix estimator at the ith value in lam:
-      List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+      List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
 
       if (start == "warm"){

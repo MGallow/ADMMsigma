@@ -44,17 +44,18 @@ arma::vec kfold(const int &n, const int &K){
 //' @description Cross validation function for ADMMsigma.
 //'
 //' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+//' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
 //' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 //' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
 //' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 //' @param path option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.
 //' @param rho initial step size for ADMM algorithm.
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
-//' @param tau1 factor in which to increase step size \code{rho}
-//' @param tau2 factor in which to decrease step size \code{rho}
-//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
-//' @param tol1 absolute convergence tolerance. Defaults to 1e-4.
-//' @param tol2 relative convergence tolerance. Defaults to 1e-4.
+//' @param tau_inc factor in which to increase step size \code{rho}
+//' @param tau_dec factor in which to decrease step size \code{rho}
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+//' @param tol_abs absolute convergence tolerance. Defaults to 1e-4.
+//' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
 //' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param K specify the number of folds for cross validation.
@@ -72,7 +73,7 @@ arma::vec kfold(const int &n, const int &K){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, bool path = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", std::string trace = "progress") {
+List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, bool path = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
@@ -142,7 +143,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
         alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-        List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+        List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit);
         Omega = as<arma::mat>(ADMM["Omega"]);
         
         if (start == "warm"){
@@ -217,6 +218,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
 //' @description Cross validation function for RIDGEsigma.
 //' 
 //' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+//' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
 //' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
 //' @param path option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.
 //' @param K specify the number of folds for cross validation.
@@ -237,9 +239,10 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
   // initialization
   int n, p = S.n_cols, l = lam.n_rows;
   double sgn = 0, logdet = 0, lam_;
+  arma::mat X_train, X_test, S_train(S), S_test(S);
+  arma::mat Omega, CV_errors(l, K, arma::fill::zeros), zeros(p, p, arma::fill::zeros);
   arma::uvec index, index_; arma::vec folds; arma::cube Path;
   arma::colvec AVG_error, CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
-  arma::mat X_train, X_test, S_train, S_test, Omega, CV_errors(l, K, arma::fill::zeros), zeros(p, p, arma::fill::zeros);
   Progress progress(l*K, trace == "progress");
   
   // no need to create folds if K = 1

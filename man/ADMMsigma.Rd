@@ -5,10 +5,11 @@
 \title{Penalized precision matrix estimation via ADMM}
 \usage{
 ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
-  1, 0.1), diagonal = FALSE, path = FALSE, rho = 2, mu = 10, tau1 = 2,
-  tau2 = 2, crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04,
-  maxit = 10000, adjmaxit = NULL, K = 5, start = c("warm", "cold"),
-  cores = 1, trace = c("progress", "print", "none"))
+  1, 0.1), diagonal = FALSE, path = FALSE, rho = 2, mu = 10,
+  tau.inc = 2, tau.dec = 2, crit = c("ADMM", "loglik"), tol.abs = 1e-04,
+  tol.rel = 1e-04, maxit = 10000, adjmaxit = NULL, K = 5,
+  start = c("warm", "cold"), cores = 1, trace = c("progress", "print",
+  "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -27,15 +28,15 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
 
 \item{mu}{factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.}
 
-\item{tau1}{factor in which to increase step size \code{rho}}
+\item{tau.inc}{factor in which to increase step size \code{rho}}
 
-\item{tau2}{factor in which to decrease step size \code{rho}}
+\item{tau.dec}{factor in which to decrease step size \code{rho}}
 
-\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol1} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
+\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol.abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
 
-\item{tol1}{absolute convergence tolerance. Defaults to 1e-4.}
+\item{tol.abs}{absolute convergence tolerance. Defaults to 1e-4.}
 
-\item{tol2}{relative convergence tolerance. Defaults to 1e-4.}
+\item{tol.rel}{relative convergence tolerance. Defaults to 1e-4.}
 
 \item{maxit}{maximum number of iterations. Defaults to 1e4.}
 
