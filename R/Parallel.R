@@ -63,6 +63,7 @@ CVP_ADMM = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
     # use cluster for each fold in CV
     n = dim(X)[1]
     ind = sample(n)
+    k = NULL
     CV = foreach(k = 1:K, .packages = "ADMMsigma", .inorder = FALSE) %dopar% 
         {
             
@@ -157,6 +158,7 @@ CVP_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5),
     n = dim(X)[1]
     ind = sample(n)
     lam = sort(lam)
+    k = NULL
     CV = foreach(k = 1:K, .packages = "ADMMsigma", .combine = "cbind", 
         .inorder = FALSE) %dopar% {
         

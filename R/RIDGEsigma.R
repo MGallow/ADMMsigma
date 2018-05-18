@@ -40,7 +40,7 @@
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
-#' @seealso \code{\link{plot.RIDGEsigma}}, \code{\link{ADMMsigma}}
+#' @seealso \code{\link{plot.RIDGE}}, \code{\link{ADMMsigma}}
 #' 
 #' @export
 #' 
@@ -243,6 +243,7 @@ plot.RIDGE = function(x, type = c("heatmap", "line"), footnote = TRUE,
     
     # check
     type = match.arg(type)
+    Means = NULL
     if (is.null(x$CV.error)) {
         stop("No cross validation errors to plot!")
     }

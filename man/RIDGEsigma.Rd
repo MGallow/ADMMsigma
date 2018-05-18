@@ -70,7 +70,7 @@ RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 }
 \seealso{
-\code{\link{plot.RIDGEsigma}}, \code{\link{ADMMsigma}}
+\code{\link{plot.RIDGE}}, \code{\link{ADMMsigma}}
 }
 \author{
 Matt Galloway \email{gall0441@umn.edu}

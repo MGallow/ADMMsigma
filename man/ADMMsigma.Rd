@@ -128,7 +128,7 @@ Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and othe
 }
 }
 \seealso{
-\code{\link{plot.ADMMsigma}}, \code{\link{RIDGEsigma}}
+\code{\link{plot.ADMM}}, \code{\link{RIDGEsigma}}
 }
 \author{
 Matt Galloway \email{gall0441@umn.edu}

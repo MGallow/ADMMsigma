@@ -8,6 +8,7 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_by
+#' @import RcppProgress
 #' @import foreach
 #' @import ggplot2
 NULL

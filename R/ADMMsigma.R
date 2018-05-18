@@ -75,7 +75,7 @@
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
-#' @seealso \code{\link{plot.ADMMsigma}}, \code{\link{RIDGEsigma}}
+#' @seealso \code{\link{plot.ADMM}}, \code{\link{RIDGEsigma}}
 #' 
 #' @export
 #' 
@@ -335,6 +335,7 @@ plot.ADMM = function(x, type = c("heatmap", "line"), footnote = TRUE,
     
     # check
     type = match.arg(type)
+    Means = NULL
     if (is.null(x$CV.error)) {
         stop("No cross validation errors to plot!")
     }
