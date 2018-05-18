@@ -104,15 +104,13 @@
 #' # produce CV heat map for ADMMsigma
 #' plot(ADMMsigma(X))
 
-# we define the ADMM covariance estimation
-# function
+# we define the ADMM covariance estimation function
 ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, 
-    path = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, 
-    crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, 
-    maxit = 10000, adjmaxit = NULL, K = 5, start = c("warm", 
-        "cold"), cores = 1, trace = c("progress", 
-        "print", "none")) {
+    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, path = FALSE, 
+    rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", 
+        "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 10000, 
+    adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1, 
+    trace = c("progress", "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -124,8 +122,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, 
-        K) > 0))) {
+    if (!(all(c(rho, mu, tau1, tau2, tol1, tol2, maxit, K) > 
+        0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, K, cores)%%1 != 0)) {
@@ -168,29 +166,28 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         # run CV in parallel?
         if (cores > 1) {
             
-            # execute ParallelCV
-            ADMM = ParallelCV(X = X, lam = lam, alpha = alpha, 
+            # execute CVP_ADMM
+            ADMM = CVP_ADMM(X = X, lam = lam, alpha = alpha, 
                 diagonal = diagonal, rho = rho, mu = mu, 
-                tau1 = tau1, tau2 = tau2, crit = crit, 
-                tol1 = tol1, tol2 = tol2, maxit = maxit, 
-                adjmaxit = adjmaxit, K = K, start = start, 
-                cores = cores, trace = trace)
+                tau1 = tau1, tau2 = tau2, crit = crit, tol1 = tol1, 
+                tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
+                K = K, start = start, cores = cores, trace = trace)
             MIN.error = ADMM$min.error
             AVG.error = ADMM$avg.error
             CV.error = ADMM$cv.error
             
         } else {
             
-            # execute CV_ADMM_sigma
+            # execute CV_ADMMc
             if (is.null(X)) {
                 X = matrix(0)
             }
-            ADMM = CV_ADMMsigmac(X = X, S = S, lam = lam, 
-                alpha = alpha, diagonal = diagonal, 
-                path = path, rho = rho, mu = mu, tau1 = tau1, 
-                tau2 = tau2, crit = crit, tol1 = tol1, 
-                tol2 = tol2, maxit = maxit, adjmaxit = adjmaxit, 
-                K = K, start = start, trace = trace)
+            ADMM = CV_ADMMc(X = X, S = S, lam = lam, alpha = alpha, 
+                diagonal = diagonal, path = path, rho = rho, 
+                mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
+                tol1 = tol1, tol2 = tol2, maxit = maxit, 
+                adjmaxit = adjmaxit, K = K, start = start, 
+                trace = trace)
             MIN.error = ADMM$min.error
             AVG.error = ADMM$avg.error
             CV.error = ADMM$cv.error
@@ -199,11 +196,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         }
         
         # compute final estimate at best tuning parameters
-        ADMM = ADMMsigmac(S = S, initOmega = init, 
-            initZ2 = init, initY = init, lam = ADMM$lam, 
-            alpha = ADMM$alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
-            crit = crit, tol1 = tol1, tol2 = tol2, 
+        ADMM = ADMMc(S = S, initOmega = init, initZ2 = init, 
+            initY = init, lam = ADMM$lam, alpha = ADMM$alpha, 
+            diagonal = diagonal, rho = rho, mu = mu, tau1 = tau1, 
+            tau2 = tau2, crit = crit, tol1 = tol1, tol2 = tol2, 
             maxit = maxit)
         
         
@@ -214,11 +210,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             stop("Must set specify X, set path = TRUE, or provide single value for lam and alpha.")
         }
         
-        ADMM = ADMMsigmac(S = S, initOmega = init, 
-            initZ2 = init, initY = init, lam = lam, 
-            alpha = alpha, diagonal = diagonal, rho = rho, 
-            mu = mu, tau1 = tau1, tau2 = tau2, crit = crit, 
-            tol1 = tol1, tol2 = tol2, maxit = maxit)
+        ADMM = ADMMc(S = S, initOmega = init, initZ2 = init, 
+            initY = init, lam = lam, alpha = alpha, diagonal = diagonal, 
+            rho = rho, mu = mu, tau1 = tau1, tau2 = tau2, 
+            crit = crit, tol1 = tol1, tol2 = tol2, maxit = maxit)
         
     }
     
@@ -231,27 +226,26 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     
     # compute penalized loglik
     loglik = (-n/2) * (sum(ADMM$Omega * S) - determinant(ADMM$Omega, 
-        logarithm = TRUE)$modulus[1] + ADMM$lam * 
-        ((1 - ADMM$alpha)/2 * sum((C * ADMM$Omega)^2) + 
-            ADMM$alpha * sum(abs(C * ADMM$Omega))))
+        logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - ADMM$alpha)/2 * 
+        sum((C * ADMM$Omega)^2) + ADMM$alpha * sum(abs(C * 
+        ADMM$Omega))))
     
     
     # return values
-    tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), 
-        ncol = 2)
+    tuning = matrix(c(log10(ADMM$lam), ADMM$alpha), ncol = 2)
     colnames(tuning) = c("log10(lam)", "alpha")
     if (!path) {
         Path = NULL
     }
     
     returns = list(Call = call, Iterations = ADMM$Iterations, 
-        Tuning = tuning, Lambdas = lam, Alphas = alpha, 
-        maxit = maxit, Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
+        Tuning = tuning, Lambdas = lam, Alphas = alpha, maxit = maxit, 
+        Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
         Path = Path, Z = ADMM$Z2, Y = ADMM$Y, rho = ADMM$rho, 
         Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, 
         CV.error = CV.error)
     
-    class(returns) = "ADMMsigma"
+    class(returns) = "ADMM"
     return(returns)
     
 }
@@ -265,13 +259,13 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 
 
-#' @title Print ADMMsigma object
-#' @description Prints ADMMsigma object and suppresses output if needed.
-#' @param x class object ADMMsigma
+#' @title Print ADMM object
+#' @description Prints ADMM object and suppresses output if needed.
+#' @param x class object ADMM
 #' @param ... additional arguments.
 #' @keywords internal
 #' @export
-print.ADMMsigma = function(x, ...) {
+print.ADMM = function(x, ...) {
     
     # print warning if maxit reached
     if (x$maxit <= x$Iterations) {
@@ -279,8 +273,8 @@ print.ADMMsigma = function(x, ...) {
     }
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print iterations
     cat("\nIterations: ", paste(x$Iterations, sep = "\n", 
@@ -288,12 +282,11 @@ print.ADMMsigma = function(x, ...) {
     
     # print optimal tuning parameters
     cat("\nTuning parameters:\n")
-    print.default(round(x$Tuning, 3), print.gap = 2L, 
-        quote = FALSE)
+    print.default(round(x$Tuning, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 
-        5), sep = "\n", collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Z) <= 10) {
@@ -307,9 +300,9 @@ print.ADMMsigma = function(x, ...) {
 
 
 
-#' @title Plot ADMMsigma object
+#' @title Plot ADMM object
 #' @description Produces a heat plot for the cross validation errors, if available.
-#' @param x class object ADMMsigma.
+#' @param x class object ADMM.
 #' @param type produce either 'heatmap' or 'line' graph
 #' @param footnote option to print footnote of optimal values. Defaults to TRUE.
 #' @param ... additional arguments.
@@ -330,8 +323,8 @@ print.ADMMsigma = function(x, ...) {
 #' # produce CV heat map for ADMMsigma
 #' plot(ADMMsigma(X))
 
-plot.ADMMsigma = function(x, type = c("heatmap", "line"), 
-    footnote = TRUE, ...) {
+plot.ADMM = function(x, type = c("heatmap", "line"), footnote = TRUE, 
+    ...) {
     
     # check
     type = match.arg(type)
@@ -348,19 +341,18 @@ plot.ADMMsigma = function(x, type = c("heatmap", "line"),
         if (length(x$Alphas) > 1) {
             
             # produce line graph
-            graph = ggplot(summarise(group_by(cv, 
-                lam, alpha), Means = mean(Errors)), 
-                aes(log10(lam), Means, color = as.factor(alpha))) + 
-                theme_minimal() + geom_line() + labs(title = "Cross-Validation Errors", 
+            graph = ggplot(summarise(group_by(cv, lam, alpha), 
+                Means = mean(Errors)), aes(log10(lam), Means, 
+                color = as.factor(alpha))) + theme_minimal() + 
+                geom_line() + labs(title = "Cross-Validation Errors", 
                 color = "alpha", y = "Average Error")
             
         } else {
             
             # produce line graph with boxplots
             graph = ggplot(cv, aes(as.factor(log10(lam)), 
-                Errors)) + geom_jitter(width = 0.2, 
-                color = "navy blue") + geom_boxplot() + 
-                theme_minimal() + labs(title = "Cross-Validation Errors", 
+                Errors)) + geom_jitter(width = 0.2, color = "navy blue") + 
+                geom_boxplot() + theme_minimal() + labs(title = "Cross-Validation Errors", 
                 y = "Error", x = "log10(lam)")
             
         }
@@ -378,9 +370,9 @@ plot.ADMMsigma = function(x, type = c("heatmap", "line"),
         bluetowhite <- c("#000E29", "white")
         
         # produce ggplot heat map
-        graph = ggplot(cv, aes(alpha, log10(lam))) + 
-            geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors")
+        graph = ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
+            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors")
         
     }
     

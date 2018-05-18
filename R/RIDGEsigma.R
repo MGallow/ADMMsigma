@@ -63,8 +63,7 @@
 #' # produce CV heat map for RIDGEsigma
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
-# we define the ADMM covariance estimation
-# function
+# we define the ADMM covariance estimation function
 RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
     5, 0.5), path = FALSE, K = 5, cores = 1, trace = c("none", 
     "progress", "print")) {
@@ -110,8 +109,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = ParallelCV_RIDGE(X = X, lam = lam, 
-                K = K, cores = cores, trace = trace)
+            RIDGE = CVP_RIDGE(X = X, lam = lam, K = K, cores = cores, 
+                trace = trace)
             MIN.error = RIDGE$min.error
             AVG.error = RIDGE$avg.error
             CV.error = RIDGE$cv.error
@@ -123,8 +122,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             if (is.null(X)) {
                 X = matrix(0)
             }
-            RIDGE = CV_RIDGEsigmac(X = X, S = S, lam = lam, 
-                path = path, K = K, trace = trace)
+            RIDGE = CV_RIDGEc(X = X, S = S, lam = lam, path = path, 
+                K = K, trace = trace)
             MIN.error = RIDGE$min.error
             AVG.error = RIDGE$avg.error
             CV.error = RIDGE$cv.error
@@ -134,7 +133,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         }
         
         # compute final estimate at best tuning parameters
-        Omega = RIDGEsigmac(S = S, lam = lam)
+        Omega = RIDGEc(S = S, lam = lam)
         
         
     } else {
@@ -143,7 +142,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (length(lam) > 1) {
             stop("Must specify X, set path = TRUE, or provide single value for lam.")
         }
-        Omega = RIDGEsigmac(S = S, lam = lam)
+        Omega = RIDGEc(S = S, lam = lam)
         
     }
     
@@ -166,7 +165,7 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         Gradient = grad, Loglik = loglik, MIN.error = MIN.error, 
         AVG.error = AVG.error, CV.error = CV.error)
     
-    class(returns) = "RIDGEsigma"
+    class(returns) = "RIDGE"
     return(returns)
     
 }
@@ -179,26 +178,25 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
 
 
 
-#' @title Print RIDGEsigma object
-#' @description Prints RIDGEsigma object and suppresses output if needed.
-#' @param x class object RIDGEsigma.
+#' @title Print RIDGE object
+#' @description Prints RIDGE object and suppresses output if needed.
+#' @param x class object RIDGE.
 #' @param ... additional arguments.
 #' @keywords internal
 #' @export
-print.RIDGEsigma = function(x, ...) {
+print.RIDGE = function(x, ...) {
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
-    print.default(round(x$Lambda, 3), print.gap = 2L, 
-        quote = FALSE)
+    print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 
-        5), sep = "\n", collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -212,9 +210,9 @@ print.RIDGEsigma = function(x, ...) {
 
 
 
-#' @title Plot RIDGEsigma object
+#' @title Plot RIDGE object
 #' @description Produces a heat plot for the cross validation errors, if available.
-#' @param x class object RIDGEsigma
+#' @param x class object RIDGE
 #' @param type produce either 'heatmap' or 'line' graph
 #' @param footnote option to print footnote of optimal values. Defaults to TRUE.
 #' @param ... additional arguments.
@@ -235,8 +233,8 @@ print.RIDGEsigma = function(x, ...) {
 #' # produce CV heat map for RIDGEsigma
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
-plot.RIDGEsigma = function(x, type = c("heatmap", 
-    "line"), footnote = TRUE, ...) {
+plot.RIDGE = function(x, type = c("heatmap", "line"), footnote = TRUE, 
+    ...) {
     
     # check
     type = match.arg(type)
@@ -251,12 +249,10 @@ plot.RIDGEsigma = function(x, type = c("heatmap",
             Errors = as.data.frame.table(x$CV.error)$Freq)
         
         # produce line graph
-        graph = ggplot(summarise(group_by(cv, lam), 
-            Means = mean(Errors)), aes(log10(lam), 
-            Means)) + geom_jitter(width = 0.2, color = "navy blue") + 
-            theme_minimal() + geom_line(color = "red") + 
-            labs(title = "Cross-Validation Errors", 
-                y = "Error")
+        graph = ggplot(summarise(group_by(cv, lam), Means = mean(Errors)), 
+            aes(log10(lam), Means)) + geom_jitter(width = 0.2, 
+            color = "navy blue") + theme_minimal() + geom_line(color = "red") + 
+            labs(title = "Cross-Validation Errors", y = "Error")
         
     } else {
         
@@ -271,11 +267,11 @@ plot.RIDGEsigma = function(x, type = c("heatmap",
         bluetowhite <- c("#000E29", "white")
         
         # produce ggplot heat map
-        graph = ggplot(cv, aes(alpha, log10(lam))) + 
-            geom_raster(aes(fill = Errors)) + scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
-            guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
-            theme(axis.title.x = element_blank(), 
-                axis.text.x = element_blank(), axis.ticks.x = element_blank())
+        graph = ggplot(cv, aes(alpha, log10(lam))) + geom_raster(aes(fill = Errors)) + 
+            scale_fill_gradientn(colours = colorRampPalette(bluetowhite)(2), 
+                guide = "none") + theme_minimal() + labs(title = "Heatmap of Cross-Validation Errors") + 
+            theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
+                axis.ticks.x = element_blank())
         
     }
     

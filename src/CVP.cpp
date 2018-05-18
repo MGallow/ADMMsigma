@@ -11,7 +11,7 @@ using namespace Rcpp;
 
 
 //' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
-//' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with ParallelCV.
+//' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with CV_ADMM.
 //'
 //' @param S_train pxp sample covariance matrix for training data (denominator n).
 //' @param S_valid pxp sample covariance matrix for validation data (denominator n).
@@ -35,7 +35,7 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", std::string trace = "progress") {
+arma::mat CVP_ADMMc(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
@@ -55,7 +55,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
       alpha_ = alpha[j];
       
       // compute the penalized likelihood precision matrix estimator at the ith value in lam:
-      List ADMM = ADMMsigmac(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+      List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
 
       if (start == "warm"){
@@ -99,7 +99,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
 
 
 //' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
-//' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with ParallelCV_RIDGE.
+//' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with CVP_RIDGE.
 //'
 //' @param S_train pxp sample covariance matrix for training data (denominator n).
 //' @param S_valid pxp sample covariance matrix for validation data (denominator n).
@@ -111,7 +111,7 @@ arma::mat CVP_ADMMsigmac(const arma::mat &S_train, const arma::mat &S_valid, con
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, std::string trace = "none") {
+arma::mat CVP_RIDGEc(const arma::mat &S_train, const arma::mat &S_valid, const arma::colvec &lam, std::string trace = "none") {
   
   // initialization
   int p = S_train.n_rows, l = lam.n_rows;
@@ -127,7 +127,7 @@ arma::mat CVP_RIDGEsigmac(const arma::mat &S_train, const arma::mat &S_valid, co
     lam_ = lam[i];
     
     // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-    Omega = RIDGEsigmac(S_train, lam_);
+    Omega = RIDGEc(S_train, lam_);
     
     // compute the observed negative validation loglikelihood (close enough)
     arma::log_det(logdet, sgn, Omega);

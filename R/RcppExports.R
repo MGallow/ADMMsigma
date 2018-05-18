@@ -40,8 +40,8 @@ NULL
 #' 
 #' @keywords internal
 #'
-CV_ADMMsigmac <- function(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, start = "warm", trace = "progress") {
-    .Call('_ADMMsigma_CV_ADMMsigmac', PACKAGE = 'ADMMsigma', X, S, lam, alpha, diagonal, path, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, trace)
+CV_ADMMc <- function(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, start = "warm", trace = "progress") {
+    .Call('_ADMMsigma_CV_ADMMc', PACKAGE = 'ADMMsigma', X, S, lam, alpha, diagonal, path, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, K, start, trace)
 }
 
 #' @title CV ridge penalized precision matrix estimation (c++)
@@ -62,12 +62,12 @@ CV_ADMMsigmac <- function(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho 
 #'
 #' @keywords internal
 #'
-CV_RIDGEsigmac <- function(X, S, lam, path = FALSE, K = 3L, trace = "none") {
-    .Call('_ADMMsigma_CV_RIDGEsigmac', PACKAGE = 'ADMMsigma', X, S, lam, path, K, trace)
+CV_RIDGEc <- function(X, S, lam, path = FALSE, K = 3L, trace = "none") {
+    .Call('_ADMMsigma_CV_RIDGEc', PACKAGE = 'ADMMsigma', X, S, lam, path, K, trace)
 }
 
 #' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
-#' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with ParallelCV.
+#' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with CV_ADMM.
 #'
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
@@ -90,12 +90,12 @@ CV_RIDGEsigmac <- function(X, S, lam, path = FALSE, K = 3L, trace = "none") {
 #' 
 #' @keywords internal
 #'
-CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, start = "warm", trace = "progress") {
-    .Call('_ADMMsigma_CVP_ADMMsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, trace)
+CVP_ADMMc <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, start = "warm", trace = "progress") {
+    .Call('_ADMMsigma_CVP_ADMMc', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit, adjmaxit, start, trace)
 }
 
 #' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
-#' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with ParallelCV_RIDGE.
+#' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with CVP_RIDGE.
 #'
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
@@ -106,8 +106,8 @@ CVP_ADMMsigmac <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho =
 #' 
 #' @keywords internal
 #'
-CVP_RIDGEsigmac <- function(S_train, S_valid, lam, trace = "none") {
-    .Call('_ADMMsigma_CVP_RIDGEsigmac', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, trace)
+CVP_RIDGEc <- function(S_train, S_valid, lam, trace = "none") {
+    .Call('_ADMMsigma_CVP_RIDGEc', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, trace)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)
@@ -120,8 +120,8 @@ CVP_RIDGEsigmac <- function(S_train, S_valid, lam, trace = "none") {
 #' 
 #' @keywords internal
 #'
-RIDGEsigmac <- function(S, lam) {
-    .Call('_ADMMsigma_RIDGEsigmac', PACKAGE = 'ADMMsigma', S, lam)
+RIDGEc <- function(S, lam) {
+    .Call('_ADMMsigma_RIDGEc', PACKAGE = 'ADMMsigma', S, lam)
 }
 
 #' @title Penalized precision matrix estimation via ADMM (c++)
@@ -168,7 +168,7 @@ RIDGEsigmac <- function(S, lam) {
 #' 
 #' @keywords internal
 #'
-ADMMsigmac <- function(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L) {
-    .Call('_ADMMsigma_ADMMsigmac', PACKAGE = 'ADMMsigma', S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
+ADMMc <- function(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = "ADMM", tol1 = 1e-4, tol2 = 1e-4, maxit = 1e4L) {
+    .Call('_ADMMsigma_ADMMc', PACKAGE = 'ADMMsigma', S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit)
 }
 

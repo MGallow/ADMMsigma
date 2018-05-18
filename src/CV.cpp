@@ -72,7 +72,7 @@ arma::vec kfold(const int &n, const int &K){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_ADMMsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, bool path = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", std::string trace = "progress") {
+List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, bool path = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
@@ -142,7 +142,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &l
         alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-        List ADMM = ADMMsigmac(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
+        List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau1, tau2, crit, tol1, tol2, maxit);
         Omega = as<arma::mat>(ADMM["Omega"]);
         
         if (start == "warm"){
@@ -232,7 +232,7 @@ List CV_ADMMsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &l
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_RIDGEsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, bool path = false, int K = 3, std::string trace = "none") {
+List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, bool path = false, int K = 3, std::string trace = "none") {
   
   // initialization
   int n, p = S.n_cols, l = lam.n_rows;
@@ -295,7 +295,7 @@ List CV_RIDGEsigmac(const arma::mat &X, const arma::mat &S, const arma::colvec &
       lam_ = lam[i];
       
       // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-      Omega = RIDGEsigmac(S_train, lam_);
+      Omega = RIDGEc(S_train, lam_);
       
       // compute the observed negative validation loglikelihood (close enough)
       arma::log_det(logdet, sgn, Omega);

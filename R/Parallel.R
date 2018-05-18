@@ -1,7 +1,7 @@
 ## Matt Galloway
 
 
-#' @title Parallel CV (uses CV_ADMMsigmac)
+#' @title Parallel CV (uses CV_ADMMc)
 #' @description Parallel implementation of cross validation.
 #'
 #' @param X nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
@@ -31,13 +31,13 @@
 #' 
 #' @keywords internal
 
-# we define the ParallelCV function
-ParallelCV = function(X = NULL, lam = 10^seq(-5, 5, 
-    0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, 
-    rho = 2, mu = 10, tau1 = 2, tau2 = 2, crit = c("ADMM", 
-        "loglik"), tol1 = 1e-04, tol2 = 1e-04, maxit = 1000, 
-    adjmaxit = NULL, K = 5, start = c("warm", "cold"), 
-    cores = 1, trace = c("progress", "print", "none")) {
+# we define the CV_ADMMc function
+CVP_ADMM = function(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 
+    1, 0.1), diagonal = FALSE, rho = 2, mu = 10, tau1 = 2, 
+    tau2 = 2, crit = c("ADMM", "loglik"), tol1 = 1e-04, tol2 = 1e-04, 
+    maxit = 1000, adjmaxit = NULL, K = 5, start = c("warm", 
+        "cold"), cores = 1, trace = c("progress", "print", 
+        "none")) {
     
     # match values
     crit = match.arg(crit)
@@ -48,7 +48,8 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5,
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        print(paste("Only detected", num_cores, "cores...", sep = " "))
+        print(paste("Only detected", num_cores, "cores...", 
+            sep = " "))
     }
     if (cores > K) {
         print("Number of cores exceeds K... setting cores = K")
@@ -61,7 +62,98 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5,
     # use cluster for each fold in CV
     n = dim(X)[1]
     ind = sample(n)
-    CV = foreach(k = 1:K, .packages = "ADMMsigma", 
+    CV = foreach(k = 1:K, .packages = "ADMMsigma", .inorder = FALSE) %dopar% 
+        {
+            
+            leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
+                n/K)]
+            
+            # training set
+            X.train = X[-leave.out, , drop = FALSE]
+            X_bar = apply(X.train, 2, mean)
+            X.train = scale(X.train, center = X_bar, scale = FALSE)
+            
+            # validation set
+            X.valid = X[leave.out, , drop = FALSE]
+            X.valid = scale(X.valid, center = X_bar, scale = FALSE)
+            
+            # sample covariances
+            S.train = crossprod(X.train)/(dim(X.train)[1])
+            S.valid = crossprod(X.valid)/(dim(X.valid)[1])
+            
+            # run foreach loop on CVP_ADMMc
+            CVP_ADMMc(S.train, S.valid, lam, alpha, diagonal, 
+                rho, mu, tau1, tau2, crit, tol1, tol2, maxit, 
+                adjmaxit, start, trace)
+            
+        }
+    
+    # determine optimal tuning parameters
+    CV = array(as.numeric(unlist(CV)), dim = c(length(lam), 
+        length(alpha), K))
+    AVG = apply(CV, c(1, 2), mean)
+    best = which(AVG == min(AVG), arr.ind = TRUE)
+    error = min(AVG)
+    best_lam = lam[best[1]]
+    best_alpha = alpha[best[2]]
+    
+    # stop cluster
+    stopCluster(cluster)
+    
+    # return best lam and alpha values
+    return(list(lam = best_lam, alpha = best_alpha, min.error = error, 
+        avg.error = AVG, cv.error = CV))
+    
+}
+
+
+
+
+##-----------------------------------------------------------------------------------
+
+
+
+
+#' @title Parallel Ridge CV (uses CVP_RIDGEc)
+#' @description Parallel implementation of cross validation for RIDGEsigma.
+#'
+#' @param X nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
+#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param K specify the number of folds for cross validation.
+#' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
+#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
+#' 
+#' @return returns list of returns which includes:
+#' \item{lam}{optimal tuning parameter.}
+#' \item{min.error}{minimum average cross validation error for optimal parameters.}
+#' \item{avg.error}{average cross validation error across all folds.}
+#' \item{cv.error}{cross validation errors (negative validation likelihood).}
+#' 
+#' @keywords internal
+
+# we define the CVP_RIDGE function
+CVP_RIDGE = function(X = NULL, lam = 10^seq(-5, 5, 0.5), 
+    K = 5, cores = 1, trace = c("none", "progress", "print")) {
+    
+    # make cluster and register cluster
+    num_cores = detectCores()
+    if (cores > num_cores) {
+        print(paste("Only detected", num_cores, "cores...", 
+            sep = " "))
+    }
+    if (cores > K) {
+        print("Number of cores exceeds K... setting cores = K")
+        cores = K
+    }
+    
+    cluster = makeCluster(cores)
+    registerDoParallel(cluster)
+    
+    # use cluster for each fold in CV
+    n = dim(X)[1]
+    ind = sample(n)
+    lam = sort(lam)
+    CV = foreach(k = 1:K, .packages = "ADMMsigma", .combine = "cbind", 
         .inorder = FALSE) %dopar% {
         
         leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
@@ -80,105 +172,10 @@ ParallelCV = function(X = NULL, lam = 10^seq(-5, 5,
         S.train = crossprod(X.train)/(dim(X.train)[1])
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
-        # run foreach loop on CV_ADMMsigmac
-        CVP_ADMMsigmac(S.train, S.valid, lam, alpha, 
-            diagonal, rho, mu, tau1, tau2, crit, tol1, 
-            tol2, maxit, adjmaxit, start, trace)
+        # run foreach loop on CVP_RIDGEc
+        CVP_RIDGEc(S.train, S.valid, lam, trace)
         
     }
-    
-    # determine optimal tuning parameters
-    CV = array(as.numeric(unlist(CV)), dim = c(length(lam), 
-        length(alpha), K))
-    AVG = apply(CV, c(1, 2), mean)
-    best = which(AVG == min(AVG), arr.ind = TRUE)
-    error = min(AVG)
-    best_lam = lam[best[1]]
-    best_alpha = alpha[best[2]]
-    
-    # stop cluster
-    stopCluster(cluster)
-    
-    # return best lam and alpha values
-    return(list(lam = best_lam, alpha = best_alpha, 
-        min.error = error, avg.error = AVG, cv.error = CV))
-    
-}
-
-
-
-
-##-----------------------------------------------------------------------------------
-
-
-
-
-#' @title Parallel Ridge CV (uses CV_RIDGEsigmac)
-#' @description Parallel implementation of cross validation for RIDGEsigma.
-#'
-#' @param X nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
-#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param K specify the number of folds for cross validation.
-#' @param cores option to run CV in parallel. Defaults to \code{cores = 1}.
-#' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
-#' 
-#' @return returns list of returns which includes:
-#' \item{lam}{optimal tuning parameter.}
-#' \item{min.error}{minimum average cross validation error for optimal parameters.}
-#' \item{avg.error}{average cross validation error across all folds.}
-#' \item{cv.error}{cross validation errors (negative validation likelihood).}
-#' 
-#' @keywords internal
-
-# we define the ParallelCV_RIDGE function
-ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5, 
-    5, 0.5), K = 5, cores = 1, trace = c("none", "progress", 
-    "print")) {
-    
-    # make cluster and register cluster
-    num_cores = detectCores()
-    if (cores > num_cores) {
-        print(paste("Only detected", num_cores, "cores...", sep = " "))
-    }
-    if (cores > K) {
-        print("Number of cores exceeds K... setting cores = K")
-        cores = K
-    }
-    
-    cluster = makeCluster(cores)
-    registerDoParallel(cluster)
-    
-    # use cluster for each fold in CV
-    n = dim(X)[1]
-    ind = sample(n)
-    lam = sort(lam)
-    CV = foreach(k = 1:K, .packages = "ADMMsigma", 
-        .combine = "cbind", .inorder = FALSE) %dopar% 
-        {
-            
-            leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
-                n/K)]
-            
-            # training set
-            X.train = X[-leave.out, , drop = FALSE]
-            X_bar = apply(X.train, 2, mean)
-            X.train = scale(X.train, center = X_bar, 
-                scale = FALSE)
-            
-            # validation set
-            X.valid = X[leave.out, , drop = FALSE]
-            X.valid = scale(X.valid, center = X_bar, 
-                scale = FALSE)
-            
-            # sample covariances
-            S.train = crossprod(X.train)/(dim(X.train)[1])
-            S.valid = crossprod(X.valid)/(dim(X.valid)[1])
-            
-            # run foreach loop on CV_ADMMsigmac
-            CVP_RIDGEsigmac(S.train, S.valid, lam, 
-                trace)
-            
-        }
     
     # determine optimal tuning parameters
     AVG = as.matrix(apply(CV, 1, mean))
@@ -190,7 +187,7 @@ ParallelCV_RIDGE = function(X = NULL, lam = 10^seq(-5,
     stopCluster(cluster)
     
     # return best lam and alpha values
-    return(list(lam = best_lam, min.error = error, 
-        avg.error = AVG, cv.error = CV))
+    return(list(lam = best_lam, min.error = error, avg.error = AVG, 
+        cv.error = CV))
     
 }

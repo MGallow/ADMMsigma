@@ -19,7 +19,7 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-arma::mat RIDGEsigmac(const arma::mat &S, double lam){
+arma::mat RIDGEc(const arma::mat &S, double lam){
 
   // gather eigen values of S (spectral decomposition)
   arma::mat V;
@@ -87,7 +87,7 @@ arma::mat RIDGEsigmac(const arma::mat &S, double lam){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e4){
+List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau1 = 2, const double tau2 = 2, std::string crit = "ADMM", const double tol1 = 1e-4, const double tol2 = 1e-4, const int maxit = 1e4){
   
   // allocate memory
   bool criterion = true;
@@ -122,7 +122,7 @@ List ADMMsigmac(const arma::mat &S, const arma::mat &initOmega, const arma::mat 
     
     // ridge equation (2)
     // gather eigen values (spectral decomposition)
-    Omega = RIDGEsigmac(S + Y - rho*Z2, rho);
+    Omega = RIDGEc(S + Y - rho*Z2, rho);
     
     // update Y (3)
     Y += rho*(Omega - Z2);
