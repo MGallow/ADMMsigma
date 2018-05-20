@@ -36,7 +36,6 @@ double softc(const double &s, const double &tau) {
 //'
 //' @param s matrix
 //' @param Tau scalar
-//' @return soft threshold matrix
 //' @keywords internal
 //'
 

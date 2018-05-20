@@ -33,4 +33,7 @@ X = Z \%*\% S.sqrt
 
 # produce CV heat map for RIDGEsigma
 plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
+
+# produce line graph for RIDGEsigma
+plot(RIDGEsigma(X), type = 'line')
 }

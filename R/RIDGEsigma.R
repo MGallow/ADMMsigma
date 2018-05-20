@@ -64,9 +64,9 @@
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), path = FALSE, K = 5, cores = 1, trace = c("none", 
-    "progress", "print")) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    path = FALSE, K = 5, cores = 1, trace = c("none", "progress", 
+        "print")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -150,8 +150,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     grad = S - qr.solve(Omega) + lam * Omega
     
     # compute penalized loglik
-    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, 
-        logarithm = TRUE)$modulus[1] + lam * sum(Omega^2))
+    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, logarithm = TRUE)$modulus[1] + 
+        lam * sum(Omega^2))
     
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
@@ -161,9 +161,9 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     }
     
     returns = list(Call = call, Lambda = tuning, Lambdas = Lambdas, 
-        Omega = Omega, Sigma = qr.solve(Omega), Path = Path, 
-        Gradient = grad, Loglik = loglik, MIN.error = MIN.error, 
-        AVG.error = AVG.error, CV.error = CV.error)
+        Omega = Omega, Sigma = qr.solve(Omega), Path = Path, Gradient = grad, 
+        Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, 
+        CV.error = CV.error)
     
     class(returns) = "RIDGE"
     return(returns)
@@ -237,6 +237,9 @@ print.RIDGE = function(x, ...) {
 #'
 #' # produce CV heat map for RIDGEsigma
 #' plot(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)))
+#' 
+#' # produce line graph for RIDGEsigma
+#' plot(RIDGEsigma(X), type = 'line')
 
 plot.RIDGE = function(x, type = c("heatmap", "line"), footnote = TRUE, 
     ...) {
@@ -251,22 +254,20 @@ plot.RIDGE = function(x, type = c("heatmap", "line"), footnote = TRUE,
     if (type == "line") {
         
         # gather values to plot
-        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), 
-            Errors = as.data.frame.table(x$CV.error)$Freq)
+        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), Errors = as.data.frame.table(x$CV.error)$Freq)
         
         # produce line graph
         graph = ggplot(summarise(group_by(cv, lam), Means = mean(Errors)), 
-            aes(log10(lam), Means)) + geom_jitter(width = 0.2, 
-            color = "navy blue") + theme_minimal() + geom_line(color = "red") + 
-            labs(title = "Cross-Validation Errors", y = "Error")
+            aes(log10(lam), Means)) + geom_jitter(width = 0.2, color = "navy blue") + 
+            theme_minimal() + geom_line(color = "red") + labs(title = "Cross-Validation Errors", 
+            y = "Error")
         
     } else {
         
         # augment values for heat map (helps visually)
         lam = x$Lambdas
         cv = expand.grid(lam = lam, alpha = 0)
-        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 
-            1)
+        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 1)
         cv = cbind(cv, Errors)
         
         # design color palette

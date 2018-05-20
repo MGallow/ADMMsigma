@@ -33,4 +33,6 @@ X = Z \%*\% S.sqrt
 
 # produce CV heat map for ADMMsigma
 plot(ADMMsigma(X))
+# produce line graph for ADMMsigma
+plot(ADMMsigma(X), type = 'line')
 }

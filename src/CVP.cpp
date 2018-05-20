@@ -11,7 +11,7 @@ using namespace Rcpp;
 
 
 //' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
-//' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with CV_ADMM.
+//' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with CVP_ADMM.
 //'
 //' @param S_train pxp sample covariance matrix for training data (denominator n).
 //' @param S_valid pxp sample covariance matrix for validation data (denominator n).

@@ -105,12 +105,12 @@
 #' plot(ADMMsigma(X))
 
 # we define the ADMM covariance estimation function
-ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 
-    5, 0.5), alpha = seq(0, 1, 0.1), diagonal = FALSE, path = FALSE, 
-    rho = 2, mu = 10, tau.inc = 2, tau.dec = 2, crit = c("ADMM", 
-        "loglik"), tol.abs = 1e-04, tol.rel = 1e-04, maxit = 10000, 
-    adjmaxit = NULL, K = 5, start = c("warm", "cold"), cores = 1, 
-    trace = c("progress", "print", "none")) {
+ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), 
+    alpha = seq(0, 1, 0.1), diagonal = FALSE, path = FALSE, rho = 2, 
+    mu = 10, tau.inc = 2, tau.dec = 2, crit = c("ADMM", "loglik"), 
+    tol.abs = 1e-04, tol.rel = 1e-04, maxit = 10000, adjmaxit = NULL, 
+    K = 5, start = c("warm", "cold"), cores = 1, trace = c("progress", 
+        "print", "none")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -122,8 +122,8 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     if (!all(lam > 0)) {
         stop("lam must be positive!")
     }
-    if (!(all(c(rho, mu, tau.inc, tau.dec, tol.abs, tol.rel, 
-        maxit, adjmaxit, K) > 0))) {
+    if (!(all(c(rho, mu, tau.inc, tau.dec, tol.abs, tol.rel, maxit, 
+        adjmaxit, K) > 0))) {
         stop("Entry must be positive!")
     }
     if (all(c(maxit, adjmaxit, K, cores)%%1 != 0)) {
@@ -136,13 +136,17 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         print("Parallelization not possible when producing solution path. Setting cores = 1...")
         cores = 1
     }
+    K = ifelse(path, 1, K)
+    if (cores > K) {
+        print("Number of cores exceeds K... setting cores = K")
+        cores = K
+    }
     if (is.null(adjmaxit)) {
         adjmaxit = maxit
     }
     
     
     # match values
-    K = ifelse(path, 1, K)
     crit = match.arg(crit)
     start = match.arg(start)
     trace = match.arg(trace)
@@ -167,11 +171,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         if (cores > 1) {
             
             # execute CVP_ADMM
-            ADMM = CVP_ADMM(X = X, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau.inc = tau.inc, tau.dec = tau.dec, crit = crit, 
-                tol.abs = tol.abs, tol.rel = tol.rel, maxit = maxit, 
-                adjmaxit = adjmaxit, K = K, start = start, 
+            ADMM = CVP_ADMM(X = X, lam = lam, alpha = alpha, diagonal = diagonal, 
+                rho = rho, mu = mu, tau.inc = tau.inc, tau.dec = tau.dec, 
+                crit = crit, tol.abs = tol.abs, tol.rel = tol.rel, 
+                maxit = maxit, adjmaxit = adjmaxit, K = K, start = start, 
                 cores = cores, trace = trace)
             MIN.error = ADMM$min.error
             AVG.error = ADMM$avg.error
@@ -184,11 +187,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
                 X = matrix(0)
             }
             ADMM = CV_ADMMc(X = X, S = S, lam = lam, alpha = alpha, 
-                diagonal = diagonal, path = path, rho = rho, 
-                mu = mu, tau_inc = tau.inc, tau_dec = tau.dec, 
-                crit = crit, tol_abs = tol.abs, tol_rel = tol.rel, 
-                maxit = maxit, adjmaxit = adjmaxit, K = K, 
-                start = start, trace = trace)
+                diagonal = diagonal, path = path, rho = rho, mu = mu, 
+                tau_inc = tau.inc, tau_dec = tau.dec, crit = crit, 
+                tol_abs = tol.abs, tol_rel = tol.rel, maxit = maxit, 
+                adjmaxit = adjmaxit, K = K, start = start, trace = trace)
             MIN.error = ADMM$min.error
             AVG.error = ADMM$avg.error
             CV.error = ADMM$cv.error
@@ -196,12 +198,17 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             
         }
         
+        # print warning if lam on boundary
+        if (((ADMM$lam == ADMM$lam[1]) || ADMM$lam == ADMM$lam[length(ADMM$lam)]) && 
+            (length(lam) != 1)) {
+            print("Optimal tuning parameter on boundary...!")
+        }
+        
         # compute final estimate at best tuning parameters
-        ADMM = ADMMc(S = S, initOmega = init, initZ2 = init, 
-            initY = init, lam = ADMM$lam, alpha = ADMM$alpha, 
-            diagonal = diagonal, rho = rho, mu = mu, tau_inc = tau.inc, 
-            tau_dec = tau.dec, crit = crit, tol_abs = tol.abs, 
-            tol_rel = tol.rel, maxit = maxit)
+        ADMM = ADMMc(S = S, initOmega = init, initZ2 = init, initY = init, 
+            lam = ADMM$lam, alpha = ADMM$alpha, diagonal = diagonal, 
+            rho = rho, mu = mu, tau_inc = tau.inc, tau_dec = tau.dec, 
+            crit = crit, tol_abs = tol.abs, tol_rel = tol.rel, maxit = maxit)
         
         
     } else {
@@ -211,11 +218,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
             stop("Must set specify X, set path = TRUE, or provide single value for lam and alpha.")
         }
         
-        ADMM = ADMMc(S = S, initOmega = init, initZ2 = init, 
-            initY = init, lam = lam, alpha = alpha, diagonal = diagonal, 
-            rho = rho, mu = mu, tau_inc = tau.inc, tau_dec = tau.dec, 
-            crit = crit, tol_abs = tol.abs, tol_rel = tol.rel, 
-            maxit = maxit)
+        ADMM = ADMMc(S = S, initOmega = init, initZ2 = init, initY = init, 
+            lam = lam, alpha = alpha, diagonal = diagonal, rho = rho, 
+            mu = mu, tau_inc = tau.inc, tau_dec = tau.dec, crit = crit, 
+            tol_abs = tol.abs, tol_rel = tol.rel, maxit = maxit)
         
     }
     
@@ -229,8 +235,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
     # compute penalized loglik
     loglik = (-n/2) * (sum(ADMM$Omega * S) - determinant(ADMM$Omega, 
         logarithm = TRUE)$modulus[1] + ADMM$lam * ((1 - ADMM$alpha)/2 * 
-        sum((C * ADMM$Omega)^2) + ADMM$alpha * sum(abs(C * 
-        ADMM$Omega))))
+        sum((C * ADMM$Omega)^2) + ADMM$alpha * sum(abs(C * ADMM$Omega))))
     
     
     # return values
@@ -240,11 +245,10 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5,
         Path = NULL
     }
     
-    returns = list(Call = call, Iterations = ADMM$Iterations, 
-        Tuning = tuning, Lambdas = lam, Alphas = alpha, maxit = maxit, 
-        Omega = ADMM$Omega, Sigma = qr.solve(ADMM$Omega), 
-        Path = Path, Z = ADMM$Z2, Y = ADMM$Y, rho = ADMM$rho, 
-        Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, 
+    returns = list(Call = call, Iterations = ADMM$Iterations, Tuning = tuning, 
+        Lambdas = lam, Alphas = alpha, maxit = maxit, Omega = ADMM$Omega, 
+        Sigma = qr.solve(ADMM$Omega), Path = Path, Z = ADMM$Z2, Y = ADMM$Y, 
+        rho = ADMM$rho, Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, 
         CV.error = CV.error)
     
     class(returns) = "ADMM"
@@ -279,8 +283,8 @@ print.ADMM = function(x, ...) {
         "\n", sep = "")
     
     # print iterations
-    cat("\nIterations: ", paste(x$Iterations, sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nIterations: ", paste(x$Iterations, sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print optimal tuning parameters
     cat("\nTuning parameters:\n")
@@ -329,6 +333,8 @@ print.ADMM = function(x, ...) {
 #'
 #' # produce CV heat map for ADMMsigma
 #' plot(ADMMsigma(X))
+#' # produce line graph for ADMMsigma
+#' plot(ADMMsigma(X), type = 'line')
 
 plot.ADMM = function(x, type = c("heatmap", "line"), footnote = TRUE, 
     ...) {
@@ -349,18 +355,17 @@ plot.ADMM = function(x, type = c("heatmap", "line"), footnote = TRUE,
         if (length(x$Alphas) > 1) {
             
             # produce line graph
-            graph = ggplot(summarise(group_by(cv, lam, alpha), 
-                Means = mean(Errors)), aes(log10(lam), Means, 
-                color = as.factor(alpha))) + theme_minimal() + 
-                geom_line() + labs(title = "Cross-Validation Errors", 
+            graph = ggplot(summarise(group_by(cv, lam, alpha), Means = mean(Errors)), 
+                aes(log10(lam), Means, color = as.factor(alpha))) + 
+                theme_minimal() + geom_line() + labs(title = "Cross-Validation Errors", 
                 color = "alpha", y = "Average Error")
             
         } else {
             
             # produce line graph with boxplots
-            graph = ggplot(cv, aes(as.factor(log10(lam)), 
-                Errors)) + geom_jitter(width = 0.2, color = "navy blue") + 
-                geom_boxplot() + theme_minimal() + labs(title = "Cross-Validation Errors", 
+            graph = ggplot(cv, aes(as.factor(log10(lam)), Errors)) + 
+                geom_jitter(width = 0.2, color = "navy blue") + geom_boxplot() + 
+                theme_minimal() + labs(title = "Cross-Validation Errors", 
                 y = "Error", x = "log10(lam)")
             
         }
@@ -370,8 +375,7 @@ plot.ADMM = function(x, type = c("heatmap", "line"), footnote = TRUE,
         # augment values for heat map (helps visually)
         lam = x$Lambdas
         cv = expand.grid(lam = lam, alpha = x$Alphas)
-        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 
-            1)
+        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 1)
         cv = cbind(cv, Errors)
         
         # design color palette
