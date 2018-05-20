@@ -200,7 +200,7 @@ ADMMsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
         }
         
         # print warning if lam on boundary
-        if (((ADMM$lam == ADMM$lam[1]) || ADMM$lam == ADMM$lam[length(ADMM$lam)]) && 
+        if (((ADMM$lam == lam[1]) || ADMM$lam == lam[length(lam)]) && 
             (length(lam) != 1)) {
             print("Optimal tuning parameter on boundary...!")
         }

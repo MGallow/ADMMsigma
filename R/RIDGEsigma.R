@@ -133,6 +133,12 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5),
             
         }
         
+        # print warning if lam on boundary
+        if ((lam == Lambdas[1]) || (lam == Lambdas[length(Lambdas)]) && 
+            (length(Lambdas) != 1)) {
+            print("Optimal tuning parameter on boundary...!")
+        }
+        
         # compute final estimate at best tuning parameters
         Omega = RIDGEc(S = S, lam = lam)
         

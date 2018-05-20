@@ -274,9 +274,9 @@ A (possibly incomplete) list of functions contained in the package can be found 
 
 * `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
 
-* `plot.ADMMsigma()` produces a heat map for cross validation errors
+* `plot.ADMMsigma()` produces a heat map or line graph for cross validation errors
 
-* `plot.RIDGEsigma()` produces a heat map for cross validation errors
+* `plot.RIDGEsigma()` produces a heat map or line graph for cross validation errors
 
 
 <br>\vspace{1cm}
