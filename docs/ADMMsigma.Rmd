@@ -331,7 +331,7 @@ However, because Omega (known as the *oracle*) is sparse, a shrinkage estimator 
 ```{r, message = FALSE, echo = TRUE}
 
 # elastic-net type penalty (set tolerance to 1e-8)
-ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8)
+ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
 
 ```
 <br>\vspace{0.5cm}
@@ -379,7 +379,8 @@ This package also has the capability to provide heat maps for the cross validati
 ```{r, message = FALSE, echo = TRUE}
 
 # produce CV heat map for ADMMsigma
-ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot
+ADMM = ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
+ADMM %>% plot(type = "heatmap")
 
 ```
 <br>\newpage
@@ -387,7 +388,7 @@ ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot
 ```{r, message = FALSE, echo = TRUE}
 
 # produce line graph for CV errors for ADMMsigma
-ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot(type = "line")
+ADMM %>% plot(type = "line")
 
 ```
 <br>\newpage
@@ -395,7 +396,8 @@ ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot(type = "line")
 ```{r, message = FALSE, echo = TRUE}
 
 # produce CV heat map for RIDGEsigma
-RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
+RIDGE = RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
+RIDGE %>% plot(type = "heatmap")
 
 ```
 
@@ -403,7 +405,7 @@ RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
 ```{r, message = FALSE, echo = TRUE}
 
 # produce line graph for CV errors for RIDGEsigma
-RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot(type = "line")
+RIDGE %>% plot(type = "line")
 
 ```
 <br><br>\vspace{1cm}
@@ -577,10 +579,10 @@ X = Z %*% S.sqrt
 microbenchmark(glasso(s = S, rho = 0.1))
 
 # benchmark ADMMsigma - default tolerance
-microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-4, tol2 = 1e-4, trace = "none"))
+microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol.abs = 1e-4, tol.rel = 1e-4, trace = "none"))
 
 # benchmark ADMMsigma - tolerance 1e-8
-microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol1 = 1e-8, tol2 = 1e-8, trace = "none"))
+microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol.abs = 1e-8, tol.rel = 1e-8, trace = "none"))
 
 # benchmark ADMMsigma CV - default parameter grid
 microbenchmark(ADMMsigma(X, trace = "none"), times = 5)

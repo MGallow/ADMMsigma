@@ -74,7 +74,7 @@ X = Z %*% S.sqrt
 (qr.solve(cov(X)) %>% round(5))
 
 # elastic-net type penalty (set tolerance to 1e-8)
-ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8)
+ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
 
 # lasso penalty (default tolerance)
 ADMMsigma(X, alpha = 1)
@@ -89,15 +89,17 @@ ADMMsigma(X, alpha = 0)
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 
 # produce CV heat map for ADMMsigma
-ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot
+ADMM = ADMMsigma(X, lam = 10^seq(-5, 5, 0.1), alpha = seq(0, 1, 0.1))
+ADMM %>% plot(type = "heatmap")
 
 # produce line graph for CV errors for ADMMsigma
-ADMMsigma(X, tol1 = 1e-8, tol2 = 1e-8) %>% plot(type = "line")
+ADMM %>% plot(type = "line")
 
 # produce CV heat map for RIDGEsigma
-RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot
+RIDGE = RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
+RIDGE %>% plot
 
 # produce line graph for CV errors for RIDGEsigma
-RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01)) %>% plot(type = "line")
+RIDGE %>% plot(type = "line")
 
 ```

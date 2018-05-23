@@ -4,7 +4,7 @@
 \alias{plot.ADMM}
 \title{Plot ADMM object}
 \usage{
-\method{plot}{ADMM}(x, type = c("heatmap", "line"), footnote = TRUE, ...)
+\method{plot}{ADMM}(x, type = c("line", "heatmap"), footnote = TRUE, ...)
 }
 \arguments{
 \item{x}{class object ADMM.}
@@ -16,7 +16,7 @@
 \item{...}{additional arguments.}
 }
 \description{
-Produces a heat plot for the cross validation errors, if available.
+Produces a plot for the cross validation errors, if available.
 }
 \examples{
 # generate data from a sparse matrix
@@ -35,9 +35,9 @@ S.sqrt = out$vectors \%*\% diag(out$values^0.5)
 S.sqrt = S.sqrt \%*\% t(out$vectors)
 X = Z \%*\% S.sqrt
 
-# produce CV heat map for ADMMsigma
-plot(ADMMsigma(X))
-
 # produce line graph for ADMMsigma
 plot(ADMMsigma(X), type = 'line')
+
+# produce CV heat map for ADMMsigma
+plot(ADMMsigma(X), type = 'heatmap')
 }

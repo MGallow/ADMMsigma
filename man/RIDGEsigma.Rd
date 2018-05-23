@@ -4,7 +4,7 @@
 \alias{RIDGEsigma}
 \title{Ridge penalized precision matrix estimation}
 \usage{
-RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), path = FALSE,
+RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-2, 2, 0.1), path = FALSE,
   K = 5, cores = 1, trace = c("none", "progress", "print"))
 }
 \arguments{
@@ -12,7 +12,7 @@ RIDGEsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), path = FALSE,
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
-\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-2, 2, 0.1)}.}
 
 \item{path}{option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.}
 

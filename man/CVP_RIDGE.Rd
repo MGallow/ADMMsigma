@@ -4,13 +4,13 @@
 \alias{CVP_RIDGE}
 \title{Parallel Ridge CV (uses CVP_RIDGEc)}
 \usage{
-CVP_RIDGE(X = NULL, lam = 10^seq(-5, 5, 0.5), K = 5, cores = 1,
+CVP_RIDGE(X = NULL, lam = 10^seq(-2, 2, 0.1), K = 5, cores = 1,
   trace = c("none", "progress", "print"))
 }
 \arguments{
 \item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
-\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-2, 2, 0.1)}.}
 
 \item{K}{specify the number of folds for cross validation.}
 

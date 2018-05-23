@@ -14,8 +14,8 @@ NULL
 #'
 #' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 #' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
-#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order.
 #' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param path option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.
 #' @param rho initial step size for ADMM algorithm.
@@ -28,6 +28,7 @@ NULL
 #' @param maxit maximum number of iterations. Defaults to 1e4.
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 #' @param K specify the number of folds for cross validation.
+#' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
@@ -35,14 +36,14 @@ NULL
 #' \item{lam}{optimal tuning parameter.}
 #' \item{alpha}{optimal tuning parameter.}
 #' \item{path}{array containing the solution path. Solutions will be ordered in ascending alpha values for each lambda.}
-#' \item{min.error}{minimum average cross validation error for optimal parameters.}
-#' \item{avg.error}{average cross validation error across all folds.}
-#' \item{cv.error}{cross validation errors (negative validation likelihood).}
+#' \item{min.error}{minimum average cross validation error (cv_crit) for optimal parameters.}
+#' \item{avg.error}{average cross validation error (cv_crit) across all folds.}
+#' \item{cv.error}{cross validation errors (cv_crit).}
 #' 
 #' @keywords internal
 #'
-CV_ADMMc <- function(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-4, tol_rel = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, start = "warm", trace = "progress") {
-    .Call('_ADMMsigma_CV_ADMMc', PACKAGE = 'ADMMsigma', X, S, lam, alpha, diagonal, path, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, K, start, trace)
+CV_ADMMc <- function(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-4, tol_rel = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, K = 5L, crit_cv = "loglik", start = "warm", trace = "progress") {
+    .Call('_ADMMsigma_CV_ADMMc', PACKAGE = 'ADMMsigma', X, S, lam, alpha, diagonal, path, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, K, crit_cv, start, trace)
 }
 
 #' @title CV ridge penalized precision matrix estimation (c++)
@@ -71,10 +72,11 @@ CV_RIDGEc <- function(X, S, lam, path = FALSE, K = 3L, trace = "none") {
 #' @title CV (no folds) ADMM penalized precision matrix estimation (c++)
 #' @description Cross validation (no folds) function for ADMMsigma. This function is to be used with CVP_ADMM.
 #'
+#' @param n sample size for X_valid (used to calculate crit_cv)
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
-#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+#' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.
+#' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order.
 #' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 #' @param rho initial step size for ADMM algorithm.
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
@@ -85,31 +87,33 @@ CV_RIDGEc <- function(X, S, lam, path = FALSE, K = 3L, trace = "none") {
 #' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
+#' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
-#' @return cross validation errors (negative validation likelihood)
+#' @return cross validation errors (cv_crit)
 #' 
 #' @keywords internal
 #'
-CVP_ADMMc <- function(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-4, tol_rel = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, start = "warm", trace = "progress") {
-    .Call('_ADMMsigma_CVP_ADMMc', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, start, trace)
+CVP_ADMMc <- function(n, S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-4, tol_rel = 1e-4, maxit = 1e4L, adjmaxit = 1e4L, crit_cv = "loglik", start = "warm", trace = "progress") {
+    .Call('_ADMMsigma_CVP_ADMMc', PACKAGE = 'ADMMsigma', n, S_train, S_valid, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, crit_cv, start, trace)
 }
 
 #' @title CV (no folds) RIDGE penalized precision matrix estimation (c++)
 #' @description Cross validation (no folds) function for RIDGEsigma. This function is to be used with CVP_RIDGE.
 #'
+#' @param n sample size for X_valid (used to calculate CV_error)
 #' @param S_train pxp sample covariance matrix for training data (denominator n).
 #' @param S_valid pxp sample covariance matrix for validation data (denominator n).
-#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
+#' @param lam positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
 #' @return cross validation errors (negative validation likelihood)
 #' 
 #' @keywords internal
 #'
-CVP_RIDGEc <- function(S_train, S_valid, lam, trace = "none") {
-    .Call('_ADMMsigma_CVP_RIDGEc', PACKAGE = 'ADMMsigma', S_train, S_valid, lam, trace)
+CVP_RIDGEc <- function(n, S_train, S_valid, lam, trace = "none") {
+    .Call('_ADMMsigma_CVP_RIDGEc', PACKAGE = 'ADMMsigma', n, S_train, S_valid, lam, trace)
 }
 
 #' @title Ridge-penalized precision matrix estimation (c++)
@@ -119,6 +123,8 @@ CVP_RIDGEc <- function(S_train, S_valid, lam, trace = "none") {
 #' @param lam tuning parameter for ridge penalty.
 #' 
 #' @return estimated Omega
+#' 
+#' @export
 #' 
 #' @keywords internal
 #'
@@ -167,6 +173,8 @@ RIDGEc <- function(S, lam) {
 #' }
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
+#' 
+#' @export
 #' 
 #' @keywords internal
 #'

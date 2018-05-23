@@ -4,10 +4,11 @@
 \alias{ADMMsigma}
 \title{Penalized precision matrix estimation via ADMM}
 \usage{
-ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
-  1, 0.1), diagonal = FALSE, path = FALSE, rho = 2, mu = 10,
-  tau.inc = 2, tau.dec = 2, crit = c("ADMM", "loglik"), tol.abs = 1e-04,
-  tol.rel = 1e-04, maxit = 10000, adjmaxit = NULL, K = 5,
+ADMMsigma(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
+  lam = NULL, alpha = seq(0, 1, 0.2), diagonal = FALSE, path = FALSE,
+  rho = 2, mu = 10, tau.inc = 2, tau.dec = 2, crit = c("ADMM",
+  "loglik"), tol.abs = 1e-04, tol.rel = 1e-04, maxit = 10000,
+  adjmaxit = NULL, K = 5, crit.cv = c("loglik", "AIC", "BIC"),
   start = c("warm", "cold"), cores = 1, trace = c("progress", "print",
   "none"))
 }
@@ -16,9 +17,13 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
-\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{nlam}{number of \code{lam} tuning parameters for penalty term generated from \code{lam.min.ratio} and \code{lam.max} (automatically generated). Defaults to 10.}
 
-\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
+\item{lam.min.ratio}{smallest \code{lam} value provided as a fraction of \code{lam.max}. The function will automatically generate \code{nlam} tuning parameters from \code{lam.min.ratio*lam.max} to \code{lam.max} in log10 scale. \code{lam.max} is calculated to be the smallest \code{lam} such that all off-diagonal entries in \code{Omega} are equal to zero (\code{alpha} = 1). Defaults to 1e-2.}
+
+\item{lam}{option to provide positive tuning parameters for penalty term. This will cause \code{nlam} and \code{lam.min.ratio} to be disregarded. If a vector of parameters is provided, they should be in increasing order. Defaults to NULL.}
+
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(0, 1, 0.2)}.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
@@ -44,6 +49,8 @@ ADMMsigma(X = NULL, S = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0,
 
 \item{K}{specify the number of folds for cross validation.}
 
+\item{crit.cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
+
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
@@ -65,9 +72,9 @@ returns class object \code{ADMMsigma} which includes:
 \item{Y}{final dual update.}
 \item{rho}{final step size.}
 \item{Loglik}{penalized log-likelihood for Omega}
-\item{MIN.error}{minimum average cross validation error for optimal parameters.}
-\item{AVG.error}{average cross validation error across all folds.}
-\item{CV.error}{cross validation errors (negative validation likelihood).}
+\item{MIN.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
+\item{AVG.error}{average cross validation error (cv.crit) across all folds.}
+\item{CV.error}{cross validation errors (cv.crit).}
 }
 \description{
 Penalized precision matrix estimation using the ADMM algorithm.

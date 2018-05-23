@@ -4,18 +4,19 @@
 \alias{CVP_ADMM}
 \title{Parallel CV (uses CV_ADMMc)}
 \usage{
-CVP_ADMM(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
+CVP_ADMM(X = NULL, lam = 10^seq(-2, 2, 0.2), alpha = seq(0, 1, 0.2),
   diagonal = FALSE, rho = 2, mu = 10, tau.inc = 2, tau.dec = 2,
   crit = c("ADMM", "loglik"), tol.abs = 1e-04, tol.rel = 1e-04,
-  maxit = 1000, adjmaxit = NULL, K = 5, start = c("warm", "cold"),
-  cores = 1, trace = c("progress", "print", "none"))
+  maxit = 1000, adjmaxit = NULL, K = 5, crit.cv = c("loglik", "AIC",
+  "BIC"), start = c("warm", "cold"), cores = 1, trace = c("progress",
+  "print", "none"))
 }
 \arguments{
 \item{X}{nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
-\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-2, 2, 0.2)}.}
 
-\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.2)}.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
@@ -39,6 +40,8 @@ CVP_ADMM(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
 
 \item{K}{specify the number of folds for cross validation.}
 
+\item{crit.cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
+
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{cores}{option to run CV in parallel. Defaults to \code{cores = 1}.}
@@ -49,9 +52,9 @@ CVP_ADMM(X = NULL, lam = 10^seq(-5, 5, 0.5), alpha = seq(0, 1, 0.1),
 returns list of returns which includes:
 \item{lam}{optimal tuning parameter.}
 \item{alpha}{optimal tuning parameter.}
-\item{min.error}{minimum average cross validation error for optimal parameters.}
-\item{avg.error}{average cross validation error across all folds.}
-\item{cv.error}{cross validation errors (negative validation likelihood).}
+\item{min.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
+\item{avg.error}{average cross validation error (cv.crit) across all folds.}
+\item{cv.error}{cross validation errors (cv.crit).}
 }
 \description{
 Parallel implementation of cross validation.

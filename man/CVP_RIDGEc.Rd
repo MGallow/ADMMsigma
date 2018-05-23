@@ -4,14 +4,16 @@
 \alias{CVP_RIDGEc}
 \title{CV (no folds) RIDGE penalized precision matrix estimation (c++)}
 \usage{
-CVP_RIDGEc(S_train, S_valid, lam, trace = "none")
+CVP_RIDGEc(n, S_train, S_valid, lam, trace = "none")
 }
 \arguments{
+\item{n}{sample size for X_valid (used to calculate CV_error)}
+
 \item{S_train}{pxp sample covariance matrix for training data (denominator n).}
 
 \item{S_valid}{pxp sample covariance matrix for validation data (denominator n).}
 
-\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for ridge penalty. If a vector of parameters is provided, they should be in increasing order.}
 
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }

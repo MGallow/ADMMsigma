@@ -4,19 +4,21 @@
 \alias{CVP_ADMMc}
 \title{CV (no folds) ADMM penalized precision matrix estimation (c++)}
 \usage{
-CVP_ADMMc(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
+CVP_ADMMc(n, S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
   mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-04,
-  tol_rel = 1e-04, maxit = 10000L, adjmaxit = 10000L, start = "warm",
-  trace = "progress")
+  tol_rel = 1e-04, maxit = 10000L, adjmaxit = 10000L,
+  crit_cv = "loglik", start = "warm", trace = "progress")
 }
 \arguments{
+\item{n}{sample size for X_valid (used to calculate crit_cv)}
+
 \item{S_train}{pxp sample covariance matrix for training data (denominator n).}
 
 \item{S_valid}{pxp sample covariance matrix for validation data (denominator n).}
 
-\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.}
 
-\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
@@ -38,12 +40,14 @@ CVP_ADMMc(S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
 
 \item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to 1e4.}
 
+\item{crit_cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
+
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
 }
 \value{
-cross validation errors (negative validation likelihood)
+cross validation errors (cv_crit)
 }
 \description{
 Cross validation (no folds) function for ADMMsigma. This function is to be used with CVP_ADMM.

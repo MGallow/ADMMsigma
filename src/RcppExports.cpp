@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // CV_ADMMc
-List CV_ADMMc(const arma::mat& X, const arma::mat& S, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, bool path, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, int maxit, int adjmaxit, int K, std::string start, std::string trace);
-RcppExport SEXP _ADMMsigma_CV_ADMMc(SEXP XSEXP, SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP pathSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP startSEXP, SEXP traceSEXP) {
+List CV_ADMMc(const arma::mat& X, const arma::mat& S, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, bool path, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, int maxit, int adjmaxit, int K, std::string crit_cv, std::string start, std::string trace);
+RcppExport SEXP _ADMMsigma_CV_ADMMc(SEXP XSEXP, SEXP SSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP pathSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP KSEXP, SEXP crit_cvSEXP, SEXP startSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -28,9 +28,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type adjmaxit(adjmaxitSEXP);
     Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< std::string >::type crit_cv(crit_cvSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CV_ADMMc(X, S, lam, alpha, diagonal, path, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, K, start, trace));
+    rcpp_result_gen = Rcpp::wrap(CV_ADMMc(X, S, lam, alpha, diagonal, path, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, K, crit_cv, start, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -51,11 +52,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // CVP_ADMMc
-arma::mat CVP_ADMMc(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, int maxit, int adjmaxit, std::string start, std::string trace);
-RcppExport SEXP _ADMMsigma_CVP_ADMMc(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP startSEXP, SEXP traceSEXP) {
+arma::mat CVP_ADMMc(const int n, const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, const arma::colvec& alpha, bool diagonal, double rho, const double mu, const double tau_inc, const double tau_dec, std::string crit, const double tol_abs, const double tol_rel, int maxit, int adjmaxit, std::string crit_cv, std::string start, std::string trace);
+RcppExport SEXP _ADMMsigma_CVP_ADMMc(SEXP nSEXP, SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP alphaSEXP, SEXP diagonalSEXP, SEXP rhoSEXP, SEXP muSEXP, SEXP tau_incSEXP, SEXP tau_decSEXP, SEXP critSEXP, SEXP tol_absSEXP, SEXP tol_relSEXP, SEXP maxitSEXP, SEXP adjmaxitSEXP, SEXP crit_cvSEXP, SEXP startSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S_train(S_trainSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S_valid(S_validSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
@@ -70,23 +72,25 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type tol_rel(tol_relSEXP);
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type adjmaxit(adjmaxitSEXP);
+    Rcpp::traits::input_parameter< std::string >::type crit_cv(crit_cvSEXP);
     Rcpp::traits::input_parameter< std::string >::type start(startSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CVP_ADMMc(S_train, S_valid, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, start, trace));
+    rcpp_result_gen = Rcpp::wrap(CVP_ADMMc(n, S_train, S_valid, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit, adjmaxit, crit_cv, start, trace));
     return rcpp_result_gen;
 END_RCPP
 }
 // CVP_RIDGEc
-arma::mat CVP_RIDGEc(const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, std::string trace);
-RcppExport SEXP _ADMMsigma_CVP_RIDGEc(SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP traceSEXP) {
+arma::mat CVP_RIDGEc(const int n, const arma::mat& S_train, const arma::mat& S_valid, const arma::colvec& lam, std::string trace);
+RcppExport SEXP _ADMMsigma_CVP_RIDGEc(SEXP nSEXP, SEXP S_trainSEXP, SEXP S_validSEXP, SEXP lamSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S_train(S_trainSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S_valid(S_validSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type lam(lamSEXP);
     Rcpp::traits::input_parameter< std::string >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(CVP_RIDGEc(S_train, S_valid, lam, trace));
+    rcpp_result_gen = Rcpp::wrap(CVP_RIDGEc(n, S_train, S_valid, lam, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -129,10 +133,10 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ADMMsigma_CV_ADMMc", (DL_FUNC) &_ADMMsigma_CV_ADMMc, 18},
+    {"_ADMMsigma_CV_ADMMc", (DL_FUNC) &_ADMMsigma_CV_ADMMc, 19},
     {"_ADMMsigma_CV_RIDGEc", (DL_FUNC) &_ADMMsigma_CV_RIDGEc, 6},
-    {"_ADMMsigma_CVP_ADMMc", (DL_FUNC) &_ADMMsigma_CVP_ADMMc, 16},
-    {"_ADMMsigma_CVP_RIDGEc", (DL_FUNC) &_ADMMsigma_CVP_RIDGEc, 4},
+    {"_ADMMsigma_CVP_ADMMc", (DL_FUNC) &_ADMMsigma_CVP_ADMMc, 18},
+    {"_ADMMsigma_CVP_RIDGEc", (DL_FUNC) &_ADMMsigma_CVP_RIDGEc, 5},
     {"_ADMMsigma_RIDGEc", (DL_FUNC) &_ADMMsigma_RIDGEc, 2},
     {"_ADMMsigma_ADMMc", (DL_FUNC) &_ADMMsigma_ADMMc, 15},
     {NULL, NULL, 0}

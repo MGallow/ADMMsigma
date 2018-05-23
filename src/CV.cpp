@@ -45,8 +45,8 @@ arma::vec kfold(const int &n, const int &K){
 //'
 //' @param X option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.
 //' @param S option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.
-//' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.
-//' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.
+//' @param lam positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.
+//' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order.
 //' @param diagonal option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.
 //' @param path option to return the regularization path. This option should be used with extreme care if the dimension is large. If set to TRUE, cores will be set to 1 and errors and optimal tuning parameters will based on the full sample. Defaults to FALSE.
 //' @param rho initial step size for ADMM algorithm.
@@ -59,6 +59,7 @@ arma::vec kfold(const int &n, const int &K){
 //' @param maxit maximum number of iterations. Defaults to 1e4.
 //' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 //' @param K specify the number of folds for cross validation.
+//' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 //' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 //' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 //' 
@@ -66,14 +67,14 @@ arma::vec kfold(const int &n, const int &K){
 //' \item{lam}{optimal tuning parameter.}
 //' \item{alpha}{optimal tuning parameter.}
 //' \item{path}{array containing the solution path. Solutions will be ordered in ascending alpha values for each lambda.}
-//' \item{min.error}{minimum average cross validation error for optimal parameters.}
-//' \item{avg.error}{average cross validation error across all folds.}
-//' \item{cv.error}{cross validation errors (negative validation likelihood).}
+//' \item{min.error}{minimum average cross validation error (cv_crit) for optimal parameters.}
+//' \item{avg.error}{average cross validation error (cv_crit) across all folds.}
+//' \item{cv.error}{cross validation errors (cv_crit).}
 //' 
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, bool path = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string start = "warm", std::string trace = "progress") {
+List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, const arma::colvec &alpha, bool diagonal = false, bool path = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, int maxit = 1e4, int adjmaxit = 1e4, int K = 5, std::string crit_cv = "loglik", std::string start = "warm", std::string trace = "progress") {
   
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
@@ -90,6 +91,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
     
     // set training and testing equal to sample
     S_train = S_test = S;
+    n = S.n_rows;
     
     // initialize Path, if necessary
     if (path){
@@ -127,6 +129,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
       // validation set
       X_test = X.rows(index_);
       X_test -= arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
+      n = X_test.n_rows;
       
       // sample covariances
       S_train = arma::cov(X_train, 1);
@@ -159,7 +162,17 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
         
         // compute the observed negative validation loglikelihood (close enough)
         arma::log_det(logdet, sgn, Omega);
-        CV_error(i, j) = (p/2)*(arma::accu(Omega % S_test) - logdet);
+        CV_error(i, j) = (n/2)*(arma::accu(Omega % S_test) - logdet);
+        
+        // update for crit_cv, if necessary
+        if (crit_cv == "AIC"){
+          arma::vec nzeros = arma::nonzeros(Omega);
+          CV_error(i, j) += nzeros.n_elem;
+        }
+        if (crit_cv == "BIC"){
+          arma::vec nzeros = arma::nonzeros(Omega);
+          CV_error(i, j) += nzeros.n_elem*log(n)/2;
+        }
         
         // save estimate if path = TRUE
         if (path){
@@ -250,6 +263,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
     
     // set training and testing equal to sample
     S_train = S_test = S;
+    n = S.n_rows;
     
     // initialize Path, if necessary
     if (path){
@@ -284,6 +298,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
     // validation set
     X_test = X.rows(index_);
     X_test -= arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
+    n = X.n_rows;
     
     // sample covariances
     S_train = arma::cov(X_train, 1);
@@ -302,7 +317,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
       
       // compute the observed negative validation loglikelihood (close enough)
       arma::log_det(logdet, sgn, Omega);
-      CV_error[i] = (p/2)*(arma::accu(Omega % S_test) - logdet);
+      CV_error[i] = (n/2)*(arma::accu(Omega % S_test) - logdet);
       
       // save estimate if path = TRUE
       if (path){

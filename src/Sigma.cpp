@@ -16,6 +16,8 @@ using namespace Rcpp;
 //' 
 //' @return estimated Omega
 //' 
+//' @export
+//' 
 //' @keywords internal
 //'
 // [[Rcpp::export]]
@@ -84,6 +86,8 @@ arma::mat RIDGEc(const arma::mat &S, double lam){
 //' 
 //' @author Matt Galloway \email{gall0441@@umn.edu}
 //' 
+//' @export
+//' 
 //' @keywords internal
 //'
 // [[Rcpp::export]]
@@ -140,7 +144,7 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
     // stopping criterion
     if (crit == "loglik"){
       
-      // compute likelihood (close enough)
+      // compute penalized loglik (close enough)
       arma::log_det(logdet, sgn, Omega);
       lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
       criterion = (std::abs(lik2 - lik) >= tol_abs);

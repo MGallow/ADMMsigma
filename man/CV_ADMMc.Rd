@@ -7,16 +7,16 @@
 CV_ADMMc(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2,
   mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-04,
   tol_rel = 1e-04, maxit = 10000L, adjmaxit = 10000L, K = 5L,
-  start = "warm", trace = "progress")
+  crit_cv = "loglik", start = "warm", trace = "progress")
 }
 \arguments{
 \item{X}{option to provide a nxp matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
 
 \item{S}{option to provide a pxp sample covariance matrix (denominator n). If argument is \code{NULL} and \code{X} is provided instead then \code{S} will be computed automatically.}
 
-\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{10^seq(-5, 5, 0.5)}.}
+\item{lam}{positive tuning parameters for elastic net penalty. If a vector of parameters is provided, they should be in increasing order.}
 
-\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order. Defaults to grid of values \code{seq(-1, 1, 0.1)}.}
+\item{alpha}{elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. If a vector of parameters is provided, they should be in increasing order.}
 
 \item{diagonal}{option to penalize the diagonal elements of the estimated precision matrix (\eqn{\Omega}). Defaults to \code{FALSE}.}
 
@@ -42,6 +42,8 @@ CV_ADMMc(X, S, lam, alpha, diagonal = FALSE, path = FALSE, rho = 2,
 
 \item{K}{specify the number of folds for cross validation.}
 
+\item{crit_cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
+
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
 \item{trace}{option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.}
@@ -51,9 +53,9 @@ list of returns includes:
 \item{lam}{optimal tuning parameter.}
 \item{alpha}{optimal tuning parameter.}
 \item{path}{array containing the solution path. Solutions will be ordered in ascending alpha values for each lambda.}
-\item{min.error}{minimum average cross validation error for optimal parameters.}
-\item{avg.error}{average cross validation error across all folds.}
-\item{cv.error}{cross validation errors (negative validation likelihood).}
+\item{min.error}{minimum average cross validation error (cv_crit) for optimal parameters.}
+\item{avg.error}{average cross validation error (cv_crit) across all folds.}
+\item{cv.error}{cross validation errors (cv_crit).}
 }
 \description{
 Cross validation function for ADMMsigma.
