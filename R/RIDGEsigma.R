@@ -34,9 +34,9 @@
 #' \item{Sigma}{estimated covariance matrix from the penalized precision matrix (inverse of Omega).}
 #' \item{Path}{array containing the solution path. Solutions are ordered dense to sparse.}
 #' \item{Gradient}{gradient of optimization function (penalized gaussian likelihood).}
-#' \item{MIN.error}{minimum average cross validation error for optimal parameters.}
-#' \item{AVG.error}{average cross validation error across all folds.}
-#' \item{CV.error}{cross validation errors (negative validation likelihood).}
+#' \item{MIN.error}{minimum average cross validation error (cv.crit) for optimal parameters.}
+#' \item{AVG.error}{average cross validation error (cv.crit) across all folds.}
+#' \item{CV.error}{cross validation errors (cv.crit).}
 #' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 

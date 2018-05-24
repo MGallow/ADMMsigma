@@ -30,7 +30,7 @@ CVP_ADMMc(n, S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
 
 \item{tau_dec}{factor in which to decrease step size \code{rho}}
 
-\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
+\item{crit}{criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit = loglik} then iterations will stop when the relative change in log-likelihood is less than \code{tol.abs}. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.}
 
 \item{tol_abs}{absolute convergence tolerance. Defaults to 1e-4.}
 
@@ -38,7 +38,7 @@ CVP_ADMMc(n, S_train, S_valid, lam, alpha, diagonal = FALSE, rho = 2,
 
 \item{maxit}{maximum number of iterations. Defaults to 1e4.}
 
-\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for 'one-step' estimators. Defaults to 1e4.}
+\item{adjmaxit}{adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.}
 
 \item{crit_cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
 

@@ -62,7 +62,7 @@ arma::mat RIDGEc(const arma::mat &S, double lam){
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 //' @param tau_inc factor in which to increase step size \code{rho}.
 //' @param tau_dec factor in which to decrease step size \code{rho}.
-//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit = loglik} then iterations will stop when the relative change in log-likelihood is less than \code{tol.abs}. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 //' @param tol_abs absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -95,8 +95,7 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
   
   // allocate memory
   bool criterion = true;
-  int p = S.n_cols;
-  int iter = 0;
+  int p = S.n_cols, iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
   arma::mat Z2(initZ2), Z(initZ2), Y(initY), Omega(initOmega), C(p, p, arma::fill::ones), Tau, Taum;
@@ -147,7 +146,7 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
       // compute penalized loglik (close enough)
       arma::log_det(logdet, sgn, Omega);
       lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
-      criterion = (std::abs(lik2 - lik) >= tol_abs);
+      criterion = (std::abs((lik2 - lik)/lik) >= tol_abs);
       lik = lik2;
       
     } else {

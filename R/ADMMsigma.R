@@ -38,7 +38,7 @@
 #' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 #' @param tau.inc factor in which to increase step size \code{rho}
 #' @param tau.dec factor in which to decrease step size \code{rho}
-#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol.abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+#' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit = loglik} then iterations will stop when the relative change in log-likelihood is less than \code{tol.abs}. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 #' @param tol.abs absolute convergence tolerance. Defaults to 1e-4.
 #' @param tol.rel relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.

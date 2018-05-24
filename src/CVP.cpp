@@ -23,7 +23,7 @@ using namespace Rcpp;
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 //' @param tau_inc factor in which to increase step size \code{rho}
 //' @param tau_dec factor in which to decrease step size \code{rho}
-//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit = loglik} then iterations will stop when the relative change in log-likelihood is less than \code{tol.abs}. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 //' @param tol_abs absolute convergence tolerance. Defaults to 1e-4.
 //' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
@@ -42,7 +42,7 @@ arma::mat CVP_ADMMc(const int n, const arma::mat &S_train, const arma::mat &S_va
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
   double sgn = 0, logdet = 0, alpha_, lam_;
-  arma::mat Omega, initOmega, initZ2, initY;
+  arma::mat Omega, initOmega, initZ2, initY; arma::colvec nzeros;
   initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
   arma::mat CV_error(l, a, arma::fill::zeros);
   Progress progress(l*a, trace == "progress");
@@ -77,11 +77,11 @@ arma::mat CVP_ADMMc(const int n, const arma::mat &S_train, const arma::mat &S_va
       
       // update for crit_cv, if necessary
       if (crit_cv == "AIC"){
-        arma::vec nzeros = arma::nonzeros(Omega);
+        nzeros = arma::nonzeros(Omega);
         CV_error(i, j) += nzeros.n_elem;
       }
       if (crit_cv == "BIC"){
-        arma::vec nzeros = arma::nonzeros(Omega);
+        nzeros = arma::nonzeros(Omega);
         CV_error(i, j) += nzeros.n_elem*log(n)/2;
       }
       

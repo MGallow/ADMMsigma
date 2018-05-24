@@ -53,8 +53,7 @@ arma::vec kfold(const int &n, const int &K){
 //' @param mu factor for primal and residual norms in the ADMM algorithm. This will be used to adjust the step size \code{rho} after each iteration.
 //' @param tau_inc factor in which to increase step size \code{rho}
 //' @param tau_dec factor in which to decrease step size \code{rho}
-//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit != ADMM} then \code{tol_abs} will be used as the convergence tolerance. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
-//' @param tol_abs absolute convergence tolerance. Defaults to 1e-4.
+//' @param crit criterion for convergence (\code{ADMM} or \code{loglik}). If \code{crit = loglik} then iterations will stop when the relative change in log-likelihood is less than \code{tol.abs}. Default is \code{ADMM} and follows the procedure outlined in Boyd, et al.
 //' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 //' @param maxit maximum number of iterations. Defaults to 1e4.
 //' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
@@ -79,11 +78,10 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
   double sgn = 0, logdet = 0, initrho = rho, alpha_, lam_;
-  arma::mat X_train, X_test, S_train(S), S_test(S);
-  arma::mat Omega, initOmega, initZ2, initY, AVG_error, CV_error, zeros(p, p, arma::fill::zeros), zerosla;
+  arma::mat X_train, X_test, S_train(S), S_test(S), Omega, initOmega, initZ2, initY;
+  arma::mat CV_error, zeros(p, p, arma::fill::zeros), zerosla(l, a, arma::fill::zeros);
   arma::uvec index, index_; arma::vec folds; arma::rowvec X_bar;
   arma::cube CV_errors(l, a, K, arma::fill::zeros), Path;
-  AVG_error = zerosla = arma::zeros<arma::mat>(l, a);
   Progress progress(l*a*K, trace == "progress");
   
   // no need to create folds if K = 1
@@ -202,7 +200,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
 
   
   // determine optimal tuning parameters
-  AVG_error = arma::mean(CV_errors, 2);
+  arma::colvec AVG_error = arma::mean(CV_errors, 2);
   double error = AVG_error.min();
   arma::uword ind = AVG_error.index_min();
   int lam_ind = ind % AVG_error.n_rows;
@@ -255,7 +253,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
   arma::mat X_train, X_test, S_train(S), S_test(S);
   arma::mat Omega, CV_errors(l, K, arma::fill::zeros), zeros(p, p, arma::fill::zeros);
   arma::uvec index, index_; arma::vec folds; arma::cube Path;
-  arma::colvec AVG_error, CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
+  arma::colvec CV_error, zerosl(l, arma::fill::zeros); arma::rowvec X_bar;
   Progress progress(l*K, trace == "progress");
   
   // no need to create folds if K = 1
@@ -344,7 +342,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
   }
   
   // determine optimal tuning parameters
-  AVG_error = arma::mean(CV_errors, 1);
+  arma::colvec AVG_error = arma::mean(CV_errors, 1);
   double error = AVG_error.min();
   arma::uword ind = AVG_error.index_min();
   int lam_ind = ind % AVG_error.n_rows;
