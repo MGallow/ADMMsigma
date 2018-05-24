@@ -200,7 +200,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
 
   
   // determine optimal tuning parameters
-  arma::colvec AVG_error = arma::mean(CV_errors, 2);
+  arma::mat AVG_error = arma::mean(CV_errors, 2);
   double error = AVG_error.min();
   arma::uword ind = AVG_error.index_min();
   int lam_ind = ind % AVG_error.n_rows;
