@@ -38,6 +38,11 @@
 #' \item{AVG.error}{average cross validation error (cv.crit) across all folds.}
 #' \item{CV.error}{cross validation errors (cv.crit).}
 #' 
+#' @references
+#' \itemize{
+#' \item Rothman, Adam. 2017. 'STAT 8931 notes on an algorithm to compute the Lasso-penalized Gaussian likelihood precision matrix estimator.'
+#' }
+#' 
 #' @author Matt Galloway \email{gall0441@@umn.edu}
 #' 
 #' @seealso \code{\link{plot.RIDGE}}, \code{\link{ADMMsigma}}

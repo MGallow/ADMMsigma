@@ -70,6 +70,11 @@ X = Z \%*\% S.sqrt
 # ridge penalty no ADMM
 RIDGEsigma(X, lam = 10^seq(-5, 5, 0.5))
 }
+\references{
+\itemize{
+\item Rothman, Adam. 2017. 'STAT 8931 notes on an algorithm to compute the Lasso-penalized Gaussian likelihood precision matrix estimator.'
+}
+}
 \seealso{
 \code{\link{plot.RIDGE}}, \code{\link{ADMMsigma}}
 }
