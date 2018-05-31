@@ -39,3 +39,7 @@ iterators
 doParallel
 glasso
 formatR
+RcppProgress
+GLASSOO
+bench
+carData

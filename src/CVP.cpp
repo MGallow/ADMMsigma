@@ -4,6 +4,7 @@
 #include <Rcpp.h>
 #include <progress.hpp>
 #include "Sigma.h"
+#include "soft.h"
 
 using namespace Rcpp;
 
@@ -77,12 +78,10 @@ arma::mat CVP_ADMMc(const int n, const arma::mat &S_train, const arma::mat &S_va
       
       // update for crit_cv, if necessary
       if (crit_cv == "AIC"){
-        nzeros = arma::nonzeros(Omega);
-        CV_error(i, j) += nzeros.n_elem;
+        CV_error(i, j) += numzeros(Omega);
       }
       if (crit_cv == "BIC"){
-        nzeros = arma::nonzeros(Omega);
-        CV_error(i, j) += nzeros.n_elem*log(n)/2;
+        CV_error(i, j) += numzeros(Omega)*std::log(n)/2;
       }
       
       // update progress bar

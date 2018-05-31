@@ -8,5 +8,6 @@ double softc(const double &s, const double &tau);
 
 void softmatrixc(arma::mat &S, const arma::mat &Tau);
 
+int numzeros(arma::mat &X);
 
 #endif

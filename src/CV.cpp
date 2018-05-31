@@ -4,6 +4,7 @@
 #include <Rcpp.h>
 #include <progress.hpp>
 #include "Sigma.h"
+#include "soft.h"
 
 using namespace Rcpp;
 
@@ -87,8 +88,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   // no need to create folds if K = 1
   if (K == 1){
     
-    // set training and testing equal to sample
-    S_train = S_test = S;
+    // set sample size
     n = S.n_rows;
     
     // initialize Path, if necessary
@@ -108,10 +108,8 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   for (int k = 0; k < K; k++){
     
     // re-initialize values for each fold
-    CV_error = zerosla;
-    initOmega = initZ2 = initY = zeros;
-    rho = initrho;
-    maxit = initmaxit;
+    CV_error = zerosla; maxit = initmaxit;
+    initOmega = initZ2 = initY = zeros; rho = initrho;
       
     if (K > 1) {
       
@@ -164,12 +162,10 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
         
         // update for crit_cv, if necessary
         if (crit_cv == "AIC"){
-          arma::vec nzeros = arma::nonzeros(Omega);
-          CV_error(i, j) += nzeros.n_elem;
+          CV_error(i, j) += numzeros(Omega);
         }
         if (crit_cv == "BIC"){
-          arma::vec nzeros = arma::nonzeros(Omega);
-          CV_error(i, j) += nzeros.n_elem*log(n)/2;
+          CV_error(i, j) += numzeros(Omega)*std::log(n)/2;
         }
         
         // save estimate if path = TRUE
@@ -204,7 +200,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   double error = AVG_error.min();
   arma::uword ind = AVG_error.index_min();
   int lam_ind = ind % AVG_error.n_rows;
-  int alpha_ind = floor(ind/AVG_error.n_rows);
+  int alpha_ind = std::floor(ind/AVG_error.n_rows);
   double best_lam = lam[lam_ind];
   double best_alpha = alpha[alpha_ind];
   
@@ -259,8 +255,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
   // no need to create folds if K = 1
   if (K == 1){
     
-    // set training and testing equal to sample
-    S_train = S_test = S;
+    // set sample size
     n = S.n_rows;
     
     // initialize Path, if necessary
@@ -296,7 +291,7 @@ List CV_RIDGEc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, 
     // validation set
     X_test = X.rows(index_);
     X_test -= arma::ones<arma::colvec>(X_test.n_rows)*X_bar;
-    n = X.n_rows;
+    n = X_test.n_rows;
     
     // sample covariances
     S_train = arma::cov(X_train, 1);
