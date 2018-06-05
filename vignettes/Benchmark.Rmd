@@ -5,13 +5,12 @@ author: "Matt Galloway"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Benchmarks}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[UTF-8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
-library(microbenchmark)
 ```
 
 Below we benchmark the various functions contained in `ADMMsigma`. We can see that `ADMMsigma` (at the default tolerance) offers comparable computation time to the popular `glasso` R package.
@@ -27,6 +26,7 @@ Below we benchmark the various functions contained in `ADMMsigma`. We can see th
 <br>\vspace{0.5cm}
 ```{r, message = FALSE, echo = TRUE}
 library(ADMMsigma)
+library(microbenchmark)
 
 #  generate data from tri-diagonal (sparse) matrix
 # compute covariance matrix (can confirm inverse is tri-diagonal)

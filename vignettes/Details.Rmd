@@ -6,8 +6,8 @@ output: rmarkdown::html_vignette
 bibliography: lib.bib
 vignette: >
   %\VignetteIndexEntry{Penalized Precision Matrix Estimation}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[UTF-8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
