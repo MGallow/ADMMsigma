@@ -6,7 +6,6 @@ articles:
   Details: Details.html
   Simulations: Simulations.html
   Tutorial: Tutorial.html
-  _ADMMsigma: _ADMMsigma.html
 urls:
   reference: https://mgallow.github.io/ADMMsigma//reference
   article: https://mgallow.github.io/ADMMsigma//articles
