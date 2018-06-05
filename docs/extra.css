@@ -1,0 +1,26 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
+
+body {
+  font:Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight:300;
+}
+
+
+code.r {
+  font-size:12px;
+}
+
+pre {
+  font-size:12px;
+}
+
+
+.fl      {color: darkblue;}
+.fu      {color: darkblue;} /* function */
+.ch,.st  {color: orange;} /* string */
+.kw      {color: black;} /* keyword */
+.co      {color: grey;} /* comment */
+
+.message {color: gray;   font-weight: bolder;}
+.error   {color: red;  font-weight: bolder;}
+.warning {color: purple; font-weight: bolder;}

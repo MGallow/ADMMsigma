@@ -6,21 +6,12 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
 ```
 
-
-See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/ADMMsigma)](https://cran.r-project.org/package=ADMMsigma)
 
 ## Overview
-
-<br>\vspace{0.5cm}
-
-<p align="center">
-  <img src="lik.gif">
-</p>
-
-<br>\vspace{0.5cm}
-
 
 `ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. A (possibly incomplete) list of functions contained in the package can be found below:
 
@@ -32,6 +23,7 @@ See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.
 
 * `plot.RIDGEsigma()` produces a heat map or line graph for cross validation errors
 
+See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
 
 ## Installation
 
@@ -44,7 +36,7 @@ install.packages("ADMMsigma")
 devtools::install_github("MGallow/ADMMsigma")
 ```
 
-If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
+If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](https://mgallow.github.io/). Pull requests are welcome!
 
 ## Usage
 
@@ -61,9 +53,10 @@ for (i in 1:5){
 }
 
 # print oracle precision matrix (shrinkage might be useful)
-(Omega = qr.solve(S) %>% round(3))
+(Omega = round(qr.solve(S), 3))
 
-# generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
@@ -71,7 +64,7 @@ X = Z %*% S.sqrt
 
 
 # print sample precision matrix (perhaps a bad estimate)
-(qr.solve(cov(X)) %>% round(5))
+round(qr.solve(cov(X)), 5)
 
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
@@ -90,16 +83,16 @@ RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 
 # produce CV heat map for ADMMsigma
 ADMM = ADMMsigma(X, lam = 10^seq(-5, 5, 0.1), alpha = seq(0, 1, 0.1))
-ADMM %>% plot(type = "heatmap")
+plot(ADMM, type = "heatmap")
 
 # produce line graph for CV errors for ADMMsigma
-ADMM %>% plot(type = "line")
+plot(ADMM, type = "line")
 
 # produce CV heat map for RIDGEsigma
 RIDGE = RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
-RIDGE %>% plot
+plot(RIDGE, type = "heatmap")
 
 # produce line graph for CV errors for RIDGEsigma
-RIDGE %>% plot(type = "line")
+plot(RIDGE, type = "line")
 
 ```

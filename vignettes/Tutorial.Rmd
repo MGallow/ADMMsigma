@@ -1,0 +1,173 @@
+---
+title: "Tutorial"
+#author: "Matt Galloway"
+#date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+## Installation
+
+<br>\vspace{0.5cm}
+```{r, eval = FALSE, echo = TRUE}
+# The easiest way to install is from CRAN
+install.packages("ADMMsigma")
+
+# You can also install the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("MGallow/ADMMsigma")
+```
+<br>\vspace{0.5cm}
+
+If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](https://mgallow.github.io/). Pull requests are welcome!
+
+<br>\vspace{0.5cm}
+
+A (possibly incomplete) list of functions contained in the package can be found below:
+
+* `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
+
+* `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
+
+* `plot.ADMMsigma()` produces a heat map or line graph for cross validation errors
+
+* `plot.RIDGEsigma()` produces a heat map or line graph for cross validation errors
+
+
+<br>\vspace{1cm}
+
+## Usage
+
+We will first generate data from a sparse, tri-diagonal precision matrix and denote it as Omega.
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+library(ADMMsigma)
+
+#  generate data from a sparse matrix
+# first compute covariance matrix
+S = matrix(0.7, nrow = 5, ncol = 5)
+for (i in 1:5){
+  for (j in 1:5){
+    S[i, j] = S[i, j]^abs(i - j)
+  }
+}
+
+# print oracle precision matrix (shrinkage might be useful)
+(Omega = round(qr.solve(S), 3))
+
+# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+set.seed(123)
+Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
+out = eigen(S, symmetric = TRUE)
+S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
+X = Z %*% S.sqrt
+
+# snap shot of data
+head(X)
+
+```
+<br>\vspace{0.5cm}
+
+As described earlier in the report, the maximum likelihood estimator (MLE) for Omega is the inverse of the sample precision matrix $S^{-1} = \left[\sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n \right]^{-1}$:
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# print inverse of sample precision matrix (perhaps a bad estimate)
+round(qr.solve(cov(X)*(nrow(X) - 1)/nrow(X)), 5)
+
+
+```
+<br>\vspace{0.5cm}
+
+However, because Omega (known as the *oracle*) is sparse, a shrinkage estimator will perhaps perform better than the sample estimator. Below we construct various penalized estimators:
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# elastic-net type penalty (set tolerance to 1e-8)
+ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
+
+```
+<br>\vspace{0.5cm}
+
+**LASSO:**
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# lasso penalty (default tolerance)
+ADMMsigma(X, alpha = 1)
+
+
+```
+<br>\vspace{0.5cm}
+
+**ELASTIC-NET:**
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# elastic-net penalty (alpha = 0.5)
+ADMMsigma(X, alpha = 0.5)
+
+```
+<br>\newpage
+
+**RIDGE:**
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# ridge penalty
+ADMMsigma(X, alpha = 0)
+
+# ridge penalty no ADMM
+RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
+
+```
+<br>\newpage
+
+This package also has the capability to provide heat maps for the cross validation errors. The more bright (white) areas of the heat map pertain to more optimal tuning parameters.
+
+<br>\vspace{0.5cm}
+```{r, message = FALSE, echo = TRUE}
+
+# produce CV heat map for ADMMsigma
+ADMM = ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
+plot(ADMM, type = "heatmap")
+
+```
+<br>\newpage
+
+```{r, message = FALSE, echo = TRUE}
+
+# produce line graph for CV errors for ADMMsigma
+plot(ADMM, type = "line")
+
+```
+<br>\newpage
+
+```{r, message = FALSE, echo = TRUE}
+
+# produce CV heat map for RIDGEsigma
+RIDGE = RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
+plot(RIDGE, type = "heatmap")
+
+```
+
+<br>\newpage
+```{r, message = FALSE, echo = TRUE}
+
+# produce line graph for CV errors for RIDGEsigma
+plot(RIDGE, type = "line")
+
+```

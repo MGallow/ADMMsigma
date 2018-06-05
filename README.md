@@ -1,30 +1,32 @@
 ADMMsigma
 ================
 
-See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ADMMsigma)](https://cran.r-project.org/package=ADMMsigma)
 
-Overview
---------
+## Overview
 
-<br>
+`ADMMsigma` is an R package that estimates a penalized precision matrix
+via the alternating direction method of multipliers (ADMM) algorithm. It
+currently supports a general elastic-net penalty that allows for both
+ridge and lasso-type penalties as special cases. A (possibly incomplete)
+list of functions contained in the package can be found below:
 
-<p align="center">
-<img src="lik.gif">
-</p>
-<br>
+  - `ADMMsigma()` computes the estimated precision matrix (ridge, lasso,
+    and elastic-net type regularization optional)
 
-`ADMMsigma` is an R package that estimates a penalized precision matrix via the alternating direction method of multipliers (ADMM) algorithm. It currently supports a general elastic-net penalty that allows for both ridge and lasso-type penalties as special cases. A (possibly incomplete) list of functions contained in the package can be found below:
+  - `RIDGEsigma()` computes the estimated ridge penalized precision
+    matrix via closed-form solution
 
--   `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
+  - `plot.ADMMsigma()` produces a heat map or line graph for cross
+    validation errors
 
--   `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
+  - `plot.RIDGEsigma()` produces a heat map or line graph for cross
+    validation errors
 
--   `plot.ADMMsigma()` produces a heat map or line graph for cross validation errors
+See [vignette](https://mgallow.github.io/ADMMsigma/) or
+[manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
 
--   `plot.RIDGEsigma()` produces a heat map or line graph for cross validation errors
-
-Installation
-------------
+## Installation
 
 ``` r
 # The easiest way to install is from CRAN
@@ -35,10 +37,12 @@ install.packages("ADMMsigma")
 devtools::install_github("MGallow/ADMMsigma")
 ```
 
-If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](http://users.stat.umn.edu/~gall0441/). Pull requests are welcome!
+If there are any issues/bugs, please let me know:
+[github](https://github.com/MGallow/ADMMsigma/issues). You can also
+contact me via my [website](https://mgallow.github.io/). Pull requests
+are welcome\!
 
-Usage
------
+## Usage
 
 ``` r
 library(ADMMsigma)
@@ -53,7 +57,7 @@ for (i in 1:5){
 }
 
 # print oracle precision matrix (shrinkage might be useful)
-(Omega = qr.solve(S) %>% round(3))
+(Omega = round(qr.solve(S), 3))
 ```
 
     ##        [,1]   [,2]   [,3]   [,4]   [,5]
@@ -64,7 +68,8 @@ for (i in 1:5){
     ## [5,]  0.000  0.000  0.000 -1.373  1.961
 
 ``` r
-# generate 1000 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
@@ -72,15 +77,15 @@ X = Z %*% S.sqrt
 
 
 # print sample precision matrix (perhaps a bad estimate)
-(qr.solve(cov(X)) %>% round(5))
+round(qr.solve(cov(X)), 5)
 ```
 
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  2.05121 -1.49584 -0.14523  0.26045 -0.19023
-    ## [2,] -1.49584  2.73491 -0.87214 -0.55415  0.40914
-    ## [3,] -0.14523 -0.87214  2.31357 -1.05951 -0.18131
-    ## [4,]  0.26045 -0.55415 -1.05951  2.69115 -1.11630
-    ## [5,] -0.19023  0.40914 -0.18131 -1.11630  1.78573
+    ## [1,]  2.30646 -1.53483  0.21884 -0.08521  0.24066
+    ## [2,] -1.53483  3.24286 -1.66346 -0.14134  0.18760
+    ## [3,]  0.21884 -1.66346  3.16698 -1.23906 -0.10906
+    ## [4,] -0.08521 -0.14134 -1.23906  2.74022 -1.35853
+    ## [5,]  0.24066  0.18760 -0.10906 -1.35853  2.03323
 
 ``` r
 # elastic-net type penalty (set tolerance to 1e-8)
@@ -90,21 +95,21 @@ ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
     ## 
     ## Call: ADMMsigma(X = X, tol.abs = 1e-08, tol.rel = 1e-08)
     ## 
-    ## Iterations: 110
+    ## Iterations: 162
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
-    ## [1,]      -1.612      0
+    ## [1,]      -1.599      1
     ## 
-    ## Log-likelihood: -138.13226
+    ## Log-likelihood: -108.41003
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.89373 -1.26005 -0.19347  0.14222 -0.09967
-    ## [2,] -1.26005  2.43110 -0.77941 -0.44759  0.28367
-    ## [3,] -0.19347 -0.77941  2.18608 -0.93923 -0.21518
-    ## [4,]  0.14222 -0.44759 -0.93923  2.45437 -0.96398
-    ## [5,] -0.09967  0.28367 -0.21518 -0.96398  1.69966
+    ## [1,]  2.15283 -1.26902  0.00000  0.00000  0.19765
+    ## [2,] -1.26902  2.79032 -1.32206 -0.08056  0.00925
+    ## [3,]  0.00000 -1.32206  2.85470 -1.17072 -0.00865
+    ## [4,]  0.00000 -0.08056 -1.17072  2.49554 -1.18959
+    ## [5,]  0.19765  0.00925 -0.00865 -1.18959  1.88121
 
 ``` r
 # lasso penalty (default tolerance)
@@ -118,17 +123,17 @@ ADMMsigma(X, alpha = 1)
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
-    ## [1,]      -1.167      1
+    ## [1,]      -1.599      1
     ## 
-    ## Log-likelihood: -163.06899
+    ## Log-likelihood: -108.41022
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.71264 -1.08411 -0.11721  0.00000  0.00000
-    ## [2,] -1.08411  2.11048 -0.68111 -0.19378  0.00000
-    ## [3,] -0.11721 -0.68111  1.89983 -0.86238 -0.07087
-    ## [4,]  0.00000 -0.19378 -0.86238  2.12371 -0.78640
-    ## [5,]  0.00000  0.00000 -0.07087 -0.78640  1.53353
+    ## [1,]  2.15228 -1.26841  0.00000  0.00000  0.19744
+    ## [2,] -1.26841  2.78830 -1.31943 -0.08246  0.01018
+    ## [3,]  0.00000 -1.31943  2.84979 -1.16708 -0.01015
+    ## [4,]  0.00000 -0.08246 -1.16708  2.49277 -1.18844
+    ## [5,]  0.19744  0.01018 -0.01015 -1.18844  1.88069
 
 ``` r
 # elastic-net penalty (alpha = 0.5)
@@ -138,21 +143,21 @@ ADMMsigma(X, alpha = 0.5)
     ## 
     ## Call: ADMMsigma(X = X, alpha = 0.5)
     ## 
-    ## Iterations: 50
+    ## Iterations: 67
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
-    ## [1,]      -1.389    0.5
+    ## [1,]      -1.821    0.5
     ## 
-    ## Log-likelihood: -147.14312
+    ## Log-likelihood: -101.13595
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.81860 -1.16818 -0.15258  0.00000  0.00000
-    ## [2,] -1.16818  2.27528 -0.74274 -0.29499  0.12116
-    ## [3,] -0.15258 -0.74274  2.06555 -0.89789 -0.16546
-    ## [4,]  0.00000 -0.29499 -0.89789  2.31618 -0.88305
-    ## [5,]  0.00000  0.12116 -0.16546 -0.88305  1.62764
+    ## [1,]  2.20031 -1.32471  0.01656 -0.00334  0.21798
+    ## [2,] -1.32471  2.90659 -1.37599 -0.19084  0.13651
+    ## [3,]  0.01656 -1.37599  2.92489 -1.12859 -0.12033
+    ## [4,] -0.00334 -0.19084 -1.12859  2.56559 -1.23472
+    ## [5,]  0.21798  0.13651 -0.12033 -1.23472  1.94528
 
 ``` r
 # ridge penalty
@@ -162,21 +167,21 @@ ADMMsigma(X, alpha = 0)
     ## 
     ## Call: ADMMsigma(X = X, alpha = 0)
     ## 
-    ## Iterations: 50
+    ## Iterations: 65
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
-    ## [1,]      -1.612      0
+    ## [1,]      -1.821      0
     ## 
-    ## Log-likelihood: -138.13234
+    ## Log-likelihood: -99.19746
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.89234 -1.25810 -0.19377  0.14128 -0.09897
-    ## [2,] -1.25810  2.42823 -0.77871 -0.44641  0.28270
-    ## [3,] -0.19377 -0.77871  2.18514 -0.93849 -0.21535
-    ## [4,]  0.14128 -0.44641 -0.93849  2.45234 -0.96291
-    ## [5,] -0.09897  0.28270 -0.21535 -0.96291  1.69900
+    ## [1,]  2.18979 -1.31533  0.04515 -0.04090  0.23511
+    ## [2,] -1.31533  2.90019 -1.37049 -0.22633  0.17808
+    ## [3,]  0.04515 -1.37049  2.89435 -1.07647 -0.17369
+    ## [4,] -0.04090 -0.22633 -1.07647  2.55026 -1.22786
+    ## [5,]  0.23511  0.17808 -0.17369 -1.22786  1.95495
 
 ``` r
 # ridge penalty no ADMM
@@ -188,44 +193,44 @@ RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
     ## 
     ## Tuning parameter:
     ##       log10(lam)    lam
-    ## [1,]       -1.72  0.019
+    ## [1,]       -2.17  0.007
     ## 
-    ## Log-likelihood: -159.80699
+    ## Log-likelihood: -109.18156
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  1.76082 -1.13220 -0.18736  0.11910 -0.09328
-    ## [2,] -1.13220  2.20492 -0.69619 -0.40086  0.24839
-    ## [3,] -0.18736 -0.69619  1.99883 -0.83316 -0.20592
-    ## [4,]  0.11910 -0.40086 -0.83316  2.22302 -0.86875
-    ## [5,] -0.09328  0.24839 -0.20592 -0.86875  1.60066
+    ## [1,]  2.15416 -1.31185  0.08499 -0.05571  0.22862
+    ## [2,] -1.31185  2.85605 -1.36677 -0.19650  0.16880
+    ## [3,]  0.08499 -1.36677  2.82606 -1.06325 -0.14946
+    ## [4,] -0.05571 -0.19650 -1.06325  2.50721 -1.21935
+    ## [5,]  0.22862  0.16880 -0.14946 -1.21935  1.92871
 
 ``` r
 # produce CV heat map for ADMMsigma
 ADMM = ADMMsigma(X, lam = 10^seq(-5, 5, 0.1), alpha = seq(0, 1, 0.1))
-ADMM %>% plot(type = "heatmap")
+plot(ADMM, type = "heatmap")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 # produce line graph for CV errors for ADMMsigma
-ADMM %>% plot(type = "line")
+plot(ADMM, type = "line")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-2.png)
+![](README_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
 
 ``` r
 # produce CV heat map for RIDGEsigma
 RIDGE = RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
-RIDGE %>% plot
+plot(RIDGE, type = "heatmap")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-3.png)
+![](README_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
 
 ``` r
 # produce line graph for CV errors for RIDGEsigma
-RIDGE %>% plot(type = "line")
+plot(RIDGE, type = "line")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-4.png)
+![](README_files/figure-gfm/unnamed-chunk-2-4.png)<!-- -->

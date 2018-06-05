@@ -1,0 +1,7 @@
+base
+Rcpp
+RcppProgress
+foreach
+iterators
+doParallel
+ADMMsigma

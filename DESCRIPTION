@@ -26,5 +26,8 @@ Depends: Rcpp (>= 0.12.10),
 LinkingTo: Rcpp,
     RcppArmadillo,
     RcppProgress
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
 SystemRequirements: GNU make
+VignetteBuilder: knitr

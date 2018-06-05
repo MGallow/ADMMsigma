@@ -1,0 +1,45 @@
+pandoc: 1.19.2.1
+pkgdown: 1.0.0
+pkgdown_sha: ~
+
+title: ADMMsigma
+url: https://mgallow.github.io/ADMMsigma/
+template:
+  params:
+    bootswatch: flatly
+
+navbar:
+  title: "ADMMsigma"
+  left:
+    - icon: fa-home fa-lg
+      href: index.html
+    - text: Articles
+      menu:
+        - text: "Tutorial"
+          href: articles/Tutorial.html
+        - text: "Details"
+          href: articles/Details.html
+        - text: "Simulations"
+          href: articles/Simulations.html
+        - text: "Benchmark"
+          href: articles/Benchmark.html
+        - text: "Functions"
+          href: "reference/index.html"
+    - text: "Related Packages"
+      menu:
+        - text: "OMEGA"
+          href: https://mgallow.github.io/OMEGA/
+        - text: "GLASSOO"
+          href: https://mgallow.github.io/GLASSOO/
+        - text: "CVglasso"
+          href: https://mgallow.github.io/CVglasso/
+  right:
+    - icon: fa-newspaper-o fa-lg
+      #text: "News"
+      href: news/index.html
+    - icon: fa-github fa-lg
+      #text: "Github"
+      href: https://github.com/MGallow/ADMMsigma/
+    - icon: fa-user fa-lg
+      text: "MGallow"
+      href: https://mgallow.github.io/
