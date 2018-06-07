@@ -22,3 +22,4 @@ vignettes/ADMMsigma_cache/markdown_github/*.rdb
 vignettes/ADMMsigma_cache/markdown_github/*.rdx
 vignettes/ADMMsigma_cache/markdown_github/*.Rdata
 inst/doc
+docs

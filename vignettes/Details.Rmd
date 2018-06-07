@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+## Introduction
+
 Suppose we want to solve the following optimization problem:
 
 \begin{align*}
@@ -44,7 +46,7 @@ A more complete introduction to the algorithm -- specifically how it arose out o
 
 <br>\vspace{1cm}
 
-# ADMM Algorithm
+## ADMM Algorithm
 
 Now consider the case where $X_{1}, ..., X_{n}$ are iid $N_{p}(\mu, \Sigma)$ random variables and we are tasked with estimating the precision matrix, denoted $\Omega \equiv \Sigma^{-1}$. The maximum likelihood estimator for $\Omega$ is
 
@@ -223,4 +225,4 @@ where $Soft$ is the soft-thresholding function.
 
 <!-- \end{thebibliography} -->
 
-# References
+## References

@@ -1,2 +1,22 @@
 language: r
+dist: trusty
+sudo: false
+
+branches:
+  only:
+    - master
+
 cache: packages
+
+after_success:
+  - Rscript -e "pkgdown::build_site()"
+  
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master
+  local_dir: docs
+  keep-history: true
+  allow-empty-commit: false

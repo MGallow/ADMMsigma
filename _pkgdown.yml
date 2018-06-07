@@ -7,6 +7,7 @@ url: https://mgallow.github.io/ADMMsigma/
 template:
   params:
     bootswatch: flatly
+    ganalytics: UA-84680750-3
 
 navbar:
   title: "ADMMsigma"
@@ -27,8 +28,8 @@ navbar:
           href: "reference/index.html"
     - text: "Related Packages"
       menu:
-        - text: "OMEGA"
-          href: https://mgallow.github.io/OMEGA/
+        - text: "Omega"
+          href: https://mgallow.github.io/Omega/
         - text: "GLASSOO"
           href: https://mgallow.github.io/GLASSOO/
         - text: "CVglasso"
