@@ -59,7 +59,7 @@ microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol.abs = 1e-8, tol.rel = 
 microbenchmark(ADMMsigma(X, trace = "none"), times = 5)
 
 # benchmark ADMMsigma parallel CV
-microbenchmark(ADMMsigma(X, cores = 3, trace = "none"), times = 5)
+microbenchmark(ADMMsigma(X, cores = 2, trace = "none"), times = 5)
 
 # benchmark ADMMsigma CV - likelihood convergence criteria
 microbenchmark(ADMMsigma(X, crit = "loglik", trace = "none"), times = 5)
