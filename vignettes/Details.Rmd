@@ -209,20 +209,4 @@ where $Soft$ is the soft-thresholding function.
 
 <br><br>\newpage
 
-<!-- \begin{thebibliography}{9} -->
-
-<!-- \bibitem{1} -->
-<!--   Boyd, Stephen, et al. "Distributed optimization and statistical learning via the alternating direction method of multipliers." Foundations and Trends® in Machine Learning 3.1 (2011): 1-122. -->
-
-<!-- \bibitem{2} -->
-<!--   Polson, Nicholas G., James G. Scott, and Brandon T. Willard. "Proximal algorithms in statistics and machine learning." Statistical Science 30.4 (2015): 559-581. -->
-
-<!-- \bibitem{3} -->
-<!--   Marjanovic, Goran, and Victor Solo. "On $ l_q $ optimization and matrix completion." IEEE Transactions on signal processing 60.11 (2012): 5714-5724. -->
-
-<!-- \bibitem{4} -->
-<!--   Zou, Hui, and Trevor Hastie. "Regularization and variable selection via the elastic net." Journal of the Royal Statistical Society: Series B (Statistical Methodology) 67.2 (2005): 301-320. -->
-
-<!-- \end{thebibliography} -->
-
 ## References

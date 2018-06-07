@@ -1,0 +1,15 @@
+base
+methods
+datasets
+utils
+grDevices
+graphics
+stats
+Rcpp
+RcppProgress
+foreach
+iterators
+parallel
+doParallel
+ADMMsigma
+microbenchmark

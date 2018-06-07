@@ -1,3 +1,5 @@
+# Thanks to jtilly (https://github.com/jtilly/R-travis-container-example/blob/master/.travis.yml)
+
 language: r
 dist: trusty
 sudo: false
@@ -42,3 +44,4 @@ notifications:
   email:
     on_success: change
     on_failure: change
+
