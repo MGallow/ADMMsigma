@@ -36,7 +36,7 @@ deploy:
   on:
     branch: master
   local_dir: docs
-  keep-history: true
+  keep-history: false
   allow-empty-commit: false
 
 # send email if any changes
