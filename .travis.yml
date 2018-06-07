@@ -8,8 +8,6 @@ branches:
 
 cache: packages
 
-install: travis_wait 30 mvn install
-
 after_success:
   - Rscript -e "pkgdown::build_site()"
   

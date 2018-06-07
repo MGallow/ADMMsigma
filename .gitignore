@@ -12,14 +12,4 @@ src/*.dll
 .rdb
 .rdx
 ADMMsigma.Rproj
-vignettes/ADMMsigma_cache/html/*.rdb
-vignettes/ADMMsigma_cache/html/*.rdx
-vignettes/ADMMsigma_cache/html/*.Rdata
-vignettes/ADMMsigma_cache/latex/*.rdb
-vignettes/ADMMsigma_cache/latex/*.rdx
-vignettes/ADMMsigma_cache/latex/*.Rdata
-vignettes/ADMMsigma_cache/markdown_github/*.rdb
-vignettes/ADMMsigma_cache/markdown_github/*.rdx
-vignettes/ADMMsigma_cache/markdown_github/*.Rdata
 inst/doc
-docs
