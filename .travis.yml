@@ -6,11 +6,27 @@ branches:
   only:
     - master
 
+# cache local packages
 cache: packages
 
+# install the package and dependencies:
+# - update all installed packages
+# - install package with dependencies
+install:
+  - Rscript -e 'update.packages(ask = FALSE)'
+  - Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE)'
+
+# Build and check package
+script:
+  - R CMD build . --no-build-vignettes --no-manual
+  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+  - R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual --as-cran 
+
+# build package site
 after_success:
   - travis_wait Rscript -e "pkgdown::build_site()"
-  
+
+# deploy site to gh-pages branch  
 deploy:
   provider: pages
   skip_cleanup: true
@@ -20,3 +36,9 @@ deploy:
   local_dir: docs
   keep-history: true
   allow-empty-commit: false
+
+# send email if any changes
+notifications:
+  email:
+    on_success: change
+    on_failure: change
