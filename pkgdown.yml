@@ -1,0 +1,8 @@
+pandoc: '2.2'
+pkgdown: 1.1.0
+pkgdown_sha: ~
+articles: []
+urls:
+  reference: https://mgallow.github.io/ADMMsigma//reference
+  article: https://mgallow.github.io/ADMMsigma//articles
+
