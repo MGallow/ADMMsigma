@@ -13,7 +13,7 @@ src/*.dll
 ADMMsigma.Rproj
 inst/doc
 docs
-vignettes/Tutorial_cache
-vignettes/Benchmark_cache
-vignettes/Details_cache
-vignetttes/Simulations_cache
+vignettes/Tutorial_cache/__packages
+vignettes/Benchmark_cache/__packages
+vignettes/Details_cache/__packages
+vignetttes/Simulations_cache/__packages
