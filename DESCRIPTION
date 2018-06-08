@@ -31,6 +31,8 @@ Suggests: testthat,
     rmarkdown,
     microbenchmark,
     glasso,
-    pkgdown
+    pkgdown,
+    tidyverse,
+    formatR
 SystemRequirements: GNU make
 VignetteBuilder: knitr
