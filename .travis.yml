@@ -23,10 +23,8 @@ script:
   - R CMD build . --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
   - R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual --as-cran 
-
-# build package site
-after_success:
-  - travis_wait Rscript -e "pkgdown::build_site()"
+  - R CMD INSTALL "${PKG_FILE_NAME}"
+  - Rscript -e "pkgdown::build_site()"
 
 # deploy site to gh-pages branch  
 deploy:
@@ -36,7 +34,7 @@ deploy:
   on:
     branch: master
   local_dir: docs
-  keep-history: false
+  keep-history: true
   allow-empty-commit: false
 
 # send email if any changes

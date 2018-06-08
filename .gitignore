@@ -12,3 +12,4 @@ src/*.dll
 .rdx
 ADMMsigma.Rproj
 inst/doc
+docs
