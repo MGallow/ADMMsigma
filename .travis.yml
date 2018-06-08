@@ -16,7 +16,7 @@ cache: packages
 # - install package with dependencies
 install:
   - Rscript -e 'update.packages(ask = FALSE)'
-  - Rscript -e 'devtools::install(pkg = ".", dependencies = c("Depends", "Imports", "LinkingTo", "Suggests"))'
+  - Rscript -e 'devtools::install(pkg = ".", dependencies = TRUE)'
 
 # Build and check package
 script:
