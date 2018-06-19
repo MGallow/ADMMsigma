@@ -133,61 +133,36 @@
 
     
     
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<p>BLAH BLAH BLAH!!!!!</p>
 <p><br></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># The easiest way to install is from CRAN</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">install.packages</span>(<span class="st">"ADMMsigma"</span>)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># You can also install the development version from GitHub:</span></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># install.packages("devtools")</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6">devtools<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"MGallow/ADMMsigma"</span>)</a></code></pre></div>
-<p><br></p>
-<p>If there are any issues/bugs, please let me know: <a href="https://github.com/MGallow/ADMMsigma/issues">github</a>. You can also contact me via my <a href="https://mgallow.github.io/">website</a>. Pull requests are welcome!</p>
-<p><br></p>
-<p>A (possibly incomplete) list of functions contained in the package can be found below:</p>
-<ul>
-<li><p><code><a href="../reference/ADMMsigma.html">ADMMsigma()</a></code> computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)</p></li>
-<li><p><code><a href="../reference/RIDGEsigma.html">RIDGEsigma()</a></code> computes the estimated ridge penalized precision matrix via closed-form solution</p></li>
-<li><p><code>plot.ADMMsigma()</code> produces a heat map or line graph for cross validation errors</p></li>
-<li><p><code>plot.RIDGEsigma()</code> produces a heat map or line graph for cross validation errors</p></li>
-</ul>
-<p><br></p>
-</div>
-<div id="usage" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h2>
-<p>We will first generate data from a sparse, tri-diagonal precision matrix and denote it as Omega.</p>
-<p><br></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(ADMMsigma)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co">#  generate data from a sparse matrix</span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># first compute covariance matrix</span></a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.7</span>, <span class="dt">nrow =</span> <span class="dv">5</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">    S[i, j] =<span class="st"> </span>S[i, j]<span class="op">^</span><span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j)</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">  }</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10">}</a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co"># print oracle precision matrix (shrinkage might be useful)</span></a>
-<a class="sourceLine" id="cb2-13" data-line-number="13">(<span class="dt">Omega =</span> <span class="kw">round</span>(<span class="kw">qr.solve</span>(S), <span class="dv">3</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(ADMMsigma)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co">#  generate data from a sparse matrix</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># first compute covariance matrix</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.7</span>, <span class="dt">nrow =</span> <span class="dv">5</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">    S[i, j] =<span class="st"> </span>S[i, j]<span class="op">^</span><span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j)</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">  }</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">}</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="co"># print oracle precision matrix (shrinkage might be useful)</span></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">(<span class="dt">Omega =</span> <span class="kw">round</span>(<span class="kw">qr.solve</span>(S), <span class="dv">3</span>))</a></code></pre></div>
 <pre><code>##        [,1]   [,2]   [,3]   [,4]   [,5]
 ## [1,]  1.961 -1.373  0.000  0.000  0.000
 ## [2,] -1.373  2.922 -1.373  0.000  0.000
 ## [3,]  0.000 -1.373  2.922 -1.373  0.000
 ## [4,]  0.000  0.000 -1.373  2.922 -1.373
 ## [5,]  0.000  0.000  0.000 -1.373  1.961</code></pre>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># generate 100 x 5 matrix with rows drawn from iid N_p(0, S)</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">Z =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">100</span><span class="op">*</span><span class="dv">5</span>), <span class="dt">nrow =</span> <span class="dv">100</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">out =<span class="st"> </span><span class="kw">eigen</span>(S, <span class="dt">symmetric =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a>
-<a class="sourceLine" id="cb4-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="co"># snap shot of data</span></a>
-<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="kw">head</span>(X)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># generate 100 x 5 matrix with rows drawn from iid N_p(0, S)</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">Z =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">100</span><span class="op">*</span><span class="dv">5</span>), <span class="dt">nrow =</span> <span class="dv">100</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">out =<span class="st"> </span><span class="kw">eigen</span>(S, <span class="dt">symmetric =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="co"># snap shot of data</span></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="kw">head</span>(X)</a></code></pre></div>
 <pre><code>##            [,1]         [,2]         [,3]       [,4]        [,5]
 ## [1,] -0.4311177 -0.217744186  1.276826576 -0.1061308 -0.02363953
 ## [2,] -0.0418538  0.304253474  0.688201742 -0.5976510 -1.06758924
@@ -198,8 +173,8 @@
 <p><br></p>
 <p>As described earlier in the report, the maximum likelihood estimator (MLE) for Omega is the inverse of the sample precision matrix <span class="math inline">\(S^{-1} = \left[\sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n \right]^{-1}\)</span>:</p>
 <p><br></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># print inverse of sample precision matrix (perhaps a bad estimate)</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">round</span>(<span class="kw">qr.solve</span>(<span class="kw">cov</span>(X)<span class="op">*</span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)), <span class="dv">5</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># print inverse of sample precision matrix (perhaps a bad estimate)</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">round</span>(<span class="kw">qr.solve</span>(<span class="kw">cov</span>(X)<span class="op">*</span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)), <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>##          [,1]     [,2]     [,3]     [,4]     [,5]
 ## [1,]  2.32976 -1.55033  0.22105 -0.08607  0.24309
 ## [2,] -1.55033  3.27561 -1.68026 -0.14277  0.18949
@@ -209,8 +184,8 @@
 <p><br></p>
 <p>However, because Omega (known as the <em>oracle</em>) is sparse, a shrinkage estimator will perhaps perform better than the sample estimator. Below we construct various penalized estimators:</p>
 <p><br></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># elastic-net type penalty (set tolerance to 1e-8)</span></a>
-<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># elastic-net type penalty (set tolerance to 1e-8)</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a></code></pre></div>
 <pre><code>## 
 ## Call: ADMMsigma(X = X, tol.abs = 1e-08, tol.rel = 1e-08)
 ## 
@@ -232,8 +207,8 @@
 <p><br></p>
 <p><strong>LASSO:</strong></p>
 <p><br></p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># lasso penalty (default tolerance)</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">alpha =</span> <span class="dv">1</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co"># lasso penalty (default tolerance)</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">alpha =</span> <span class="dv">1</span>)</a></code></pre></div>
 <pre><code>## 
 ## Call: ADMMsigma(X = X, alpha = 1)
 ## 
@@ -255,8 +230,8 @@
 <p><br></p>
 <p><strong>ELASTIC-NET:</strong></p>
 <p><br></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co"># elastic-net penalty (alpha = 0.5)</span></a>
-<a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">alpha =</span> <span class="fl">0.5</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co"># elastic-net penalty (alpha = 0.5)</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">alpha =</span> <span class="fl">0.5</span>)</a></code></pre></div>
 <pre><code>## 
 ## Call: ADMMsigma(X = X, alpha = 0.5)
 ## 
@@ -278,8 +253,8 @@
 <p><br></p>
 <p><strong>RIDGE:</strong></p>
 <p><br></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># ridge penalty</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">alpha =</span> <span class="dv">0</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="co"># ridge penalty</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">alpha =</span> <span class="dv">0</span>)</a></code></pre></div>
 <pre><code>## 
 ## Call: ADMMsigma(X = X, alpha = 0)
 ## 
@@ -298,8 +273,8 @@
 ## [3,]  0.04515 -1.37049  2.89435 -1.07647 -0.17369
 ## [4,] -0.04090 -0.22633 -1.07647  2.55026 -1.22786
 ## [5,]  0.23511  0.17808 -0.17369 -1.22786  1.95495</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="co"># ridge penalty no ADMM</span></a>
-<a class="sourceLine" id="cb16-2" data-line-number="2"><span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="co"># ridge penalty no ADMM</span></a>
+<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>))</a></code></pre></div>
 <pre><code>## 
 ## Call: RIDGEsigma(X = X, lam = 10^seq(-8, 8, 0.01))
 ## 
@@ -319,33 +294,24 @@
 <p><br></p>
 <p>This package also has the capability to provide heat maps for the cross validation errors. The more bright (white) areas of the heat map pertain to more optimal tuning parameters.</p>
 <p><br></p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co"># produce CV heat map for ADMMsigma</span></a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3"><span class="kw">plot</span>(ADMM, <span class="dt">type =</span> <span class="st">"heatmap"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="co"># produce CV heat map for ADMMsigma</span></a>
+<a class="sourceLine" id="cb17-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a>
+<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="kw">plot</span>(ADMM, <span class="dt">type =</span> <span class="st">"heatmap"</span>)</a></code></pre></div>
+<p><img src="Tutorial_files/figure-html/unnamed-chunk-7-1.png" width="700"><br></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co"># produce line graph for CV errors for ADMMsigma</span></a>
+<a class="sourceLine" id="cb18-2" data-line-number="2"><span class="kw">plot</span>(ADMM, <span class="dt">type =</span> <span class="st">"line"</span>)</a></code></pre></div>
 <p><img src="Tutorial_files/figure-html/unnamed-chunk-8-1.png" width="700"><br></p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="co"># produce line graph for CV errors for ADMMsigma</span></a>
-<a class="sourceLine" id="cb19-2" data-line-number="2"><span class="kw">plot</span>(ADMM, <span class="dt">type =</span> <span class="st">"line"</span>)</a></code></pre></div>
-<p><img src="Tutorial_files/figure-html/unnamed-chunk-9-1.png" width="700"><br></p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="co"># produce CV heat map for RIDGEsigma</span></a>
-<a class="sourceLine" id="cb20-2" data-line-number="2">RIDGE =<span class="st"> </span><span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>))</a>
-<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="kw">plot</span>(RIDGE, <span class="dt">type =</span> <span class="st">"heatmap"</span>)</a></code></pre></div>
-<p><img src="Tutorial_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="co"># produce CV heat map for RIDGEsigma</span></a>
+<a class="sourceLine" id="cb19-2" data-line-number="2">RIDGE =<span class="st"> </span><span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>))</a>
+<a class="sourceLine" id="cb19-3" data-line-number="3"><span class="kw">plot</span>(RIDGE, <span class="dt">type =</span> <span class="st">"heatmap"</span>)</a></code></pre></div>
+<p><img src="Tutorial_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
 <p><br></p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="co"># produce line graph for CV errors for RIDGEsigma</span></a>
-<a class="sourceLine" id="cb21-2" data-line-number="2"><span class="kw">plot</span>(RIDGE, <span class="dt">type =</span> <span class="st">"line"</span>)</a></code></pre></div>
-<p><img src="Tutorial_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
-</div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="co"># produce line graph for CV errors for RIDGEsigma</span></a>
+<a class="sourceLine" id="cb20-2" data-line-number="2"><span class="kw">plot</span>(RIDGE, <span class="dt">type =</span> <span class="st">"line"</span>)</a></code></pre></div>
+<p><img src="Tutorial_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-        <div id="tocnav">
-      <h2 class="hasAnchor">
-<a href="#tocnav" class="anchor"></a>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-<li><a href="#installation">Installation</a></li>
-      <li><a href="#usage">Usage</a></li>
-      </ul>
-</div>
       </div>
 
 </div>

@@ -134,13 +134,11 @@
 
     
     
-<p>In the simulations below we generated data from a number of oracle precision matrices with various structures. For each data-generating procedure, the <code><a href="../reference/ADMMsigma.html">ADMMsigma()</a></code> function was run using 5-fold cross validation. After 20 replications, the cross validation errors were totalled and the optimal tuning parameters were selected (results in the top figure). These results are compared with the Kullback Leibler (KL) losses between the estimates and the oracle precision matrix (bottom figure). We can see below that our cross validation procedure choosing tuning parameters close to the optimal parameters.</p>
+<p>In the simulations below, we generate data from a number of different oracle precision matrices with various structures. For each data-generating procedure, the <code><a href="../reference/ADMMsigma.html">ADMMsigma()</a></code> function was run using 5-fold cross validation. After 20 replications, the cross validation errors were totalled and the optimal tuning parameters were selected (results in the top figure). These results are compared with the Kullback Leibler (KL) losses between the estimates and the oracle precision matrix (bottom figure). We can see below that our cross validation procedure consistently chooses tuning parameters that are close to the optimal parameters (with respsect to the oracle).</p>
 <p><br></p>
 <div id="compound-symmetric-p-100-n-50" class="section level3">
 <h3 class="hasAnchor">
 <a href="#compound-symmetric-p-100-n-50" class="anchor"></a>Compound Symmetric: P = 100, N = 50</h3>
-<p><img src="images/compound_N50_P100.png"></p>
-<p><br></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># oracle precision matrix</span></a>
 <a class="sourceLine" id="cb1-2" data-line-number="2">Omega =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.9</span>, <span class="dt">ncol =</span> <span class="dv">100</span>, <span class="dt">nrow =</span> <span class="dv">100</span>)</a>
 <a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">diag</span>(<span class="dt">Omega =</span> <span class="dv">1</span>)</a>
@@ -154,12 +152,12 @@
 <a class="sourceLine" id="cb1-11" data-line-number="11">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
 <a class="sourceLine" id="cb1-12" data-line-number="12">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a></code></pre></div>
 <p><br></p>
+<p><img src="images/compound_N50_P100.png"></p>
+<p><br></p>
 </div>
 <div id="compound-symmetric-p-10-n-1000" class="section level3">
 <h3 class="hasAnchor">
 <a href="#compound-symmetric-p-10-n-1000" class="anchor"></a>Compound Symmetric: P = 10, N = 1000</h3>
-<p><img src="images/compound_N1000_P10.png"></p>
-<p><br></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># oracle precision matrix</span></a>
 <a class="sourceLine" id="cb2-2" data-line-number="2">Omega =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.9</span>, <span class="dt">ncol =</span> <span class="dv">10</span>, <span class="dt">nrow =</span> <span class="dv">10</span>)</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">diag</span>(<span class="dt">Omega =</span> <span class="dv">1</span>)</a>
@@ -173,12 +171,12 @@
 <a class="sourceLine" id="cb2-11" data-line-number="11">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
 <a class="sourceLine" id="cb2-12" data-line-number="12">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a></code></pre></div>
 <p><br></p>
+<p><img src="images/compound_N1000_P10.png"></p>
+<p><br></p>
 </div>
 <div id="dense-p-100-n-50" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dense-p-100-n-50" class="anchor"></a>Dense: P = 100, N = 50</h3>
-<p><img src="images/repsKLdenseQR_N50_P100.png"></p>
-<p><br></p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># generate eigen values</span></a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">eigen =<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">1000</span>, <span class="dv">5</span>, <span class="kw">rep</span>(<span class="dv">1</span>, <span class="dv">100</span> <span class="op">-</span><span class="st"> </span><span class="dv">5</span>)))</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3"></a>
@@ -194,12 +192,12 @@
 <a class="sourceLine" id="cb3-13" data-line-number="13">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
 <a class="sourceLine" id="cb3-14" data-line-number="14">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a></code></pre></div>
 <p><br></p>
+<p><img src="images/repsKLdenseQR_N50_P100.png"></p>
+<p><br></p>
 </div>
 <div id="dense-p-10-n-50" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dense-p-10-n-50" class="anchor"></a>Dense: P = 10, N = 50</h3>
-<p><img src="images/repsKLdense_N50_P10.png"></p>
-<p><br></p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># generate eigen values</span></a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">eigen =<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">1000</span>, <span class="dv">5</span>, <span class="kw">rep</span>(<span class="dv">1</span>, <span class="dv">10</span> <span class="op">-</span><span class="st"> </span><span class="dv">5</span>)))</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3"></a>
@@ -215,12 +213,12 @@
 <a class="sourceLine" id="cb4-13" data-line-number="13">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
 <a class="sourceLine" id="cb4-14" data-line-number="14">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a></code></pre></div>
 <p><br></p>
+<p><img src="images/repsKLdense_N50_P10.png"></p>
+<p><br></p>
 </div>
 <div id="tridiagonal-p-100-n-50" class="section level3">
 <h3 class="hasAnchor">
 <a href="#tridiagonal-p-100-n-50" class="anchor"></a>Tridiagonal: P = 100, N = 50</h3>
-<p><img src="images/repsKLtridiag_N50_P100.png"></p>
-<p><br></p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># generate covariance matrix</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co"># (can confirm inverse is tri-diagonal)</span></a>
 <a class="sourceLine" id="cb5-3" data-line-number="3">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">0</span>, <span class="dt">nrow =</span> <span class="dv">100</span>, <span class="dt">ncol =</span> <span class="dv">100</span>)</a>
@@ -235,6 +233,8 @@
 <a class="sourceLine" id="cb5-12" data-line-number="12">out =<span class="st"> </span><span class="kw">eigen</span>(S, <span class="dt">symmetric =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb5-13" data-line-number="13">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
 <a class="sourceLine" id="cb5-14" data-line-number="14">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a></code></pre></div>
+<p><br></p>
+<p><img src="images/repsKLtridiag_N50_P100.png"></p>
 </div>
   </div>
 
