@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Suppose we want to solve the following optimization problem:
+Suppose we want to solve the following optimization problem :
 
 \begin{align*}
   \mbox{minimize } f(x) + g(z) \\
