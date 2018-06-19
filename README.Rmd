@@ -6,7 +6,6 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(magrittr)
 ```
 
 [![Build Status](https://travis-ci.org/MGallow/ADMMsigma.svg?branch=master)](https://travis-ci.org/MGallow/ADMMsigma)
@@ -56,7 +55,7 @@ for (i in 1:5){
 # print oracle precision matrix (shrinkage might be useful)
 (Omega = round(qr.solve(S), 3))
 
-# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 data matrix with rows drawn from iid N_p(0, S)
 set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
@@ -65,7 +64,8 @@ X = Z %*% S.sqrt
 
 
 # print sample precision matrix (perhaps a bad estimate)
-round(qr.solve(cov(X)), 5)
+Sample = (nrow(X) - 1)/nrow(X)*cov(X)
+round(qr.solve(Sample), 5)
 
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)

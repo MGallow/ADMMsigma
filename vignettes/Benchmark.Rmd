@@ -13,15 +13,11 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
-Below we benchmark the various functions contained in `ADMMsigma`. We can see that `ADMMsigma` (at the default tolerance) offers comparable computation time to the popular `glasso` R package.
+This is a short effort to give users an idea of how long the functions take to process. The benchmarks were performed using the default R install on [Travis CI](https://travis-ci.org/).
 
-### Computer Specs:
+*Note: the benchmarks -- particularly `ADMMsigma` -- run significantly faster on my personal machine (MacBook Pro Late 2016). In most cases, the processes take $\approx$ 25\% of the time.*
 
- - MacBook Pro (Late 2016)
- - Processor: 2.9 GHz Intel Core i5
- - Memory: 8GB 2133 MHz
- - Graphics: Intel Iris Graphics 550
-
+We will be estimating a tri-diagonal precision matrix with dimension $p = 100$:
 
 <br>\vspace{0.5cm}
 ```{r, message = FALSE, echo = TRUE}
@@ -45,24 +41,59 @@ out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
+# calculate sample covariance matrix
+Sample = (nrow(X) - 1)/nrow(X)*cov(X)
 
-# glasso (for comparison)
-microbenchmark(glasso::glasso(s = S, rho = 0.1))
+```
+
+Default convergence tolerance with specified tuning parameters (no cross validation):
+
+```{r, message = FALSE, echo = TRUE}
 
 # benchmark ADMMsigma - default tolerance
-microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol.abs = 1e-4, tol.rel = 1e-4, trace = "none"))
+microbenchmark(ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-4, tol.rel = 1e-4, trace = "none"))
+
+```
+
+Smaller convergence tolerance with specified tuning parameters (no cross validation):
+
+```{r, message = FALSE, echo = TRUE}
 
 # benchmark ADMMsigma - tolerance 1e-8
-microbenchmark(ADMMsigma(S = S, lam = 0.1, alpha = 1, tol.abs = 1e-8, tol.rel = 1e-8, trace = "none"))
+microbenchmark(ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-8, tol.rel = 1e-8, trace = "none"))
+
+```
+
+Default convergence tolerance with cross validation for both `lam` and `alpha`:
+
+```{r, message = FALSE, echo = TRUE}
 
 # benchmark ADMMsigma CV - default parameter grid
 microbenchmark(ADMMsigma(X, trace = "none"), times = 5)
 
+```
+
+Parallel (`cores = 2`) cross validation:
+
+```{r, message = FALSE, echo = TRUE}
+
 # benchmark ADMMsigma parallel CV
 microbenchmark(ADMMsigma(X, cores = 2, trace = "none"), times = 5)
 
+```
+
+Cross validation with log-likelihood convergence criteria:
+
+```{r, message = FALSE, echo = TRUE}
+
 # benchmark ADMMsigma CV - likelihood convergence criteria
 microbenchmark(ADMMsigma(X, crit = "loglik", trace = "none"), times = 5)
+
+```
+
+`RIDGEsigma` with extremely fine parameter grid:
+
+```{r, message = FALSE, echo = TRUE}
 
 # benchmark RIDGEsigma CV
 microbenchmark(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none"), times = 5)

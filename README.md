@@ -70,7 +70,7 @@ for (i in 1:5){
     ## [5,]  0.000  0.000  0.000 -1.373  1.961
 
 ``` r
-# generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+# generate 100 x 5 data matrix with rows drawn from iid N_p(0, S)
 set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
@@ -79,15 +79,16 @@ X = Z %*% S.sqrt
 
 
 # print sample precision matrix (perhaps a bad estimate)
-round(qr.solve(cov(X)), 5)
+Sample = (nrow(X) - 1)/nrow(X)*cov(X)
+round(qr.solve(Sample), 5)
 ```
 
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  2.30646 -1.53483  0.21884 -0.08521  0.24066
-    ## [2,] -1.53483  3.24286 -1.66346 -0.14134  0.18760
-    ## [3,]  0.21884 -1.66346  3.16698 -1.23906 -0.10906
-    ## [4,] -0.08521 -0.14134 -1.23906  2.74022 -1.35853
-    ## [5,]  0.24066  0.18760 -0.10906 -1.35853  2.03323
+    ## [1,]  2.32976 -1.55033  0.22105 -0.08607  0.24309
+    ## [2,] -1.55033  3.27561 -1.68026 -0.14277  0.18949
+    ## [3,]  0.22105 -1.68026  3.19897 -1.25158 -0.11016
+    ## [4,] -0.08607 -0.14277 -1.25158  2.76790 -1.37226
+    ## [5,]  0.24309  0.18949 -0.11016 -1.37226  2.05377
 
 ``` r
 # elastic-net type penalty (set tolerance to 1e-8)

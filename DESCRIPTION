@@ -30,7 +30,6 @@ Suggests: testthat,
     knitr,
     rmarkdown,
     microbenchmark,
-    glasso,
     pkgdown
 SystemRequirements: GNU make
 VignetteBuilder: knitr

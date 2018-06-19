@@ -13,39 +13,9 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
-## Installation
 
-<br>\vspace{0.5cm}
-```{r, eval = FALSE, echo = TRUE}
-# The easiest way to install is from CRAN
-install.packages("ADMMsigma")
+BLAH BLAH BLAH!!!!!
 
-# You can also install the development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("MGallow/ADMMsigma")
-```
-<br>\vspace{0.5cm}
-
-If there are any issues/bugs, please let me know: [github](https://github.com/MGallow/ADMMsigma/issues). You can also contact me via my [website](https://mgallow.github.io/). Pull requests are welcome!
-
-<br>\vspace{0.5cm}
-
-A (possibly incomplete) list of functions contained in the package can be found below:
-
-* `ADMMsigma()` computes the estimated precision matrix (ridge, lasso, and elastic-net type regularization optional)
-
-* `RIDGEsigma()` computes the estimated ridge penalized precision matrix via closed-form solution
-
-* `plot.ADMMsigma()` produces a heat map or line graph for cross validation errors
-
-* `plot.RIDGEsigma()` produces a heat map or line graph for cross validation errors
-
-
-<br>\vspace{1cm}
-
-## Usage
-
-We will first generate data from a sparse, tri-diagonal precision matrix and denote it as Omega.
 
 <br>\vspace{0.5cm}
 ```{r, message = FALSE, echo = TRUE}
