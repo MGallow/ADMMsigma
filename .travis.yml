@@ -11,6 +11,10 @@ branches:
 # cache local packages
 cache: packages
 
+# install textlive
+before_install:
+- sudo apt-get install texlive-latex-base
+
 # install the package and dependencies:
 # - update all installed packages
 # - install package with dependencies
