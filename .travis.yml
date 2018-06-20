@@ -13,10 +13,10 @@ cache: packages
 
 # install required latex packages
 before_install:
-- tlmgr install index
-- tlmgr install amsmath
-- tlmgr install bbm
-- tlmgr install multirow
+  - tlmgr install index
+  - tlmgr install amsmath
+  - tlmgr install bbm
+  - tlmgr install multirow
 
 # install the package and dependencies:
 # - update all installed packages
