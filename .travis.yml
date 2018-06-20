@@ -13,7 +13,7 @@ branches:
 cache:
   packages: yes
   directories:
-    - $TRAVIS_BUILD_DIR/vignettes
+    - $TRAVIS_BUILD_DIR/docs
 
 # install required latex packages (if needed)
 #before_install:
@@ -28,7 +28,7 @@ install:
 
 # Build and check package
 script:
-  - travis_wait R CMD build . --no-manual
+  - R CMD build . --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
   - R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual --as-cran 
   - travis_wait Rscript -e "pkgdown::build_site()"
