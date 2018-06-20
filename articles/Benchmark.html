@@ -166,48 +166,48 @@
 <pre><code>## Unit: milliseconds
 ##                                                                                                expr
 ##  ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-04,      tol.rel = 1e-04, trace = "none")
-##       min      lq     mean   median       uq      max neval
-##  284.9814 286.028 296.1097 295.3591 302.2648 326.8849   100</code></pre>
+##       min       lq     mean   median       uq      max neval
+##  285.4034 292.9333 306.7828 298.9154 305.7942 443.6538   100</code></pre>
 <p>Smaller convergence tolerance with specified tuning parameters (no cross validation):</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># benchmark ADMMsigma - tolerance 1e-8</span></a>
 <a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(<span class="dt">S =</span> Sample, <span class="dt">lam =</span> <span class="fl">0.1</span>, <span class="dt">alpha =</span> <span class="dv">1</span>, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>, <span class="dt">trace =</span> <span class="st">"none"</span>))</a></code></pre></div>
 <pre><code>## Unit: seconds
 ##                                                                                                expr
 ##  ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-08,      tol.rel = 1e-08, trace = "none")
-##      min       lq    mean   median       uq      max neval
-##  1.00524 1.008318 1.06397 1.046813 1.078654 1.383926   100</code></pre>
+##       min       lq     mean   median       uq     max neval
+##  1.009953 1.027022 1.078266 1.054045 1.088009 1.38267   100</code></pre>
 <p>Default convergence tolerance with cross validation for both <code>lam</code> and <code>alpha</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># benchmark ADMMsigma CV - default parameter grid</span></a>
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
-##                          expr      min       lq    mean   median       uq
-##  ADMMsigma(X, trace = "none") 26.87093 29.20385 30.1765 30.94835 31.45932
+##                          expr     min       lq     mean   median       uq
+##  ADMMsigma(X, trace = "none") 27.1733 30.05881 32.64078 30.67661 33.14103
 ##       max neval
-##  32.40007     5</code></pre>
+##  42.15416     5</code></pre>
 <p>Parallel (<code>cores = 2</code>) cross validation:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># benchmark ADMMsigma parallel CV</span></a>
 <a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">cores =</span> <span class="dv">2</span>, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
 ##                                     expr      min       lq     mean
-##  ADMMsigma(X, cores = 2, trace = "none") 17.22823 17.63676 18.27703
+##  ADMMsigma(X, cores = 2, trace = "none") 17.65535 17.84767 17.98691
 ##    median       uq      max neval
-##  17.94308 18.89556 19.68153     5</code></pre>
+##  17.99927 18.21201 18.22027     5</code></pre>
 <p>Cross validation with log-likelihood convergence criteria:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># benchmark ADMMsigma CV - likelihood convergence criteria</span></a>
 <a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">crit =</span> <span class="st">"loglik"</span>, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
-##                                           expr      min      lq     mean
-##  ADMMsigma(X, crit = "loglik", trace = "none") 22.56579 22.8143 23.40815
-##    median       uq      max neval
-##  22.92871 24.13842 24.59352     5</code></pre>
+##                                           expr      min       lq     mean
+##  ADMMsigma(X, crit = "loglik", trace = "none") 21.68488 21.78277 22.13056
+##   median       uq     max neval
+##  22.2541 22.39275 22.5383     5</code></pre>
 <p><code>RIDGEsigma</code> with extremely fine parameter grid:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co"># benchmark RIDGEsigma CV</span></a>
 <a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>), <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
 ##                                                      expr      min
-##  RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none") 40.55901
+##  RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none") 40.40045
 ##        lq    mean   median       uq      max neval
-##  40.77895 45.4932 47.07106 48.87326 50.18371     5</code></pre>
+##  40.96809 41.4717 41.07023 41.50869 43.41102     5</code></pre>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
