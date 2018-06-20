@@ -1,7 +1,8 @@
 # Thanks to jtilly (https://github.com/jtilly/R-travis-container-example/blob/master/.travis.yml)
 
 language: r
-#dist: trusty
+pandoc_version: 2.2.1
+dist: trusty
 sudo: false
 
 branches:
@@ -9,14 +10,14 @@ branches:
     - master
 
 # cache local packages
-cache: packages
+cache:
+  packages: yes
+  directories:
+    - $TRAVIS_BUILD_DIR/vignettes
 
-# install required latex packages
+# install required latex packages (if needed)
 #before_install:
-#  - tlmgr install index
-#  - tlmgr install amsmath
 #  - tlmgr install bbm
-#  - tlmgr install multirow
 
 # install the package and dependencies:
 # - update all installed packages
@@ -27,7 +28,7 @@ install:
 
 # Build and check package
 script:
-  - R CMD build . --no-build-vignettes --no-manual
+  - travis_wait R CMD build . --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
   - R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual --as-cran 
   - travis_wait Rscript -e "pkgdown::build_site()"
