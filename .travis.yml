@@ -2,7 +2,7 @@
 
 language: r
 dist: trusty
-sudo: false
+sudo: true
 
 branches:
   only:
@@ -13,7 +13,7 @@ cache: packages
 
 # install textlive
 before_install:
-- sudo apt-get install texlive-latex-base
+- sudo apt-get -qq update && apt-get install -y --no-install-recommends texlive-latex-base
 
 # install the package and dependencies:
 # - update all installed packages
