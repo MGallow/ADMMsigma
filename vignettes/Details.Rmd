@@ -4,15 +4,15 @@ author: "Matt Galloway"
 #date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: lib.bib
+header-includes:
+  - \usepackage{bbm}
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \usepackage{amsmath}
 vignette: >
   %\VignetteIndexEntry{Penalized Precision Matrix Estimation}
   %\VignetteEngine{knitr::knitr}
   %\usepackage[UTF-8]{inputenc}
-header-includes:
-   - \usepackage{bbm}
-   - \usepackage{multirow}
-   - \usepackage{graphicx}
-   - \usepackage{amsmath}
 ---
 
 ```{r setup, include=FALSE}
