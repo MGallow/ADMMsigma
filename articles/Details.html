@@ -138,17 +138,21 @@
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>Suppose we want to solve the following optimization problem :</p>
-<p><span class="math display">\[ \begin{align*}
+<p><span class="math display">\[\begin{align*}
   \mbox{minimize } f(x) + g(z) \\
   \mbox{subject to } Ax + Bz = c
-\end{align*} \]</span></p>
+\end{align*}\]</span></p>
 <p>where <span class="math inline">\(x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times n}, B \in \mathbb{R}^{p \times m}\)</span>, and <span class="math inline">\(c \in \mathbb{R}^{p}\)</span>. Following <span class="citation">Boyd et al. (2011)</span>, the optimization problem will be introduced in vector form though we will later consider cases where <span class="math inline">\(x\)</span> and <span class="math inline">\(z\)</span> are matrices. We will also assume <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> are convex functions. Optimization problems like this arise naturally in several statistics and machine learning applications – particularly regularization methods. For instance, we could take <span class="math inline">\(f\)</span> to be the squared error loss, <span class="math inline">\(g\)</span> to be the <span class="math inline">\(l_{2}\)</span>-norm, <span class="math inline">\(c\)</span> to be equal to zero and <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> to be identity matrices to solve the ridge regression optimization problem.</p>
 <p>The <em>augmented lagrangian</em> is constructed as follows:</p>
 <p><span class="math display">\[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]</span></p>
 <p>where <span class="math inline">\(y \in \mathbb{R}^{p}\)</span> is the lagrange multiplier and <span class="math inline">\(\rho &gt; 0\)</span> is a scalar. Clearly any minimizer, <span class="math inline">\(p^{*}\)</span>, under the augmented lagrangian is equivalent to that of the lagrangian since any feasible point <span class="math inline">\((x, z)\)</span> satisfies the constraint <span class="math inline">\(\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0\)</span>.</p>
 <p><span class="math display">\[ p^{*} = inf\left\{ f(x) + g(z) | Ax + Bz = c \right\} \]</span></p>
 <p>The alternating direction method of multipliers (ADMM) algorithm consists of the following repeated iterations:</p>
-
+<p><span class="math display">\[\begin{align}
+  x^{k + 1} &amp;:= \arg\min_{x}L_{\rho}(x, z^{k}, y^{k}) \\
+  z^{k + 1} &amp;:= \arg\min_{z}L_{\rho}(x^{k + 1}, z, y^{k}) \\
+  y^{k + 1} &amp;:= y^{k} + \rho(Ax^{k + 1} + Bz^{k + 1} - c)
+\end{align}\]</span></p>
 <p>A more complete introduction to the algorithm – specifically how it arose out of <em>dual ascent</em> and <em>method of multipliers</em> – can be found in <span class="citation">Boyd et al. (2011)</span>.</p>
 <p><br></p>
 </div>
@@ -166,25 +170,45 @@
 <p>By letting <span class="math inline">\(f\)</span> be equal to the non-penalized likelihood and <span class="math inline">\(g\)</span> equal to <span class="math inline">\(P\left( \Omega \right)\)</span>, our goal is to minimize the full augmented lagrangian where the constraint is that <span class="math inline">\(\Omega - Z\)</span> is equal to zero:</p>
 <p><span class="math display">\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + Tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]</span></p>
 <p>The ADMM algorithm for estimating the penalized precision matrix in this problem is</p>
-
+<p><span class="math display">\[\begin{align}
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  \Lambda^{k + 1} &amp;= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
+\end{align}\]</span></p>
 <p><br></p>
 </div>
 <div id="scaled-form-admm" class="section level2">
 <h2 class="hasAnchor">
 <a href="#scaled-form-admm" class="anchor"></a>Scaled-Form ADMM</h2>
 <p>An alternate form of the ADMM algorithm can constructed by scaling the dual variable (<span class="math inline">\(\Lambda^{k}\)</span>). Let us define <span class="math inline">\(R^{k} = \Omega - Z^{k}\)</span> and <span class="math inline">\(U^{k} = \Lambda^{k}/\rho\)</span>.</p>
-
+<p><span class="math display">\[\begin{align*}
+  Tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &amp;= Tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
+  &amp;= \frac{\rho}{2}\left\| R^{k} + \Lambda^{k}/\rho \right\|_{F}^{2} - \frac{\rho}{2}\left\| \Lambda^{k}/\rho \right\|_{F}^{2} \\
+  &amp;= \frac{\rho}{2}\left\| R^{k} + U^{k} \right\|_{F}^{2} - \frac{\rho}{2}\left\| U^{k} \right\|_{F}^{2}
+\end{align*}\]</span></p>
 <p>Therefore, the condensed-form ADMM algorithm can now be written as</p>
-
+<p><span class="math display">\[\begin{align}
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
+  U^{k + 1} &amp;= U^{k} + \Omega^{k + 1} - Z^{k + 1}
+\end{align}\]</span></p>
 <p>And more generally (in vector form),</p>
-
+<p><span class="math display">\[\begin{align}
+  x^{k + 1} &amp;= \arg\min_{x}\left\{ f(x) + \frac{\rho}{2}\left\| Ax + Bz^{k} - c + u^{k} \right\|_{2}^{2} \right\} \\
+  z^{k + 1} &amp;= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
+  u^{k + 1} &amp;= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
+\end{align}\]</span></p>
 <p>Note that there are limitations to using this method. Because the dual variable is scaled by <span class="math inline">\(\rho\)</span> (the step size), this form limits one to using a constant step size without making further adjustments to <span class="math inline">\(U^{k}\)</span>. It has been shown in the literature that a dynamic step size can significantly reduce the number of iterations required for convergence.</p>
 <p><br></p>
 </div>
 <div id="algorithm" class="section level2">
 <h2 class="hasAnchor">
 <a href="#algorithm" class="anchor"></a>Algorithm</h2>
-
+<p><span class="math display">\[\begin{align*}
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &amp;= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  \Lambda^{k + 1} &amp;= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
+\end{align*}\]</span></p>
 <p><br></p>
 <p>Initialize <span class="math inline">\(Z^{0}, \Lambda^{0}\)</span>, and <span class="math inline">\(\rho\)</span>. Iterate the following three steps until convergence:</p>
 <ol style="list-style-type: decimal">
@@ -194,6 +218,10 @@
 <ol start="2" style="list-style-type: decimal">
 <li>Elementwise soft-thresholding for all <span class="math inline">\(i = 1,..., p\)</span> and <span class="math inline">\(j = 1,..., p\)</span>.</li>
 </ol>
+<p><span class="math display">\[\begin{align*}
+Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}Sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&amp;= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}, \lambda\alpha\right)
+\end{align*}\]</span></p>
 <ol start="3" style="list-style-type: decimal">
 <li>Update <span class="math inline">\(\Lambda^{k + 1}\)</span>.</li>
 </ol>
@@ -203,13 +231,19 @@
 <h3 class="hasAnchor">
 <a href="#proof-of-1" class="anchor"></a>Proof of (1):</h3>
 <p><span class="math display">\[ \Omega^{k + 1} = \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]</span></p>
-
+<p><span class="math display">\[\begin{align*}
+  \nabla_{\Omega}&amp;\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  &amp;= S - \Omega^{-1} + \Lambda^{k} + \rho\left( \Omega - Z^{k} \right)
+\end{align*}\]</span></p>
 <p>Set the gradient equal to zero and decompose <span class="math inline">\(\Omega = VDV^{T}\)</span> where <span class="math inline">\(D\)</span> is a diagonal matrix with diagonal elements equal to the eigen values of <span class="math inline">\(\Omega\)</span> and <span class="math inline">\(V\)</span> is the matrix with corresponding eigen vectors as columns.</p>
 <p><span class="math display">\[ S + \Lambda^{k} - \rho Z^{k} = \Omega^{-1} - \rho \Omega = VD^{-1}V^{T} - \rho VDV^{T} =  V\left(D^{-1} - \rho D\right)V^{T} \]</span></p>
 <p>This equivalence implies that</p>
 <p><span class="math display">\[ \phi_{j}\left( S + \Lambda^{k} - \rho Z^{k} \right) = \frac{1}{\phi_{j}(\Omega^{k + 1})} - \rho\phi_{j}(\Omega^{k + 1}) \]</span></p>
 <p>where <span class="math inline">\(\phi_{j}(\cdot)\)</span> is the <span class="math inline">\(j\)</span>th eigen value.</p>
-
+<p><span class="math display">\[\begin{align*}
+  &amp;\Rightarrow \rho\phi_{j}^{2}(\Omega^{k + 1}) + \phi_{j}\left( S + \Lambda^{k} - \rho Z^{k} \right)\phi_{j}(\Omega^{k + 1}) - 1 = 0 \\
+  &amp;\Rightarrow \phi_{j}(\Omega^{k + 1}) = \frac{-\phi_{j}(S + \Lambda^{k} - \rho Z^{k}) \pm \sqrt{\phi_{j}^{2}(S + \Lambda^{k} - \rho Z^{k}) + 4\rho}}{2\rho}
+\end{align*}\]</span></p>
 <p>In summary, if we decompose <span class="math inline">\(S + \Lambda^{k} - \rho Z^{k} = VQV^{T}\)</span> then</p>
 <p><span class="math display">\[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + (Q^{2} + 4\rho I_{p})^{1/2}\right] V^{T} \]</span></p>
 <p><br></p>
@@ -218,7 +252,11 @@
 <h3 class="hasAnchor">
 <a href="#proof-of-2" class="anchor"></a>Proof of (2)</h3>
 <p><span class="math display">\[ Z^{k + 1} = \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]</span></p>
-
+<p><span class="math display">\[\begin{align*}
+  \partial&amp;\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  &amp;= \partial\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right]\right\} + \nabla_{\Omega}\left\{\frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  &amp;= \lambda(1 - \alpha)Z + Sign(Z)\lambda\alpha - \Lambda^{k} - \rho\left( \Omega^{k + 1} - Z \right)
+\end{align*}\]</span></p>
 <p>where <span class="math inline">\(Sign(Z)\)</span> is the elementwise Sign operator. By setting the gradient/sub-differential equal to zero, we arrive at the following equivalence:</p>
 <p><span class="math display">\[ Z_{ij} = \frac{1}{\lambda(1 - \alpha) + \rho}\left( \rho \Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} - Sign(Z_{ij})\lambda\alpha \right) \]</span></p>
 <p>for all <span class="math inline">\(i = 1,..., p\)</span> and <span class="math inline">\(j = 1,..., p\)</span>. We observe two scenarios:</p>
@@ -231,7 +269,10 @@
 </ul>
 <p><span class="math display">\[ \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} &lt; -\lambda\alpha \]</span></p>
 <p>This implies that <span class="math inline">\(Sign(Z_{ij}) = Sign(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k})\)</span>. Putting all the pieces together, we arrive at</p>
-
+<p><span class="math display">\[\begin{align*}
+Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}Sign\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&amp;= \frac{1}{\lambda(1 - \alpha) + \rho}Soft\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}, \lambda\alpha\right)
+\end{align*}\]</span></p>
 <p>where <span class="math inline">\(Soft\)</span> is the soft-thresholding function.</p>
 <p><br><br></p>
 </div>
