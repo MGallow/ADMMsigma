@@ -24,10 +24,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Suppose we want to solve the following optimization problem :
 
-\begin{align*}
+$$ \begin{align*}
   \mbox{minimize } f(x) + g(z) \\
   \mbox{subject to } Ax + Bz = c
-\end{align*}
+\end{align*} $$
 
 where $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times n}, B \in \mathbb{R}^{p \times m}$, and $c \in \mathbb{R}^{p}$. Following @boyd2011distributed, the optimization problem will be introduced in vector form though we will later consider cases where $x$ and $z$ are matrices. We will also assume $f$ and $g$ are convex functions. Optimization problems like this arise naturally in several statistics and machine learning applications -- particularly regularization methods. For instance, we could take $f$ to be the squared error loss, $g$ to be the $l_{2}$-norm, $c$ to be equal to zero and $A$ and $B$ to be identity matrices to solve the ridge regression optimization problem.
 
