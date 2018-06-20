@@ -1,7 +1,7 @@
 # Thanks to jtilly (https://github.com/jtilly/R-travis-container-example/blob/master/.travis.yml)
 
 language: r
-dist: trusty
+#dist: trusty
 sudo: false
 
 branches:
@@ -12,11 +12,11 @@ branches:
 cache: packages
 
 # install required latex packages
-before_install:
-  - tlmgr install index
-  - tlmgr install amsmath
-  - tlmgr install bbm
-  - tlmgr install multirow
+#before_install:
+#  - tlmgr install index
+#  - tlmgr install amsmath
+#  - tlmgr install bbm
+#  - tlmgr install multirow
 
 # install the package and dependencies:
 # - update all installed packages
