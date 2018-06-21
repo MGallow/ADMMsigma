@@ -10,10 +10,7 @@ branches:
     - master
 
 # cache local packages
-cache:
-  packages: yes
-  directories:
-    - $TRAVIS_BUILD_DIR/docs
+cache: packages
 
 # install required latex packages (if needed)
 #before_install:
