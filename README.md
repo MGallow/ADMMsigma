@@ -10,8 +10,17 @@ Status](https://travis-ci.org/MGallow/ADMMsigma.svg?branch=master)](https://trav
 `ADMMsigma` is an R package that estimates a penalized precision matrix
 via the alternating direction method of multipliers (ADMM) algorithm. It
 currently supports a general elastic-net penalty that allows for both
-ridge and lasso-type penalties as special cases. A (possibly incomplete)
-list of functions contained in the package can be found below:
+ridge and lasso-type penalties as special
+cases.
+
+<p align="center">
+
+<img src = "https://github.com/MGallow/ADMMsigma/raw/master/vignettes/images/gif.gif"/>
+
+</p>
+
+A (possibly incomplete) list of functions contained in the package can
+be found below:
 
   - `ADMMsigma()` computes the estimated precision matrix (ridge, lasso,
     and elastic-net type regularization optional)
