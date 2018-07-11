@@ -170,7 +170,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
         
         // save estimate if path = TRUE
         if (path){
-          Path.slice(j + i*a) = as<arma::mat>(ADMM["Omega"]);
+          Path.slice(j + i*a) = as<arma::mat>(ADMM["Z"]);
         }
         
         // update progress bar
