@@ -43,8 +43,8 @@ arma::mat CVP_ADMMc(const int n, const arma::mat &S_train, const arma::mat &S_va
   // initialization
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
   double sgn = 0, logdet = 0, alpha_, lam_;
-  arma::mat Omega, initOmega, initZ2, initY; arma::colvec nzeros;
-  initOmega = initZ2 = initY = arma::zeros<arma::mat>(p, p);
+  arma::mat Omega, initOmega, initZ, initY; arma::colvec nzeros;
+  initOmega = initZ = initY = arma::zeros<arma::mat>(p, p);
   arma::mat CV_error(l, a, arma::fill::zeros);
   Progress progress(l*a, trace == "progress");
   
@@ -58,14 +58,14 @@ arma::mat CVP_ADMMc(const int n, const arma::mat &S_train, const arma::mat &S_va
       alpha_ = alpha[j];
       
       // compute the penalized likelihood precision matrix estimator at the ith value in lam:
-      List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit);
+      List ADMM = ADMMc(S_train, initOmega, initZ, initY, lam_, alpha_, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit);
       Omega = as<arma::mat>(ADMM["Omega"]);
 
       if (start == "warm"){
         
         // option to save initial values for warm starts
         initOmega = as<arma::mat>(ADMM["Omega"]);
-        initZ2 = as<arma::mat>(ADMM["Z2"]);
+        initZ = as<arma::mat>(ADMM["Z"]);
         initY = as<arma::mat>(ADMM["Y"]);
         rho = as<double>(ADMM["rho"]);
         maxit = adjmaxit;

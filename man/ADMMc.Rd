@@ -4,7 +4,7 @@
 \alias{ADMMc}
 \title{Penalized precision matrix estimation via ADMM (c++)}
 \usage{
-ADMMc(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
+ADMMc(S, initOmega, initZ, initY, lam, alpha = 1, diagonal = FALSE,
   rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM",
   tol_abs = 1e-04, tol_rel = 1e-04, maxit = 10000L)
 }
@@ -13,7 +13,7 @@ ADMMc(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE,
 
 \item{initOmega}{initialization matrix for Omega}
 
-\item{initZ2}{initialization matrix for Z2}
+\item{initZ}{initialization matrix for Z}
 
 \item{initY}{initialization matrix for Y}
 

@@ -79,7 +79,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   // initialization
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
   double sgn = 0, logdet = 0, initrho = rho, alpha_, lam_;
-  arma::mat X_train, X_test, S_train(S), S_test(S), Omega, initOmega, initZ2, initY;
+  arma::mat X_train, X_test, S_train(S), S_test(S), Omega, initOmega, initZ, initY;
   arma::mat CV_error, zeros(p, p, arma::fill::zeros), zerosla(l, a, arma::fill::zeros);
   arma::uvec index, index_; arma::vec folds; arma::rowvec X_bar;
   arma::cube CV_errors(l, a, K, arma::fill::zeros), Path;
@@ -109,7 +109,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
     
     // re-initialize values for each fold
     CV_error = zerosla; maxit = initmaxit;
-    initOmega = initZ2 = initY = zeros; rho = initrho;
+    initOmega = initZ = initY = zeros; rho = initrho;
       
     if (K > 1) {
       
@@ -142,14 +142,14 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
         alpha_ = alpha[j];
         
         // compute the ridge-penalized likelihood precision matrix estimator at the ith value in lam:
-        List ADMM = ADMMc(S_train, initOmega, initZ2, initY, lam_, alpha_, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit);
+        List ADMM = ADMMc(S_train, initOmega, initZ, initY, lam_, alpha_, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit);
         Omega = as<arma::mat>(ADMM["Omega"]);
         
         if (start == "warm"){
           
           // option to save initial values for warm starts
           initOmega = as<arma::mat>(ADMM["Omega"]);
-          initZ2 = as<arma::mat>(ADMM["Z2"]);
+          initZ = as<arma::mat>(ADMM["Z"]);
           initY = as<arma::mat>(ADMM["Y"]);
           rho = as<double>(ADMM["rho"]);
           maxit = adjmaxit;
@@ -170,7 +170,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
         
         // save estimate if path = TRUE
         if (path){
-          Path.slice(j + i*a) = as<arma::mat>(ADMM["Z2"]);
+          Path.slice(j + i*a) = as<arma::mat>(ADMM["Omega"]);
         }
         
         // update progress bar
