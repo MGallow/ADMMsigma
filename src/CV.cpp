@@ -80,7 +80,7 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   int n, p = S.n_cols, l = lam.n_rows, a = alpha.n_rows, initmaxit = maxit;
   double sgn = 0, logdet = 0, initrho = rho, alpha_, lam_;
   arma::mat X_train, X_test, S_train(S), S_test(S), Omega, initOmega, initZ, initY;
-  arma::mat CV_error, zeros(p, p, arma::fill::zeros), zerosla(l, a, arma::fill::zeros);
+  arma::mat CV_error, zerosla(l, a, arma::fill::zeros);
   arma::uvec index, index_; arma::vec folds; arma::rowvec X_bar;
   arma::cube CV_errors(l, a, K, arma::fill::zeros), Path;
   Progress progress(l*a*K, trace == "progress");
@@ -108,8 +108,9 @@ List CV_ADMMc(const arma::mat &X, const arma::mat &S, const arma::colvec &lam, c
   for (int k = 0; k < K; k++){
     
     // re-initialize values for each fold
-    CV_error = zerosla; maxit = initmaxit;
-    initOmega = initZ = initY = zeros; rho = initrho;
+    CV_error = zerosla; maxit = initmaxit; rho = initrho;
+    initOmega = initZ = arma::diagmat(1/arma::diagvec(S));
+    initY = arma::zeros<arma::mat>(p, p);
       
     if (K > 1) {
       

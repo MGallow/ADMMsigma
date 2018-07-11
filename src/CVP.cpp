@@ -44,7 +44,8 @@ arma::mat CVP_ADMMc(const int n, const arma::mat &S_train, const arma::mat &S_va
   int p = S_train.n_rows, l = lam.n_rows, a = alpha.n_rows;
   double sgn = 0, logdet = 0, alpha_, lam_;
   arma::mat Omega, initOmega, initZ, initY; arma::colvec nzeros;
-  initOmega = initZ = initY = arma::zeros<arma::mat>(p, p);
+  initOmega = initZ = arma::diagmat(1/arma::diagvec(S_train));
+  initY = arma::zeros<arma::mat>(p, p);
   arma::mat CV_error(l, a, arma::fill::zeros);
   Progress progress(l*a, trace == "progress");
   
