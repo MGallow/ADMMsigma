@@ -140,6 +140,9 @@ lasso-type penalty." />
     <li>
       <a href="https://mgallow.github.io/CVglasso/">CVglasso</a>
     </li>
+    <li>
+      <a href="https://mgallow.github.io/SCPME/">shrink</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -365,59 +368,59 @@ lasso-type penalty.</p>
 <span class='fu'>ADMMsigma</span>(<span class='no'>X</span>)</div><div class='output co'>#&gt; 
 #&gt; Call: ADMMsigma(X = X)
 #&gt; 
-#&gt; Iterations: 66
+#&gt; Iterations: 23
 #&gt; 
 #&gt; Tuning parameters:
 #&gt;       log10(lam)  alpha
 #&gt; [1,]      -1.599      1
 #&gt; 
-#&gt; Log-likelihood: -108.41022
+#&gt; Log-likelihood: -108.41249
 #&gt; 
 #&gt; Omega:
 #&gt;          [,1]     [,2]     [,3]     [,4]     [,5]
-#&gt; [1,]  2.15228 -1.26841  0.00000  0.00000  0.19744
-#&gt; [2,] -1.26841  2.78830 -1.31943 -0.08246  0.01018
-#&gt; [3,]  0.00000 -1.31943  2.84979 -1.16708 -0.01015
-#&gt; [4,]  0.00000 -0.08246 -1.16708  2.49277 -1.18844
-#&gt; [5,]  0.19744  0.01018 -0.01015 -1.18844  1.88069</div><div class='input'>
+#&gt; [1,]  2.15312 -1.26977  0.00000  0.00000  0.19724
+#&gt; [2,] -1.26977  2.79119 -1.32200 -0.08152  0.00989
+#&gt; [3,]  0.00000 -1.32200  2.85339 -1.16930 -0.00931
+#&gt; [4,]  0.00000 -0.08152 -1.16930  2.49442 -1.18906
+#&gt; [5,]  0.19724  0.00989 -0.00931 -1.18906  1.88091</div><div class='input'>
 <span class='co'># ridge penalty (use CV for optimal lambda)</span>
 <span class='fu'>ADMMsigma</span>(<span class='no'>X</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0</span>)</div><div class='output co'>#&gt; 
 #&gt; Call: ADMMsigma(X = X, alpha = 0)
 #&gt; 
-#&gt; Iterations: 58
+#&gt; Iterations: 27
 #&gt; 
 #&gt; Tuning parameters:
 #&gt;       log10(lam)  alpha
 #&gt; [1,]      -1.599      0
 #&gt; 
-#&gt; Log-likelihood: -102.22452
+#&gt; Log-likelihood: -102.22453
 #&gt; 
 #&gt; Omega:
 #&gt;          [,1]     [,2]     [,3]     [,4]     [,5]
-#&gt; [1,]  2.12904 -1.21826 -0.01544 -0.03166  0.23187
-#&gt; [2,] -1.21826  2.74648 -1.25141 -0.24670  0.16448
-#&gt; [3,] -0.01544 -1.25141  2.76938 -1.00483 -0.19582
-#&gt; [4,] -0.03166 -0.24670 -1.00483  2.44699 -1.15723
-#&gt; [5,]  0.23187  0.16448 -0.19582 -1.15723  1.90428</div><div class='input'>
+#&gt; [1,]  2.12894 -1.21804 -0.01560 -0.03163  0.23187
+#&gt; [2,] -1.21804  2.74612 -1.25106 -0.24677  0.16446
+#&gt; [3,] -0.01560 -1.25106  2.76906 -1.00464 -0.19586
+#&gt; [4,] -0.03163 -0.24677 -1.00464  2.44681 -1.15713
+#&gt; [5,]  0.23187  0.16446 -0.19586 -1.15713  1.90422</div><div class='input'>
 <span class='co'># lasso penalty (lam = 0.1)</span>
 <span class='fu'>ADMMsigma</span>(<span class='no'>X</span>, <span class='kw'>lam</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; 
 #&gt; Call: ADMMsigma(X = X, lam = 0.1, alpha = 1)
 #&gt; 
-#&gt; Iterations: 67
+#&gt; Iterations: 26
 #&gt; 
 #&gt; Tuning parameters:
 #&gt;       log10(lam)  alpha
 #&gt; [1,]          -1      1
 #&gt; 
-#&gt; Log-likelihood: -140.60864
+#&gt; Log-likelihood: -140.62042
 #&gt; 
 #&gt; Omega:
 #&gt;          [,1]     [,2]     [,3]     [,4]     [,5]
-#&gt; [1,]  1.81633 -0.87377  0.00000  0.00000  0.00000
-#&gt; [2,] -0.87377  2.13797 -0.93396 -0.04670  0.00000
-#&gt; [3,]  0.00000 -0.93396  2.22066 -0.85016  0.00000
-#&gt; [4,]  0.00000 -0.04670 -0.85016  1.95244 -0.85819
-#&gt; [5,]  0.00000  0.00000  0.00000 -0.85819  1.59722</div></pre>
+#&gt; [1,]  1.81687 -0.87463  0.00000  0.00000  0.00000
+#&gt; [2,] -0.87463  2.13999 -0.93586 -0.04631  0.00000
+#&gt; [3,]  0.00000 -0.93586  2.22353 -0.85160  0.00000
+#&gt; [4,]  0.00000 -0.04631 -0.85160  1.95369 -0.85871
+#&gt; [5,]  0.00000  0.00000  0.00000 -0.85871  1.59748</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

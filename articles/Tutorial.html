@@ -88,6 +88,9 @@
     <li>
       <a href="https://mgallow.github.io/CVglasso/">CVglasso</a>
     </li>
+    <li>
+      <a href="https://mgallow.github.io/SCPME/">shrink</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -189,7 +192,7 @@
 <pre><code>## 
 ## Call: ADMMsigma(X = X, tol.abs = 1e-08, tol.rel = 1e-08)
 ## 
-## Iterations: 162
+## Iterations: 47
 ## 
 ## Tuning parameters:
 ##       log10(lam)  alpha
@@ -212,21 +215,21 @@
 <pre><code>## 
 ## Call: ADMMsigma(X = X, alpha = 1)
 ## 
-## Iterations: 66
+## Iterations: 23
 ## 
 ## Tuning parameters:
 ##       log10(lam)  alpha
 ## [1,]      -1.599      1
 ## 
-## Log-likelihood: -108.41022
+## Log-likelihood: -108.41249
 ## 
 ## Omega:
 ##          [,1]     [,2]     [,3]     [,4]     [,5]
-## [1,]  2.15228 -1.26841  0.00000  0.00000  0.19744
-## [2,] -1.26841  2.78830 -1.31943 -0.08246  0.01018
-## [3,]  0.00000 -1.31943  2.84979 -1.16708 -0.01015
-## [4,]  0.00000 -0.08246 -1.16708  2.49277 -1.18844
-## [5,]  0.19744  0.01018 -0.01015 -1.18844  1.88069</code></pre>
+## [1,]  2.15312 -1.26977  0.00000  0.00000  0.19724
+## [2,] -1.26977  2.79119 -1.32200 -0.08152  0.00989
+## [3,]  0.00000 -1.32200  2.85339 -1.16930 -0.00931
+## [4,]  0.00000 -0.08152 -1.16930  2.49442 -1.18906
+## [5,]  0.19724  0.00989 -0.00931 -1.18906  1.88091</code></pre>
 <p><br></p>
 <p><strong>ELASTIC-NET:</strong></p>
 <p><br></p>
@@ -235,21 +238,21 @@
 <pre><code>## 
 ## Call: ADMMsigma(X = X, alpha = 0.5)
 ## 
-## Iterations: 67
+## Iterations: 20
 ## 
 ## Tuning parameters:
 ##       log10(lam)  alpha
 ## [1,]      -1.821    0.5
 ## 
-## Log-likelihood: -101.13595
+## Log-likelihood: -101.13591
 ## 
 ## Omega:
 ##          [,1]     [,2]     [,3]     [,4]     [,5]
-## [1,]  2.20031 -1.32471  0.01656 -0.00334  0.21798
-## [2,] -1.32471  2.90659 -1.37599 -0.19084  0.13651
-## [3,]  0.01656 -1.37599  2.92489 -1.12859 -0.12033
-## [4,] -0.00334 -0.19084 -1.12859  2.56559 -1.23472
-## [5,]  0.21798  0.13651 -0.12033 -1.23472  1.94528</code></pre>
+## [1,]  2.20054 -1.32509  0.01689 -0.00350  0.21805
+## [2,] -1.32509  2.90737 -1.37664 -0.19054  0.13641
+## [3,]  0.01689 -1.37664  2.92555 -1.12877 -0.12032
+## [4,] -0.00350 -0.19054 -1.12877  2.56559 -1.23467
+## [5,]  0.21805  0.13641 -0.12032 -1.23467  1.94525</code></pre>
 <p><br></p>
 <p><strong>RIDGE:</strong></p>
 <p><br></p>
@@ -258,21 +261,21 @@
 <pre><code>## 
 ## Call: ADMMsigma(X = X, alpha = 0)
 ## 
-## Iterations: 65
+## Iterations: 32
 ## 
 ## Tuning parameters:
 ##       log10(lam)  alpha
 ## [1,]      -1.821      0
 ## 
-## Log-likelihood: -99.19746
+## Log-likelihood: -99.19743
 ## 
 ## Omega:
 ##          [,1]     [,2]     [,3]     [,4]     [,5]
-## [1,]  2.18979 -1.31533  0.04515 -0.04090  0.23511
-## [2,] -1.31533  2.90019 -1.37049 -0.22633  0.17808
-## [3,]  0.04515 -1.37049  2.89435 -1.07647 -0.17369
-## [4,] -0.04090 -0.22633 -1.07647  2.55026 -1.22786
-## [5,]  0.23511  0.17808 -0.17369 -1.22786  1.95495</code></pre>
+## [1,]  2.18998 -1.31565  0.04541 -0.04099  0.23512
+## [2,] -1.31565  2.90084 -1.37104 -0.22615  0.17806
+## [3,]  0.04541 -1.37104  2.89494 -1.07670 -0.17366
+## [4,] -0.04099 -0.22615 -1.07670  2.55040 -1.22790
+## [5,]  0.23512  0.17806 -0.17366 -1.22790  1.95497</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="co"># ridge penalty no ADMM</span></a>
 <a class="sourceLine" id="cb15-2" data-line-number="2"><span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>))</a></code></pre></div>
 <pre><code>## 
