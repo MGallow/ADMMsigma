@@ -209,9 +209,9 @@ lasso-type penalty.</p>
   <span class='kw'>lam</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fu'>seq</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='fl'>0.2</span>), <span class='kw'>diagonal</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>path</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>rho</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>mu</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>tau.inc</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>tau.dec</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>crit</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"ADMM"</span>,
   <span class='st'>"loglik"</span>), <span class='kw'>tol.abs</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>tol.rel</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>maxit</span> <span class='kw'>=</span> <span class='fl'>10000</span>,
-  <span class='kw'>adjmaxit</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>crit.cv</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"loglik"</span>, <span class='st'>"AIC"</span>, <span class='st'>"BIC"</span>),
-  <span class='kw'>start</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"warm"</span>, <span class='st'>"cold"</span>), <span class='kw'>cores</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>trace</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"progress"</span>, <span class='st'>"print"</span>,
-  <span class='st'>"none"</span>))</pre>
+  <span class='kw'>adjmaxit</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>crit.cv</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"loglik"</span>, <span class='st'>"penloglik"</span>, <span class='st'>"AIC"</span>,
+  <span class='st'>"BIC"</span>), <span class='kw'>start</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"warm"</span>, <span class='st'>"cold"</span>), <span class='kw'>cores</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>trace</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"progress"</span>,
+  <span class='st'>"print"</span>, <span class='st'>"none"</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -290,7 +290,7 @@ lasso-type penalty.</p>
     </tr>
     <tr>
       <th>crit.cv</th>
-      <td><p>cross validation criterion (<code>loglik</code>, <code>AIC</code>, or <code>BIC</code>). Defaults to <code>loglik</code>.</p></td>
+      <td><p>cross validation criterion (<code>loglik</code>, <code>penloglik</code>, <code>AIC</code>, or <code>BIC</code>). Defaults to <code>loglik</code>.</p></td>
     </tr>
     <tr>
       <th>start</th>
