@@ -145,7 +145,7 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
       
       // compute penalized loglik (close enough)
       arma::log_det(logdet, sgn, Omega);
-      lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
+      lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::accu(arma::square(C % Omega)) + alpha*arma::accu(C % arma::abs(Omega))));
       criterion = (std::abs((lik2 - lik)/lik) >= tol_abs);
       lik = lik2;
       
