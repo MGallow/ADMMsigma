@@ -1,11 +1,11 @@
 ---
-title: "Penalized Precision Matrix Estimation"
+title: "Precision Matrix Estimation via ADMM"
 author: "Matt Galloway"
 #date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: lib.bib
 vignette: >
-  %\VignetteIndexEntry{Penalized Precision Matrix Estimation}
+  %\VignetteIndexEntry{Precision Matrix Estimation via ADMM}
   %\VignetteEngine{knitr::knitr}
   %\usepackage[UTF-8]{inputenc}
 ---
@@ -17,111 +17,106 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Suppose we want to solve the following optimization problem :
+Consider the case where we observe $n$ independent, identically distributed copies of the random variable ($X_{i}$) where $X_{i} \in \mathbb{R}^{p}$ is normally distributed with some mean, $\mu$, and some variance, $\Sigma$. That is, $X_{i} \sim N_{p}\left( \mu, \Sigma \right)$.
+
+Because we assume independence, we know that the probability of observing these specific observations $X_{1}, ..., X_{n}$ is equal to
+
+\begin{align*}
+  f(X | \mu, \Sigma) &= \prod_{i = 1}^{n}(2\pi)^{-p/2}\left| \Sigma \right|^{-1/2}\exp\left[ -\frac{1}{2}\left( X_{i} - \mu \right)^{T}\Sigma^{-1}\left( X_{i} - \mu \right) \right] \\
+  &= (2\pi)^{-nr/2}\left| \Sigma \right|^{-n/2}\mbox{etr}\left[ -\frac{1}{2}\sum_{i = 1}^{n}\left( X_{i} - \mu \right)\left( X_{i} - \mu \right)^{T}\Sigma^{-1} \right]
+\end{align*}
+
+where $\mbox{etr}\left( \cdot \right)$ denotes the exponential trace operator. It follows that the log-likelihood for $\mu$ and $\Sigma$ is equal to the following:
+
+\[ l(\mu, \Sigma | X) = const. - \frac{n}{2}\log\left| \Sigma \right| - tr\left[ \frac{1}{2}\sum_{i = 1}^{n}\left(X_{i} - \mu \right)\left(X_{i} - \mu \right)^{T}\Sigma^{-1} \right] \]
+
+If we are interested in estimating $\mu$, it is relatively straight forward to that the maximum likelihood estimator (MLE) for $\mu$ is $\hat{\mu} = \sum_{i = 1}^{n}X_{i}/n \equiv \bar{X}$. However, in addition to $\mu$, many practical applications require the estimation of $\Sigma$ as well. Like $\mu$, we can find a maximum likelihood estimator:
+
+\begin{align*}
+  &\hat{\Sigma} = \arg\max_{\Sigma \in \mathbb{S}_{+}^{p}}\left\{ const. - \frac{n}{2}\log\left| \Sigma \right| - tr\left[ \frac{1}{2}\sum_{i = 1}^{n}\left(X_{i} - \mu \right)\left(X_{i} - \mu \right)^{T}\Sigma^{-1} \right] \right\} \\
+  &\nabla_{\Sigma}l(\mu, \Sigma | X) = -\frac{n}{2}\Sigma^{-1} - \frac{1}{2}\sum_{i = 1}^{n}\left(X_{i} - \mu \right)\left(X_{i} - \mu \right)^{T}\Sigma^{-2} \\
+  \Rightarrow &\hat{\Sigma} = \left[ \frac{1}{n}\sum_{i = 1}^{n}\left(X_{i} - \bar{X} \right)\left(X_{i} - \bar{X} \right)^{T} \right]
+\end{align*}
+
+by setting the gradient equal to zero and plugging in the MLE for $\mu$. This implies that the MLE for $\Sigma$ is our usual sample estimator often denoted as $S$. We could have just as easily computed the maximum likelihood estimator for the precision matrix $\Omega \equiv \Sigma^{-1}$:
+
+\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log \det\left(\Omega \right) \right\} \]
+
+so that $\hat{\Omega} = S^{-1}$. Notice that here we are *minimizing* the negative log-likelihood as opposed to maximizing the log-likelihood. Both procedures will result in the same estimate. Beyond the formatting convenience, computing estimates for $\Omega$ as opposed to $\Sigma$ often poses less computational challenges -- and accordingly, the literature has placed more emphasis on efficiently solving for $\Omega$ instad of $\Sigma$.
+
+As in regression settings, we can construct a *penalized* log-likelihood estimator by adding a penalty term, $P\left(\Omega\right)$, to the likelihood:
+
+\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P\left( \Omega \right) \right\} \]
+
+$P\left( \Omega \right)$ is often of the form $P\left(\Omega \right) = \lambda\|\Omega \|_{F}^{2}$ or $P\left(\Omega \right) = \|\Omega\|_{1}$ where $\lambda > 0$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. These penalties are the ridge and lasso, respectively. In the `ADMMsigma` package, we instead take $P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]$ so that solving the full penalized log-likelihood for $\Omega$ results in solving
+
+\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]
+
+where $0 \leq \alpha \leq 1$. This penalty, know as the *elastic-net* penalty, was explored by Hui Zou and Trevor Hastie [@zou2005regularization] and is identical to the penalty used in the popular penalized regression package `glmnet`. Clearly, when $\alpha = 0$ the elastic-net reduces to a ridge-type penalty and when $\alpha = 1$ it reduces to a lasso-type penalty. Having this flexibility or generalization allows us to perform cross validation across proposed $\alpha$ values in addition to proposed $\lambda$ values.
+
+We will explore how to solve for $\hat{\Omega}$ in the next section.
+
+<br>\vspace{1cm}
+
+## ADMM Algorithm
+
+Many efficient methods have been proposed in order to solve for $\hat{\Omega}$ when $\alpha = 1$. The most popular method is the graphical lasso algorithm (glasso) introduced by @friedman2008sparse. However, no methods (to the best of my knowledge) have estimated $\Omega$ when $\alpha \in (0, 1)$. We will use the alternating direction method of multipliers (ADMM) algorithm to do so.
+
+As the authors state in @boyd2011distributed, the "ADMM is an algorithm that is intended to blend the decomposability of dual ascent with the superior convergence properties of the method of multipliers." For our purposes, we will only focus on the ADMM algorithm but it is encouraged to read the original text from Boyd and others for a complete introduction to the other two methods.
+
+In general, suppose we want to solve an optimization problem of the following form:
 
 \begin{align*}
   \mbox{minimize } f(x) + g(z) \\
   \mbox{subject to } Ax + Bz = c
 \end{align*}
 
-where $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times n}, B \in \mathbb{R}^{p \times m}$, and $c \in \mathbb{R}^{p}$. Following @boyd2011distributed, the optimization problem will be introduced in vector form though we will later consider cases where $x$ and $z$ are matrices. We will also assume $f$ and $g$ are convex functions. Optimization problems like this arise naturally in several statistics and machine learning applications -- particularly regularization methods. For instance, we could take $f$ to be the squared error loss, $g$ to be the $l_{2}$-norm, $c$ to be equal to zero and $A$ and $B$ to be identity matrices to solve the ridge regression optimization problem.
-
-The *augmented lagrangian* is constructed as follows:
-
-\[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]
-
-where $y \in \mathbb{R}^{p}$ is the lagrange multiplier and $\rho > 0$ is a scalar. Clearly any minimizer, $p^{*}$, under the augmented lagrangian is equivalent to that of the lagrangian since any feasible point $(x, z)$ satisfies the constraint $\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0$.
+where $x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times n}, B \in \mathbb{R}^{p \times m}$, $c \in \mathbb{R}^{p}$, and $f$ and $g$ are assumed to be convex functions. Our goal is to find $x^{*} \in \mathbb{R}^{n}$ and $z^{*} \in \mathbb{R}^{m}$ that results in the infimum $p^{*}$:
 
 \[ p^{*} = inf\left\{ f(x) + g(z) | Ax + Bz = c \right\} \]
 
-The alternating direction method of multipliers (ADMM) algorithm consists of the following repeated iterations:
+Honoring the constraint $Ax + Bz = c$, the lagrangian will be of the form
+
+\[ L(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) \]
+
+where $y \in \mathbb{R}^{p}$ is the lagrange multiplier. Following @boyd2011distributed, the estimation procedure will be introduced in vector form though we will later consider the case where $x$ and $z$ are matrices.
+
+In addition to penalized precision matrix estimation, optimization problems like this arise naturally in several statistics and machine learning applications -- particularly regularization methods. For instance, we could take $f$ to be the squared error loss, $g$ to be the $l_{2}$-norm, $c$ to be equal to zero and $A$ and $B$ to be identity matrices to solve the ridge regression optimization problem.
+
+The ADMM algorithm, however, uses the *augmented lagrangian*
+
+\[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]
+
+in which case $\rho > 0$ is a scalar. Clearly any minimizer, $p^{*}$, under the augmented lagrangian is equivalent to that of the lagrangian since any feasible point $(x, z)$ satisfies the constraint $\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0$. The ADMM algorithm consists of the following repeated iterations:
 
 \begin{align}
-  x^{k + 1} &:= \arg\min_{x}L_{\rho}(x, z^{k}, y^{k}) \\
-  z^{k + 1} &:= \arg\min_{z}L_{\rho}(x^{k + 1}, z, y^{k}) \\
+  x^{k + 1} &:= \arg\min_{x \in \mathbb{R}^{n}}L_{\rho}(x, z^{k}, y^{k}) \\
+  z^{k + 1} &:= \arg\min_{z \in \mathbb{R}^{m}}L_{\rho}(x^{k + 1}, z, y^{k}) \\
   y^{k + 1} &:= y^{k} + \rho(Ax^{k + 1} + Bz^{k + 1} - c)
 \end{align}
 
-A more complete introduction to the algorithm -- specifically how it arose out of *dual ascent* and *method of multipliers* -- can be found in @boyd2011distributed.
+In the context of precision matrix estimation, we can let $f$ be equal to the non-penalized likelihood, $g$ be equal to $P\left( \Omega \right)$, and use the constraint $\Omega$ equal to some $Z$ so that the lagrangian is
 
-<br>\vspace{1cm}
+\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + Tr\left[\Lambda\left(\Omega - Z\right)\right] \]
 
-## ADMM Algorithm
+Augmented lagrangian:
 
-Now consider the case where $X_{1}, ..., X_{n}$ are iid $N_{p}(\mu, \Sigma)$ random variables and we are tasked with estimating the precision matrix, denoted $\Omega \equiv \Sigma^{-1}$. The maximum likelihood estimator for $\Omega$ is
-
-\[ \hat{\Omega}_{MLE} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) \right\} \]
-
-where $S = \sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n$ and $\bar{X}$ is the sample mean. By setting the gradient equal to zero, we can show that when the solution exists, $\hat{\Omega}_{MLE} = S^{-1}$.
-
-As in regression settings, we can construct a *penalized* likelihood estimator by adding a penalty term, $P\left( \Omega \right)$, to the likelihood:
-
-\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + P\left( \Omega \right) \right\} \]
-
-$P\left( \Omega \right)$ is often of the form $P\left(\Omega \right) = \lambda\|\Omega \|_{F}^{2}$ or $P\left(\Omega \right) = \|\Omega\|_{1}$ where $\lambda > 0$, $\left\|\cdot \right\|_{F}^{2}$ is the Frobenius norm and we define $\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|$. These penalties are the ridge and lasso, respectively. We will, instead, take $P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right]$ so that the full penalized likelihood is
-
-\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ Tr\left(S\Omega\right) - \log \det\left(\Omega \right) + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]
-
-where $0 \leq \alpha \leq 1$. This *elastic-net* penalty was explored by Hui Zou and Trevor Hastie [@zou2005regularization] and is identical to the penalty used in the popular penalized regression package `glmnet`. Clearly, when $\alpha = 0$ the elastic-net reduces to a ridge-type penalty and when $\alpha = 1$ it reduces to a lasso-type penalty.
-
-By letting $f$ be equal to the non-penalized likelihood and $g$ equal to $P\left( \Omega \right)$, our goal is to minimize the full augmented lagrangian where the constraint is that $\Omega - Z$ is equal to zero:
-
-\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + Tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]
+\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]
 
 
-The ADMM algorithm for estimating the penalized precision matrix in this problem is
+The ADMM algorithm is now the following:
 
 \begin{align}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
-  Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  \Omega^{k + 1} &= \arg\min_{\Omega \in \mathbb{S}_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\det\left(\Omega\right) + tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &= \arg\min_{Z \in \mathbb{S}^{p}}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
   \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
 \end{align}
 
-
 <br>\vspace{1cm}
 
-## Scaled-Form ADMM
+### Algorithm
 
-An alternate form of the ADMM algorithm can constructed by scaling the dual variable ($\Lambda^{k}$). Let us define $R^{k} = \Omega - Z^{k}$ and $U^{k} = \Lambda^{k}/\rho$.
-
-\begin{align*}
-  Tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &= Tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
-  &= \frac{\rho}{2}\left\| R^{k} + \Lambda^{k}/\rho \right\|_{F}^{2} - \frac{\rho}{2}\left\| \Lambda^{k}/\rho \right\|_{F}^{2} \\
-  &= \frac{\rho}{2}\left\| R^{k} + U^{k} \right\|_{F}^{2} - \frac{\rho}{2}\left\| U^{k} \right\|_{F}^{2}
-\end{align*}
-
-Therefore, the condensed-form ADMM algorithm can now be written as
-
-\begin{align}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
-  Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
-  U^{k + 1} &= U^{k} + \Omega^{k + 1} - Z^{k + 1}
-\end{align}
-
-And more generally (in vector form),
-
-\begin{align}
-  x^{k + 1} &= \arg\min_{x}\left\{ f(x) + \frac{\rho}{2}\left\| Ax + Bz^{k} - c + u^{k} \right\|_{2}^{2} \right\} \\
-  z^{k + 1} &= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
-  u^{k + 1} &= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
-\end{align}
-
-Note that there are limitations to using this method. Because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size without making further adjustments to $U^{k}$. It has been shown in the literature that a dynamic step size can significantly reduce the number of iterations required for convergence.
-
-<br>\vspace{1cm}
-
-## Algorithm
-
-\begin{align*}
-  \Omega^{k + 1} &= \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
-  Z^{k + 1} &= \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
-  \Lambda^{k + 1} &= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
-\end{align*}
-
-<br>\vspace{1cm}
-
-
-Initialize $Z^{0}, \Lambda^{0}$, and $\rho$. Iterate the following three steps until convergence:
+Set $k = 0$ and initialize $Z^{0}, \Lambda^{0}$, and $\rho$. Repeat steps 1-3 until convergence:
 
 1. Decompose $S + \Lambda^{k} - \rho Z^{k} = VQV^{T}$ via spectral decomposition.
 
@@ -138,18 +133,23 @@ Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}Sign\left(\rho\Omega_{ij}^
 
 \[ \Lambda^{k + 1} = \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right) \]
 
+where $Soft(a, b) = Sign(a)(\left| a \right| - b)_{+}$.
+
 
 <br>\vspace{1cm}
 
 ### Proof of (1):
 
-\[ \Omega^{k + 1} = \arg\min_{\Omega}\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]
+\[ \Omega^{k + 1} = \arg\min_{\Omega \in \mathbb{S}_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\det\left(\Omega\right) + tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]
+
+\vspace{1cm}
 
 \begin{align*}
-  \nabla_{\Omega}&\left\{ Tr\left(S\Omega\right) - \log\det\left(\Omega\right) + Tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  \nabla_{\Omega}&\left\{ tr\left(S\Omega\right) - \log\det\left(\Omega\right) + tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
   &= S - \Omega^{-1} + \Lambda^{k} + \rho\left( \Omega - Z^{k} \right)
 \end{align*}
 
+Note that because all of the variables are symmetric, we can essentially ignore the constraint when deriving the gradient.
 Set the gradient equal to zero and decompose $\Omega = VDV^{T}$ where $D$ is a diagonal matrix with diagonal elements equal to the eigen values of $\Omega$ and $V$ is the matrix with corresponding eigen vectors as columns.
 
 \[ S + \Lambda^{k} - \rho Z^{k} = \Omega^{-1} - \rho \Omega = VD^{-1}V^{T} - \rho VDV^{T} =  V\left(D^{-1} - \rho D\right)V^{T} \]
@@ -175,7 +175,9 @@ In summary, if we decompose $S + \Lambda^{k} - \rho Z^{k} = VQV^{T}$ then
 
 ### Proof of (2)
 
-\[ Z^{k + 1} = \arg\min_{Z}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]
+\[ Z^{k + 1} = \arg\min_{Z \in \mathbb{S}^{p}}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]
+
+\vspace{1cm}
 
 \begin{align*}
   \partial&\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + Tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
@@ -206,6 +208,88 @@ Z_{ij}^{k + 1} &= \frac{1}{\lambda(1 - \alpha) + \rho}Sign\left(\rho\Omega_{ij}^
 \end{align*}
 
 where $Soft$ is the soft-thresholding function.
+
+
+<br>\vspace{1cm}
+
+## Scaled-Form ADMM
+
+There is another popular, alternate form of the ADMM algorithm used by scaling the dual variable ($\Lambda^{k}$).
+
+Let us define $R^{k} = \Omega - Z^{k}$ and $U^{k} = \Lambda^{k}/\rho$.
+
+\begin{align*}
+  tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &= tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
+  &= \frac{\rho}{2}\left\| R^{k} + \Lambda^{k}/\rho \right\|_{F}^{2} - \frac{\rho}{2}\left\| \Lambda^{k}/\rho \right\|_{F}^{2} \\
+  &= \frac{\rho}{2}\left\| R^{k} + U^{k} \right\|_{F}^{2} - \frac{\rho}{2}\left\| U^{k} \right\|_{F}^{2}
+\end{align*}
+
+Therefore, a scaled-form can now be written as
+
+\begin{align}
+  \Omega^{k + 1} &= \arg\min_{\Omega \in \mathbb{R}_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\det\left(\Omega\right) + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &= \arg\min_{Z \in \mathbb{S}^{p}}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
+  U^{k + 1} &= U^{k} + \Omega^{k + 1} - Z^{k + 1}
+\end{align}
+
+And more generally (in vector form),
+
+\begin{align}
+  x^{k + 1} &= \arg\min_{x}\left\{ f(x) + \frac{\rho}{2}\left\| Ax + Bz^{k} - c + u^{k} \right\|_{2}^{2} \right\} \\
+  z^{k + 1} &= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
+  u^{k + 1} &= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
+\end{align}
+
+Note that there are limitations to using this method. Because the dual variable is scaled by $\rho$ (the step size), this form limits one to using a constant step size without making further adjustments to $U^{k}$. It has been shown in the literature that a dynamic step size (like the one used in `ADMMsigma`) can significantly reduce the number of iterations required for convergence.
+
+
+
+<br>\vspace{1cm}
+
+## Stopping Criterion
+
+In discussing the optimality conditions and stopping criterion, we will follow the steps outlined in @boyd2011distributed and cater them to precision matrix estimation.
+
+Below we have three optimality conditions:
+
+1. Primal:
+
+\[ \Omega^{k + 1} - Z^{k + 1} = 0 \]
+
+2. Dual:
+
+\[ 0 \in \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k + 1} \]
+
+\[ 0 \in \partial g\left(Z^{k + 1}\right) - \Lambda^{k + 1} \]
+
+We will define the left-hand side of the first condition as the primal residual: $r^{k + 1} = \Omega^{k + 1} - Z^{k + 1}$. At convergence, optimality conditions require that $r^{k + 1} \approx 0$. The second residual we will define is the dual residual: $s^{k + 1} = \rho\left( Z^{k + 1} - Z^{k} \right)$. This residual is defined from the following:
+
+Because $\Omega^{k + 1}$ is the argument that minimizes $L_{p}\left( \Omega, Z^{k}, \Lambda^{k} \right)$,
+
+\begin{align*}
+  0 &\in \partial \left\{ f\left(\Omega^{k + 1}\right) + tr\left[ \Lambda^{k}\left( \Omega^{k + 1} - Z^{k} \right) \right] + \rho\left\| \Omega^{k + 1} - Z^{k} \right\|_{F}^{2} \right\} \\
+  &= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k} + \rho\left(\Omega^{k + 1} - Z^{k}\right) \\
+  &= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k} + \rho\left(\Omega^{k + 1} + Z^{k + 1} - Z^{k + 1} - Z^{k}\right) \\
+  &= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k} + \rho\left(\Omega^{k + 1} + - Z^{k + 1}\right) + \rho\left(Z^{k + 1} - Z^{k}\right) \\
+  &= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k + 1} + \rho\left(Z^{k + 1} - Z^{k}\right) \\
+  \Rightarrow 0 &\in \rho\left( Z^{k + 1} - Z^{k} \right)
+\end{align*}
+
+Like the primal residual, at convergence optimality conditions require that $s^{k + 1} \approx 0$. Note that the second dual optimality condition is always satisfied:
+
+\begin{align*}
+  0 &\in \partial \left\{ g\left(Z^{k + 1}\right) + tr\left[ \Lambda^{k}\left( \Omega^{k + 1} - Z^{k + 1} \right) \right] + \rho\left\| \Omega^{k + 1} - Z^{k + 1} \right\|_{F}^{2} \right\} \\
+  &= \partial g\left(Z^{k + 1}\right) - \Lambda^{k} - \rho\left(\Omega^{k + 1} - Z^{k + 1}\right) \\
+  &= \partial g\left(Z^{k + 1}\right) - \Lambda^{k + 1} \\
+\end{align*}
+
+One possible stopping criterion is to set $\epsilon^{rel} = \epsilon^{abs} = 10^{-3}$ and stop the algorithm when $\epsilon^{pri} \leq \left\| r^{k + 1} \right\|_{F}$ and $\epsilon^{dual} \leq \left\| s^{k + 1} \right\|_{F}$ where
+
+\begin{align*}
+  \epsilon^{pri} &= p\epsilon^{abs} + \epsilon^{rel}\max\left\{ \left\| \Omega^{k + 1} \right\|_{F}, \left\| Z^{k + 1} \right\|_{F} \right\} \\
+  \epsilon^{dual} &= p\epsilon^{abs} + \epsilon^{rel}\left\| \Lambda^{k + 1} \right\|_{F}
+\end{align*}
+
 
 <br><br>\newpage
 
