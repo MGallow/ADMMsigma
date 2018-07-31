@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Matt Galloway" />
+
+
+<title>Precision Matrix Estimation via ADMM</title>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Precision Matrix Estimation via ADMM</h1>
+<h4 class="author"><em>Matt Galloway</em></h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Consider the case where we observe <span class="math inline">\(n\)</span> independent, identically distributed copies of the random variable (<span class="math inline">\(X_{i}\)</span>) where <span class="math inline">\(X_{i} \in \mathbb{R}^{p}\)</span> is normally distributed with some mean, <span class="math inline">\(\mu\)</span>, and some variance, <span class="math inline">\(\Sigma\)</span>. That is, <span class="math inline">\(X_{i} \sim N_{p}\left( \mu, \Sigma \right)\)</span>.</p>
+<p>Because we assume independence, we know that the probability of observing these specific observations <span class="math inline">\(X_{1}, ..., X_{n}\)</span> is equal to</p>
+<p><span class="math display">\[\begin{align*}
+  f(X_{1}, ..., X_{n}; \mu, \Sigma) &amp;= \prod_{i = 1}^{n}(2\pi)^{-p/2}\left| \Sigma \right|^{-1/2}\exp\left[ -\frac{1}{2}\left( X_{i} - \mu \right)^{T}\Sigma^{-1}\left( X_{i} - \mu \right) \right] \\
+  &amp;= (2\pi)^{-nr/2}\left| \Sigma \right|^{-n/2}\mbox{etr}\left[ -\frac{1}{2}\sum_{i = 1}^{n}\left( X_{i} - \mu \right)\left( X_{i} - \mu \right)^{T}\Sigma^{-1} \right]
+\end{align*}\]</span></p>
+<p>where <span class="math inline">\(\mbox{etr}\left( \cdot \right)\)</span> denotes the exponential trace operator. It follows that the log-likelihood for <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\Sigma\)</span> is equal to the following:</p>
+<p><span class="math display">\[ l(\mu, \Sigma | X) = const. - \frac{n}{2}\log\left| \Sigma \right| - tr\left[ \frac{1}{2}\sum_{i = 1}^{n}\left(X_{i} - \mu \right)\left(X_{i} - \mu \right)^{T}\Sigma^{-1} \right] \]</span></p>
+<p>If we are interested in estimating <span class="math inline">\(\mu\)</span>, it is relatively straight forward to show that the maximum likelihood estimator (MLE) for <span class="math inline">\(\mu\)</span> is <span class="math inline">\(\hat{\mu}_{MLE} = \sum_{i = 1}^{n}X_{i}/n\)</span> which we typically denote as <span class="math inline">\(\bar{X}\)</span>. However, in addition to <span class="math inline">\(\mu\)</span>, many applications require the estimation of <span class="math inline">\(\Sigma\)</span> as well. We can also find a maximum likelihood estimator:</p>
+<p><span class="math display">\[\begin{align*}
+  &amp;\hat{\Sigma}_{MLE} = \arg\max_{\Sigma \in \mathbb{S}_{+}^{p}}\left\{ const. - \frac{n}{2}\log\left| \Sigma \right| - tr\left[ \frac{1}{2}\sum_{i = 1}^{n}\left(X_{i} - \mu \right)\left(X_{i} - \mu \right)^{T}\Sigma^{-1} \right] \right\} \\
+  &amp;\nabla_{\Sigma}l(\mu, \Sigma | X) = -\frac{n}{2}\Sigma^{-1} + \frac{1}{2}\sum_{i = 1}^{n}\left(X_{i} - \mu \right)\left(X_{i} - \mu \right)^{T}\Sigma^{-2} \\
+  \Rightarrow &amp;\hat{\Sigma}_{MLE} = \left[ \frac{1}{n}\sum_{i = 1}^{n}\left(X_{i} - \bar{X} \right)\left(X_{i} - \bar{X} \right)^{T} \right]
+\end{align*}\]</span></p>
+<p>By setting the gradient equal to zero and plugging in the MLE for <span class="math inline">\(\mu\)</span>, we find that the MLE for <span class="math inline">\(\Sigma\)</span> is our usual sample estimator often denoted as <span class="math inline">\(S\)</span>. It turns out that we could have just as easily computed the maximum likelihood estimator for the precision matrix <span class="math inline">\(\Omega \equiv \Sigma^{-1}\)</span> and taken its inverse:</p>
+<p><span class="math display">\[ \hat{\Omega}_{MLE} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\left|\Omega\right| \right\} \]</span></p>
+<p>so that <span class="math inline">\(\hat{\Omega}_{MLE} = S^{-1}\)</span>. Beyond the formatting convenience, computing estimates for <span class="math inline">\(\Omega\)</span> as opposed to <span class="math inline">\(\Sigma\)</span> often poses less computational challenges – and accordingly, the literature has placed more emphasis on efficiently solving for <span class="math inline">\(\Omega\)</span> instead of <span class="math inline">\(\Sigma\)</span>.</p>
+<p>Notice that here we are <em>minimizing</em> the negative log-likelihood as opposed to maximizing the log-likelihood. Both procedures will result in the same estimate.</p>
+<p>As in regression settings, we can construct a <em>penalized</em> log-likelihood estimator by adding a penalty term, <span class="math inline">\(P\left(\Omega\right)\)</span>, to the log-likelihood so that</p>
+<p><span class="math display">\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\left|\Omega \right| + P\left( \Omega \right) \right\} \]</span></p>
+<p><span class="math inline">\(P\left( \Omega \right)\)</span> is often of the form <span class="math inline">\(P\left(\Omega \right) = \lambda\|\Omega \|_{F}^{2}/2\)</span> or <span class="math inline">\(P\left(\Omega \right) = \|\Omega\|_{1}\)</span> where <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(\left\|\cdot \right\|_{F}^{2}\)</span> is the Frobenius norm and we define <span class="math inline">\(\left\|A \right\|_{1} = \sum_{i, j} \left| A_{ij} \right|\)</span>. These penalties are the ridge and lasso, respectively. In the <code>ADMMsigma</code> package, we instead take</p>
+<p><span class="math display">\[ P\left( \Omega \right) = \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \]</span></p>
+<p>so that solving the full penalized log-likelihood for <span class="math inline">\(\Omega\)</span> results in solving</p>
+<p><span class="math display">\[ \hat{\Omega} = \arg\min_{\Omega \in S_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\left|\Omega \right| + \lambda\left[\frac{1 - \alpha}{2}\left\| \Omega \right|_{F}^{2} + \alpha\left\| \Omega \right\|_{1} \right] \right\} \]</span></p>
+<p>where <span class="math inline">\(0 \leq \alpha \leq 1\)</span>. This penalty, know as the <em>elastic-net</em> penalty, was explored by Hui Zou and Trevor Hastie <span class="citation">(Zou and Hastie 2005)</span> and is identical to the penalty used in the popular penalized regression package <code>glmnet</code>. Clearly, when <span class="math inline">\(\alpha = 0\)</span> the elastic-net reduces to a ridge-type penalty and when <span class="math inline">\(\alpha = 1\)</span> it reduces to a lasso-type penalty. Having this flexibility and generalization allows us to perform cross validation across proposed <span class="math inline">\(\alpha\)</span> values in addition to proposed <span class="math inline">\(\lambda\)</span> values.</p>
+<p>We will explore how to solve for <span class="math inline">\(\hat{\Omega}\)</span> in the next section.</p>
+<p><br></p>
+</div>
+<div id="admm-algorithm" class="section level2">
+<h2>ADMM Algorithm</h2>
+<p>Many efficient methods have been proposed to solve for <span class="math inline">\(\hat{\Omega}\)</span> when <span class="math inline">\(\alpha = 1\)</span>. The most popular method is the graphical lasso algorithm (glasso) introduced by <span class="citation">Friedman, Hastie, and Tibshirani (2008)</span>. However, no methods (to the best of my knowledge) have estimated <span class="math inline">\(\Omega\)</span> when <span class="math inline">\(\alpha \in (0, 1)\)</span>. We will use the alternating direction method of multipliers (ADMM) algorithm to do so.</p>
+<p>As the authors state in <span class="citation">Boyd et al. (2011)</span>, the “ADMM is an algorithm that is intended to blend the decomposability of dual ascent with the superior convergence properties of the method of multipliers.” For our purposes, we will only focus on the ADMM algorithm but it is encouraged to read the original text from Boyd and others for a complete introduction to the other two methods.</p>
+<p>In general, suppose we want to solve an optimization problem of the following form:</p>
+<p><span class="math display">\[\begin{align*}
+  \mbox{minimize } f(x) + g(z) \\
+  \mbox{subject to } Ax + Bz = c
+\end{align*}\]</span></p>
+<p>where <span class="math inline">\(x \in \mathbb{R}^{n}, z \in \mathbb{R}^{m}, A \in \mathbb{R}^{p \times n}, B \in \mathbb{R}^{p \times m}\)</span>, <span class="math inline">\(c \in \mathbb{R}^{p}\)</span>, and <span class="math inline">\(f\)</span> and <span class="math inline">\(g\)</span> are assumed to be convex functions (following <span class="citation">Boyd et al. (2011)</span>, the estimation procedure will be introduced in vector form though we could just as easily take <span class="math inline">\(x\)</span> and <span class="math inline">\(z\)</span> to be matrices). In addition to penalized precision matrix estimation, optimization problems like this arise naturally in several statistics and machine learning applications – particularly regularization methods. For instance, we could take <span class="math inline">\(f\)</span> to be the squared error loss, <span class="math inline">\(g\)</span> to be the <span class="math inline">\(l_{2}\)</span>-norm, <span class="math inline">\(c\)</span> to be equal to zero and <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> to be identity matrices to solve the ridge regression optimization problem. In all cases, our goal is to find <span class="math inline">\(x^{*} \in \mathbb{R}^{n}\)</span> and <span class="math inline">\(z^{*} \in \mathbb{R}^{m}\)</span> that achieves the infimum <span class="math inline">\(p^{*}\)</span>:</p>
+<p><span class="math display">\[ p^{*} = inf\left\{ f(x) + g(z) | Ax + Bz = c \right\} \]</span></p>
+<p>To do so, the ADMM algorithm uses the <em>augmented lagrangian</em></p>
+<p><span class="math display">\[ L_{\rho}(x, z, y) = f(x) + g(z) + y^{T}(Ax + Bz - c) + \frac{\rho}{2}\left\| Ax + Bz - c \right\|_{2}^{2} \]</span></p>
+<p>where <span class="math inline">\(y \in \mathbb{R}^{p}\)</span> is the lagrange multiplier and <span class="math inline">\(\rho &gt; 0\)</span> is a scalar. Clearly any minimizer, <span class="math inline">\(p^{*}\)</span>, under the augmented lagrangian is equivalent to that of the lagrangian since any feasible point <span class="math inline">\((x, z)\)</span> satisfies the constraint <span class="math inline">\(\rho\left\| Ax + Bz - c \right\|_{2}^{2}/2 = 0\)</span>.</p>
+<p>The algorithm consists of the following repeated iterations:</p>
+<p><span class="math display">\[\begin{align}
+  x^{k + 1} &amp;= \arg\min_{x \in \mathbb{R}^{n}}L_{\rho}(x, z^{k}, y^{k}) \\
+  z^{k + 1} &amp;= \arg\min_{z \in \mathbb{R}^{m}}L_{\rho}(x^{k + 1}, z, y^{k}) \\
+  y^{k + 1} &amp;= y^{k} + \rho(Ax^{k + 1} + Bz^{k + 1} - c)
+\end{align}\]</span></p>
+<p>In the context of precision matrix estimation, we can let <span class="math inline">\(f\)</span> be equal to the non-penalized likelihood, <span class="math inline">\(g\)</span> be equal to <span class="math inline">\(P\left( \Omega \right)\)</span>, and use the constraint <span class="math inline">\(\Omega\)</span> equal to some <span class="math inline">\(Z\)</span> so that the lagrangian is</p>
+<p><span class="math display">\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + tr\left[\Lambda\left(\Omega - Z\right)\right] \]</span></p>
+<p>and the augmented lagrangian is</p>
+<p><span class="math display">\[ L_{\rho}(\Omega, Z, \Lambda) = f\left(\Omega\right) + g\left(Z\right) + tr\left[\Lambda\left(\Omega - Z\right)\right] + \frac{\rho}{2}\left\|\Omega - Z\right\|_{F}^{2} \]</span></p>
+<p>The ADMM algorithm is now the following:</p>
+<p><span class="math display">\[\begin{align}
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega \in \mathbb{S}_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\left|\Omega\right| + tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &amp;= \arg\min_{Z \in \mathbb{S}^{p}}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  \Lambda^{k + 1} &amp;= \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right)
+\end{align}\]</span></p>
+<p><br></p>
+<div id="algorithm" class="section level3">
+<h3>Algorithm</h3>
+<p>Set <span class="math inline">\(k = 0\)</span> and initialize <span class="math inline">\(Z^{0}, \Lambda^{0}\)</span>, and <span class="math inline">\(\rho\)</span>. Repeat steps 1-3 until convergence:</p>
+<ol style="list-style-type: decimal">
+<li>Decompose <span class="math inline">\(S + \Lambda^{k} - \rho Z^{k} = VQV^{T}\)</span> via spectral decomposition.</li>
+</ol>
+<p><span class="math display">\[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + \left( Q^{2} + 4\rho I_{p} \right)^{1/2} \right]V^{T} \]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Elementwise soft-thresholding for all <span class="math inline">\(i = 1,..., p\)</span> and <span class="math inline">\(j = 1,..., p\)</span>.</li>
+</ol>
+<p><span class="math display">\[\begin{align*}
+Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}\mbox{sign}\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&amp;= \frac{1}{\lambda(1 - \alpha) + \rho}\mbox{soft}\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}, \lambda\alpha\right)
+\end{align*}\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Update <span class="math inline">\(\Lambda^{k + 1}\)</span>.</li>
+</ol>
+<p><span class="math display">\[ \Lambda^{k + 1} = \Lambda^{k} + \rho\left( \Omega^{k + 1} - Z^{k + 1} \right) \]</span></p>
+<p>where <span class="math inline">\(\mbox{soft}(a, b) = \mbox{sign}(a)(\left| a \right| - b)_{+}\)</span>.</p>
+<p><br></p>
+</div>
+<div id="proof-of-1" class="section level3">
+<h3>Proof of (1):</h3>
+<p><span class="math display">\[ \Omega^{k + 1} = \arg\min_{\Omega \in \mathbb{S}_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\left|\Omega\right| + tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \]</span></p>
+
+<p><span class="math display">\[\begin{align*}
+  \nabla_{\Omega}&amp;\left\{ tr\left(S\Omega\right) - \log\left|\Omega\right| + tr\left[\Lambda^{k}\left(\Omega - Z^{k}\right)\right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} \right\} \\
+  &amp;= S - \Omega^{-1} + \Lambda^{k} + \rho\left( \Omega - Z^{k} \right)
+\end{align*}\]</span></p>
+<p>Note that because all of the variables are symmetric, we can ignore the symmetric constraint when deriving the gradient. First set the gradient equal to zero and decompose <span class="math inline">\(\Omega^{k + 1} = VDV^{T}\)</span> where <span class="math inline">\(D\)</span> is a diagonal matrix with diagonal elements equal to the eigen values of <span class="math inline">\(\Omega^{k + 1}\)</span> and <span class="math inline">\(V\)</span> is the matrix with corresponding eigen vectors as columns:</p>
+<p><span class="math display">\[ S + \Lambda^{k} - \rho Z^{k} = (\Omega^{k + 1})^{-1} - \rho \Omega^{k + 1} = VD^{-1}V^{T} - \rho VDV^{T} =  V\left(D^{-1} - \rho D\right)V^{T} \]</span></p>
+<p>This equivalence implies that</p>
+<p><span class="math display">\[ \phi_{j}\left( S + \Lambda^{k} - \rho Z^{k} \right) = \frac{1}{\phi_{j}(\Omega^{k + 1})} - \rho\phi_{j}(\Omega^{k + 1}) \]</span></p>
+<p>where <span class="math inline">\(\phi_{j}(\cdot)\)</span> is the <span class="math inline">\(j\)</span>th eigen value.</p>
+<p><span class="math display">\[\begin{align*}
+  &amp;\Rightarrow \rho\phi_{j}^{2}(\Omega^{k + 1}) + \phi_{j}\left( S + \Lambda^{k} - \rho Z^{k} \right)\phi_{j}(\Omega^{k + 1}) - 1 = 0 \\
+  &amp;\Rightarrow \phi_{j}(\Omega^{k + 1}) = \frac{-\phi_{j}(S + \Lambda^{k} - \rho Z^{k}) \pm \sqrt{\phi_{j}^{2}(S + \Lambda^{k} - \rho Z^{k}) + 4\rho}}{2\rho}
+\end{align*}\]</span></p>
+<p>In summary, if we decompose <span class="math inline">\(S + \Lambda^{k} - \rho Z^{k} = VQV^{T}\)</span> then</p>
+<p><span class="math display">\[ \Omega^{k + 1} = \frac{1}{2\rho}V\left[ -Q + (Q^{2} + 4\rho I_{p})^{1/2}\right] V^{T} \]</span></p>
+<p><br></p>
+</div>
+<div id="proof-of-2" class="section level3">
+<h3>Proof of (2)</h3>
+<p><span class="math display">\[ Z^{k + 1} = \arg\min_{Z \in \mathbb{S}^{p}}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \]</span></p>
+
+<p><span class="math display">\[\begin{align*}
+  \partial&amp;\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  &amp;= \partial\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] \right\} + \nabla_{\Omega}\left\{ tr\left[\Lambda^{k}\left(\Omega^{k + 1} - Z\right)\right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z \right\|_{F}^{2} \right\} \\
+  &amp;= \lambda(1 - \alpha)Z + \mbox{sign}(Z)\lambda\alpha - \Lambda^{k} - \rho\left( \Omega^{k + 1} - Z \right)
+\end{align*}\]</span></p>
+<p>where sign is the elementwise sign operator. By setting the gradient/sub-differential equal to zero, we arrive at the following equivalence:</p>
+<p><span class="math display">\[ Z_{ij}^{k + 1} = \frac{1}{\lambda(1 - \alpha) + \rho}\left( \rho \Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} - \mbox{sign}(Z_{ij}^{k + 1})\lambda\alpha \right) \]</span></p>
+<p>for all <span class="math inline">\(i = 1,..., p\)</span> and <span class="math inline">\(j = 1,..., p\)</span>. We observe two scenarios:</p>
+<ul>
+<li>If <span class="math inline">\(Z_{ij}^{k + 1} &gt; 0\)</span> then</li>
+</ul>
+<p><span class="math display">\[ \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} &gt; \lambda\alpha \]</span></p>
+<ul>
+<li>If <span class="math inline">\(Z_{ij}^{k + 1} &lt; 0\)</span> then</li>
+</ul>
+<p><span class="math display">\[ \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} &lt; -\lambda\alpha \]</span></p>
+<p>This implies that <span class="math inline">\(\mbox{sign}(Z_{ij}) = \mbox{sign}(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k})\)</span>. Putting all the pieces together, we arrive at</p>
+<p><span class="math display">\[\begin{align*}
+Z_{ij}^{k + 1} &amp;= \frac{1}{\lambda(1 - \alpha) + \rho}\mbox{sign}\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}\right)\left( \left| \rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k} \right| - \lambda\alpha \right)_{+} \\
+&amp;= \frac{1}{\lambda(1 - \alpha) + \rho}\mbox{soft}\left(\rho\Omega_{ij}^{k + 1} + \Lambda_{ij}^{k}, \lambda\alpha\right)
+\end{align*}\]</span></p>
+<p>where soft is the soft-thresholding function.</p>
+<p><br></p>
+</div>
+</div>
+<div id="scaled-form-admm" class="section level2">
+<h2>Scaled-Form ADMM</h2>
+<p>There is another popular, alternate form of the ADMM algorithm used by scaling the dual variable (<span class="math inline">\(\Lambda^{k}\)</span>). Let us define <span class="math inline">\(R^{k} = \Omega - Z^{k}\)</span> and <span class="math inline">\(U^{k} = \Lambda^{k}/\rho\)</span>.</p>
+<p><span class="math display">\[\begin{align*}
+  tr\left[ \Lambda^{k}\left( \Omega - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega - Z^{k} \right\|_{F}^{2} &amp;= tr\left[ \Lambda^{k}R^{k} \right] + \frac{\rho}{2}\left\| R^{k} \right\|_{F}^{2} \\
+  &amp;= \frac{\rho}{2}\left\| R^{k} + \Lambda^{k}/\rho \right\|_{F}^{2} - \frac{\rho}{2}\left\| \Lambda^{k}/\rho \right\|_{F}^{2} \\
+  &amp;= \frac{\rho}{2}\left\| R^{k} + U^{k} \right\|_{F}^{2} - \frac{\rho}{2}\left\| U^{k} \right\|_{F}^{2}
+\end{align*}\]</span></p>
+<p>Therefore, a scaled-form can now be written as</p>
+<p><span class="math display">\[\begin{align}
+  \Omega^{k + 1} &amp;= \arg\min_{\Omega \in \mathbb{R}_{+}^{p}}\left\{ tr\left(S\Omega\right) - \log\left|\Omega\right| + \frac{\rho}{2}\left\| \Omega - Z^{k} + U^{k} \right\|_{F}^{2} \right\} \\
+  Z^{k + 1} &amp;= \arg\min_{Z \in \mathbb{S}^{p}}\left\{ \lambda\left[ \frac{1 - \alpha}{2}\left\| Z \right\|_{F}^{2} + \alpha\left\| Z \right\|_{1} \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z + U^{k} \right\|_{F}^{2} \right\} \\
+  U^{k + 1} &amp;= U^{k} + \Omega^{k + 1} - Z^{k + 1}
+\end{align}\]</span></p>
+<p>And more generally (in vector form),</p>
+<p><span class="math display">\[\begin{align}
+  x^{k + 1} &amp;= \arg\min_{x}\left\{ f(x) + \frac{\rho}{2}\left\| Ax + Bz^{k} - c + u^{k} \right\|_{2}^{2} \right\} \\
+  z^{k + 1} &amp;= \arg\min_{z}\left\{ g(z) + \frac{\rho}{2}\left\| Ax^{k + 1} + Bz - c + u^{k} \right\|_{2}^{2} \right\} \\
+  u^{k + 1} &amp;= u^{k} + Ax^{k + 1} + Bz^{k + 1} - c
+\end{align}\]</span></p>
+<p>Note that there are limitations to using this method. Because the dual variable is scaled by <span class="math inline">\(\rho\)</span> (the step size), this form limits one to using a constant step size without making further adjustments to <span class="math inline">\(U^{k}\)</span>. It has been shown in the literature that a dynamic step size (like the one used in <code>ADMMsigma</code>) can significantly reduce the number of iterations required for convergence.</p>
+<p><br></p>
+</div>
+<div id="stopping-criterion" class="section level2">
+<h2>Stopping Criterion</h2>
+<p>In discussing the optimality conditions and stopping criterion, we will follow the steps outlined in <span class="citation">Boyd et al. (2011)</span> and cater them to precision matrix estimation.</p>
+<p>Below we have three optimality conditions:</p>
+<ol style="list-style-type: decimal">
+<li>Primal:</li>
+</ol>
+<p><span class="math display">\[ \Omega^{k + 1} - Z^{k + 1} = 0 \]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Dual:</li>
+</ol>
+<p><span class="math display">\[ 0 \in \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k + 1} \]</span></p>
+<p><span class="math display">\[ 0 \in \partial g\left(Z^{k + 1}\right) - \Lambda^{k + 1} \]</span></p>
+<p>The first dual optimality condition is a result of taking the sub-differential of the lagrangian (non-augmented) with respect to <span class="math inline">\(\Omega^{k + 1}\)</span> (note that we must honor the symmetric constraint of <span class="math inline">\(\Omega^{k + 1}\)</span>) and the second is a result of taking the sub-differential of the lagrangian with respect to <span class="math inline">\(Z^{k + 1}\)</span> (no symmetric constraint).</p>
+<p>We will define the left-hand side of the first condition as the primal residual <span class="math inline">\(r^{k + 1} = \Omega^{k + 1} - Z^{k + 1}\)</span>. At convergence, optimality conditions require that <span class="math inline">\(r^{k + 1} \approx 0\)</span>. The second residual we will define is the dual residual <span class="math inline">\(s^{k + 1} = \rho\left( Z^{k + 1} - Z^{k} \right)\)</span>. This residual is derived from the following:</p>
+<p>Because <span class="math inline">\(\Omega^{k + 1}\)</span> is the argument that minimizes <span class="math inline">\(L_{p}\left( \Omega, Z^{k}, \Lambda^{k} \right)\)</span>,</p>
+<p><span class="math display">\[\begin{align*}
+  0 &amp;\in \partial \left\{ f\left(\Omega^{k + 1}\right) + tr\left[ \Lambda^{k}\left( \Omega^{k + 1} - Z^{k} \right) \right] + \frac{\rho}{2}\left\| \Omega^{k + 1} - Z^{k} \right\|_{F}^{2} \right\} \\
+  &amp;= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k} + \rho\left(\Omega^{k + 1} - Z^{k}\right) \\
+  &amp;= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k} + \rho\left(\Omega^{k + 1} + Z^{k + 1} - Z^{k + 1} - Z^{k}\right) \\
+  &amp;= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k} + \rho\left(\Omega^{k + 1} - Z^{k + 1}\right) + \rho\left(Z^{k + 1} - Z^{k}\right) \\
+  &amp;= \partial f\left(\Omega^{k + 1}\right) + \Lambda^{k + 1} + \rho\left(Z^{k + 1} - Z^{k}\right) \\
+  \Rightarrow 0 &amp;\in \rho\left( Z^{k + 1} - Z^{k} \right)
+\end{align*}\]</span></p>
+<p>Like the primal residual, at convergence optimality conditions require that <span class="math inline">\(s^{k + 1} \approx 0\)</span>. Note that the second dual optimality condition is always satisfied:</p>
+<p><span class="math display">\[\begin{align*}
+  0 &amp;\in \partial \left\{ g\left(Z^{k + 1}\right) + tr\left[ \Lambda^{k}\left( \Omega^{k + 1} - Z^{k + 1} \right) \right] + \rho\left\| \Omega^{k + 1} - Z^{k + 1} \right\|_{F}^{2} \right\} \\
+  &amp;= \partial g\left(Z^{k + 1}\right) - \Lambda^{k} - \rho\left(\Omega^{k + 1} - Z^{k + 1}\right) \\
+  &amp;= \partial g\left(Z^{k + 1}\right) - \Lambda^{k + 1} \\
+\end{align*}\]</span></p>
+<p>One possible stopping criterion is to set <span class="math inline">\(\epsilon^{rel} = \epsilon^{abs} = 10^{-3}\)</span> and stop the algorithm when <span class="math inline">\(\epsilon^{pri} \leq \left\| r^{k + 1} \right\|_{F}\)</span> and <span class="math inline">\(\epsilon^{dual} \leq \left\| s^{k + 1} \right\|_{F}\)</span> where</p>
+<p><span class="math display">\[\begin{align*}
+  \epsilon^{pri} &amp;= p\epsilon^{abs} + \epsilon^{rel}\max\left\{ \left\| \Omega^{k + 1} \right\|_{F}, \left\| Z^{k + 1} \right\|_{F} \right\} \\
+  \epsilon^{dual} &amp;= p\epsilon^{abs} + \epsilon^{rel}\left\| \Lambda^{k + 1} \right\|_{F}
+\end{align*}\]</span></p>
+<p><br><br></p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-boyd2011distributed">
+<p>Boyd, Stephen, Neal Parikh, Eric Chu, Borja Peleato, Jonathan Eckstein, and others. 2011. “Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers.” <em>Foundations and Trends in Machine Learning</em> 3 (1). Now Publishers, Inc.: 1–122.</p>
+</div>
+<div id="ref-friedman2008sparse">
+<p>Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 2008. “Sparse Inverse Covariance Estimation with the Graphical Lasso.” <em>Biostatistics</em> 9 (3). Oxford University Press: 432–41.</p>
+</div>
+<div id="ref-zou2005regularization">
+<p>Zou, Hui, and Trevor Hastie. 2005. “Regularization and Variable Selection via the Elastic Net.” <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em> 67 (2). Wiley Online Library: 301–20.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -98,8 +98,8 @@ reduces to a ridge-type penalty and when \eqn{\alpha = 1} it reduces to a
 lasso-type penalty.
 }
 \details{
-For details on the implementation of 'ADMMsigma', see the vignette
-\url{https://mgallow.github.io/ADMMsigma/}.
+For details on the implementation of 'ADMMsigma', see the website
+\url{https://mgallow.github.io/ADMMsigma/articles/Details.html}.
 }
 \examples{
 # generate data from a sparse matrix

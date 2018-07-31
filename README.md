@@ -34,7 +34,7 @@ be found below:
   - `plot.RIDGEsigma()` produces a heat map or line graph for cross
     validation errors
 
-See [vignette](https://mgallow.github.io/ADMMsigma/) or
+See package [website](https://mgallow.github.io/ADMMsigma/) or
 [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
 
 ## Installation
@@ -58,8 +58,10 @@ are welcome\!
 ``` r
 library(ADMMsigma)
 
-# generate data from a sparse matrix
-# first compute covariance matrix
+# generate data from a sparse oracle precision matrix
+# we will try to estimate this matrix from the data
+
+# first compute the oracle covariance matrix
 S = matrix(0.7, nrow = 5, ncol = 5)
 for (i in 1:5){
   for (j in 1:5){
@@ -67,7 +69,8 @@ for (i in 1:5){
   }
 }
 
-# print oracle precision matrix (shrinkage might be useful)
+# print oracle precision matrix
+# because its sparse, some shrinkage might be useful
 (Omega = round(qr.solve(S), 3))
 ```
 
@@ -87,7 +90,8 @@ S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 
-# print sample precision matrix (perhaps a bad estimate)
+# print sample precision matrix from the data
+# this is perhaps a bad estimate (its not sparse)
 Sample = (nrow(X) - 1)/nrow(X)*cov(X)
 round(qr.solve(Sample), 5)
 ```
@@ -100,6 +104,7 @@ round(qr.solve(Sample), 5)
     ## [5,]  0.24309  0.18949 -0.11016 -1.37226  2.05377
 
 ``` r
+# now use ADMMsigma to provide estimates
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
 ```
@@ -107,7 +112,7 @@ ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
     ## 
     ## Call: ADMMsigma(X = X, tol.abs = 1e-08, tol.rel = 1e-08)
     ## 
-    ## Iterations: 162
+    ## Iterations: 48
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
@@ -131,21 +136,21 @@ ADMMsigma(X, alpha = 1)
     ## 
     ## Call: ADMMsigma(X = X, alpha = 1)
     ## 
-    ## Iterations: 66
+    ## Iterations: 24
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
     ## [1,]      -1.599      1
     ## 
-    ## Log-likelihood: -108.41022
+    ## Log-likelihood: -108.41193
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  2.15228 -1.26841  0.00000  0.00000  0.19744
-    ## [2,] -1.26841  2.78830 -1.31943 -0.08246  0.01018
-    ## [3,]  0.00000 -1.31943  2.84979 -1.16708 -0.01015
-    ## [4,]  0.00000 -0.08246 -1.16708  2.49277 -1.18844
-    ## [5,]  0.19744  0.01018 -0.01015 -1.18844  1.88069
+    ## [1,]  2.15308 -1.26962  0.00000  0.00000  0.19733
+    ## [2,] -1.26962  2.79103 -1.32199 -0.08135  0.00978
+    ## [3,]  0.00000 -1.32199  2.85361 -1.16953 -0.00921
+    ## [4,]  0.00000 -0.08135 -1.16953  2.49459 -1.18914
+    ## [5,]  0.19733  0.00978 -0.00921 -1.18914  1.88096
 
 ``` r
 # elastic-net penalty (alpha = 0.5)
@@ -155,21 +160,21 @@ ADMMsigma(X, alpha = 0.5)
     ## 
     ## Call: ADMMsigma(X = X, alpha = 0.5)
     ## 
-    ## Iterations: 67
+    ## Iterations: 20
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
     ## [1,]      -1.821    0.5
     ## 
-    ## Log-likelihood: -101.13595
+    ## Log-likelihood: -101.13591
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  2.20031 -1.32471  0.01656 -0.00334  0.21798
-    ## [2,] -1.32471  2.90659 -1.37599 -0.19084  0.13651
-    ## [3,]  0.01656 -1.37599  2.92489 -1.12859 -0.12033
-    ## [4,] -0.00334 -0.19084 -1.12859  2.56559 -1.23472
-    ## [5,]  0.21798  0.13651 -0.12033 -1.23472  1.94528
+    ## [1,]  2.20055 -1.32510  0.01689 -0.00350  0.21805
+    ## [2,] -1.32510  2.90739 -1.37666 -0.19054  0.13642
+    ## [3,]  0.01689 -1.37666  2.92556 -1.12877 -0.12032
+    ## [4,] -0.00350 -0.19054 -1.12877  2.56559 -1.23466
+    ## [5,]  0.21805  0.13642 -0.12032 -1.23466  1.94525
 
 ``` r
 # ridge penalty
@@ -179,24 +184,24 @@ ADMMsigma(X, alpha = 0)
     ## 
     ## Call: ADMMsigma(X = X, alpha = 0)
     ## 
-    ## Iterations: 65
+    ## Iterations: 31
     ## 
     ## Tuning parameters:
     ##       log10(lam)  alpha
     ## [1,]      -1.821      0
     ## 
-    ## Log-likelihood: -99.19746
+    ## Log-likelihood: -99.19745
     ## 
     ## Omega:
     ##          [,1]     [,2]     [,3]     [,4]     [,5]
-    ## [1,]  2.18979 -1.31533  0.04515 -0.04090  0.23511
-    ## [2,] -1.31533  2.90019 -1.37049 -0.22633  0.17808
-    ## [3,]  0.04515 -1.37049  2.89435 -1.07647 -0.17369
-    ## [4,] -0.04090 -0.22633 -1.07647  2.55026 -1.22786
-    ## [5,]  0.23511  0.17808 -0.17369 -1.22786  1.95495
+    ## [1,]  2.18987 -1.31545  0.04524 -0.04093  0.23512
+    ## [2,] -1.31545  2.90045 -1.37070 -0.22626  0.17807
+    ## [3,]  0.04524 -1.37070  2.89459 -1.07653 -0.17369
+    ## [4,] -0.04093 -0.22626 -1.07653  2.55028 -1.22785
+    ## [5,]  0.23512  0.17807 -0.17369 -1.22785  1.95494
 
 ``` r
-# ridge penalty no ADMM
+# ridge penalty (using closed-form solution)
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 ```
 

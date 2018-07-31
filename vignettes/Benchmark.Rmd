@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, tidy = TRUE)
 ```
 
 This is a short effort to give users an idea of how long the functions take to process. The benchmarks were performed using the default R install on [Travis CI](https://travis-ci.org/).
@@ -20,7 +20,7 @@ This is a short effort to give users an idea of how long the functions take to p
 We will be estimating a tri-diagonal precision matrix with dimension $p = 100$:
 
 <br>\vspace{0.5cm}
-```{r, message = FALSE, echo = TRUE}
+```{r, message = FALSE}
 library(ADMMsigma)
 library(microbenchmark)
 
@@ -45,55 +45,67 @@ X = Z %*% S.sqrt
 Sample = (nrow(X) - 1)/nrow(X)*cov(X)
 
 ```
+<br>\vspace{0.5cm}
 
-Default convergence tolerance with specified tuning parameters (no cross validation):
+ - Default convergence tolerance with specified tuning parameters (no cross validation):
 
-```{r, message = FALSE, echo = TRUE}
+<br>\vspace{0.5cm}
+```{r, message = FALSE}
 
 # benchmark ADMMsigma - default tolerance
 microbenchmark(ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-4, tol.rel = 1e-4, trace = "none"))
 
 ```
+<br>\vspace{0.5cm}
 
-Smaller convergence tolerance with specified tuning parameters (no cross validation):
+ - Stricter convergence tolerance with specified tuning parameters (no cross validation):
 
-```{r, message = FALSE, echo = TRUE}
+<br>\vspace{0.5cm}
+```{r, message = FALSE}
 
 # benchmark ADMMsigma - tolerance 1e-8
 microbenchmark(ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-8, tol.rel = 1e-8, trace = "none"))
 
 ```
+<br>\vspace{0.5cm}
 
-Default convergence tolerance with cross validation for both `lam` and `alpha`:
+ - Default convergence tolerance with cross validation for both `lam` and `alpha`:
 
-```{r, message = FALSE, echo = TRUE}
+<br>\vspace{0.5cm}
+```{r, message = FALSE}
 
 # benchmark ADMMsigma CV - default parameter grid
 microbenchmark(ADMMsigma(X, trace = "none"), times = 5)
 
 ```
+<br>\vspace{0.5cm}
 
-Parallel (`cores = 2`) cross validation:
+ - Parallel (`cores = 2`) cross validation:
 
-```{r, message = FALSE, echo = TRUE}
+<br>\vspace{0.5cm}
+```{r, message = FALSE}
 
 # benchmark ADMMsigma parallel CV
 microbenchmark(ADMMsigma(X, cores = 2, trace = "none"), times = 5)
 
 ```
+<br>\vspace{0.5cm}
 
-Cross validation with log-likelihood convergence criteria:
+ - Cross validation with log-likelihood convergence criteria:
 
-```{r, message = FALSE, echo = TRUE}
+<br>\vspace{0.5cm}
+```{r, message = FALSE}
 
 # benchmark ADMMsigma CV - likelihood convergence criteria
 microbenchmark(ADMMsigma(X, crit = "loglik", trace = "none"), times = 5)
 
 ```
+<br>\vspace{0.5cm}
 
-`RIDGEsigma` with extremely fine parameter grid:
+ - `RIDGEsigma` with fine parameter grid:
 
-```{r, message = FALSE, echo = TRUE}
+<br>\vspace{0.5cm}
+```{r, message = FALSE}
 
 # benchmark RIDGEsigma CV
 microbenchmark(RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none"), times = 5)

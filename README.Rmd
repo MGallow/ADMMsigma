@@ -29,7 +29,7 @@ A (possibly incomplete) list of functions contained in the package can be found 
 
 * `plot.RIDGEsigma()` produces a heat map or line graph for cross validation errors
 
-See [vignette](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
+See package [website](https://mgallow.github.io/ADMMsigma/) or [manual](https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf).
 
 ## Installation
 
@@ -49,8 +49,10 @@ If there are any issues/bugs, please let me know: [github](https://github.com/MG
 ```{r, message = FALSE}
 library(ADMMsigma)
 
-# generate data from a sparse matrix
-# first compute covariance matrix
+# generate data from a sparse oracle precision matrix
+# we will try to estimate this matrix from the data
+
+# first compute the oracle covariance matrix
 S = matrix(0.7, nrow = 5, ncol = 5)
 for (i in 1:5){
   for (j in 1:5){
@@ -58,7 +60,8 @@ for (i in 1:5){
   }
 }
 
-# print oracle precision matrix (shrinkage might be useful)
+# print oracle precision matrix
+# because its sparse, some shrinkage might be useful
 (Omega = round(qr.solve(S), 3))
 
 # generate 100 x 5 data matrix with rows drawn from iid N_p(0, S)
@@ -69,10 +72,12 @@ S.sqrt = out$vectors %*% diag(out$values^0.5) %*% t(out$vectors)
 X = Z %*% S.sqrt
 
 
-# print sample precision matrix (perhaps a bad estimate)
+# print sample precision matrix from the data
+# this is perhaps a bad estimate (its not sparse)
 Sample = (nrow(X) - 1)/nrow(X)*cov(X)
 round(qr.solve(Sample), 5)
 
+# now use ADMMsigma to provide estimates
 # elastic-net type penalty (set tolerance to 1e-8)
 ADMMsigma(X, tol.abs = 1e-8, tol.rel = 1e-8)
 
@@ -85,7 +90,7 @@ ADMMsigma(X, alpha = 0.5)
 # ridge penalty
 ADMMsigma(X, alpha = 0)
 
-# ridge penalty no ADMM
+# ridge penalty (using closed-form solution)
 RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01))
 
 # produce CV heat map for ADMMsigma
