@@ -28,8 +28,8 @@ navbar:
           href: "reference/index.html"
     - text: "Related Packages"
       menu:
-        - text: "Omega"
-          href: https://mgallow.github.io/Omega/
+        #- text: "Omega"
+        #  href: https://mgallow.github.io/Omega/
         - text: "GLASSOO"
           href: https://mgallow.github.io/GLASSOO/
         - text: "CVglasso"

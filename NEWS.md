@@ -1,5 +1,5 @@
 
-# ADMMsigma 2.1
+## ADMMsigma 2.1
 
  - Lots and lots of minor bug fixes
  
@@ -8,7 +8,7 @@
  - Reversed the ADMM algorithm sequence -- which improves computation speed
 
 
-# ADMMsigma 2.0
+## ADMMsigma 2.0
 
  - ADMMsigma is a major version release and total re-work of the original package.
  
