@@ -37,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ADMMsigma</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.1</span>
       </span>
     </div>
 
@@ -144,7 +144,7 @@
 <li><p><code>plot.ADMMsigma()</code> produces a heat map or line graph for cross validation errors</p></li>
 <li><p><code>plot.RIDGEsigma()</code> produces a heat map or line graph for cross validation errors</p></li>
 </ul>
-<p>See <a href="https://mgallow.github.io/ADMMsigma/">vignette</a> or <a href="https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf">manual</a>.</p>
+<p>See package <a href="https://mgallow.github.io/ADMMsigma/">website</a> or <a href="https://github.com/MGallow/ADMMsigma/blob/master/ADMMsigma.pdf">manual</a>.</p>
 </div>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
@@ -162,17 +162,20 @@
 <a href="#usage" class="anchor"></a>Usage</h2>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(ADMMsigma)</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co"># generate data from a sparse matrix</span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># first compute covariance matrix</span></a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.7</span>, <span class="dt">nrow =</span> <span class="dv">5</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">    S[i, j] =<span class="st"> </span>S[i, j]<span class="op">^</span><span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j)</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">  }</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10">}</a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co"># print oracle precision matrix (shrinkage might be useful)</span></a>
-<a class="sourceLine" id="cb2-13" data-line-number="13">(<span class="dt">Omega =</span> <span class="kw">round</span>(<span class="kw">qr.solve</span>(S), <span class="dv">3</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co"># generate data from a sparse oracle precision matrix</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># we will try to estimate this matrix from the data</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="co"># first compute the oracle covariance matrix</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.7</span>, <span class="dt">nrow =</span> <span class="dv">5</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">    S[i, j] =<span class="st"> </span>S[i, j]<span class="op">^</span><span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j)</a>
+<a class="sourceLine" id="cb2-11" data-line-number="11">  }</a>
+<a class="sourceLine" id="cb2-12" data-line-number="12">}</a>
+<a class="sourceLine" id="cb2-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="co"># print oracle precision matrix</span></a>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="co"># because its sparse, some shrinkage might be useful</span></a>
+<a class="sourceLine" id="cb2-16" data-line-number="16">(<span class="dt">Omega =</span> <span class="kw">round</span>(<span class="kw">qr.solve</span>(S), <span class="dv">3</span>))</a></code></pre></div>
 <pre><code>##        [,1]   [,2]   [,3]   [,4]   [,5]
 ## [1,]  1.961 -1.373  0.000  0.000  0.000
 ## [2,] -1.373  2.922 -1.373  0.000  0.000
@@ -187,17 +190,19 @@
 <a class="sourceLine" id="cb4-6" data-line-number="6">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a>
 <a class="sourceLine" id="cb4-7" data-line-number="7"></a>
 <a class="sourceLine" id="cb4-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="co"># print sample precision matrix (perhaps a bad estimate)</span></a>
-<a class="sourceLine" id="cb4-10" data-line-number="10">Sample =<span class="st"> </span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)<span class="op">*</span><span class="kw">cov</span>(X)</a>
-<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="kw">round</span>(<span class="kw">qr.solve</span>(Sample), <span class="dv">5</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="co"># print sample precision matrix from the data</span></a>
+<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="co"># this is perhaps a bad estimate (its not sparse)</span></a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">Sample =<span class="st"> </span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)<span class="op">*</span><span class="kw">cov</span>(X)</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12"><span class="kw">round</span>(<span class="kw">qr.solve</span>(Sample), <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>##          [,1]     [,2]     [,3]     [,4]     [,5]
 ## [1,]  2.32976 -1.55033  0.22105 -0.08607  0.24309
 ## [2,] -1.55033  3.27561 -1.68026 -0.14277  0.18949
 ## [3,]  0.22105 -1.68026  3.19897 -1.25158 -0.11016
 ## [4,] -0.08607 -0.14277 -1.25158  2.76790 -1.37226
 ## [5,]  0.24309  0.18949 -0.11016 -1.37226  2.05377</code></pre>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># elastic-net type penalty (set tolerance to 1e-8)</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># now use ADMMsigma to provide estimates</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="co"># elastic-net type penalty (set tolerance to 1e-8)</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="kw"><a href="reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a></code></pre></div>
 <pre><code>## 
 ## Call: ADMMsigma(X = X, tol.abs = 1e-08, tol.rel = 1e-08)
 ## 
@@ -276,7 +281,7 @@
 ## [3,]  0.04524 -1.37070  2.89459 -1.07653 -0.17369
 ## [4,] -0.04093 -0.22626 -1.07653  2.55028 -1.22785
 ## [5,]  0.23512  0.17807 -0.17369 -1.22785  1.95494</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># ridge penalty no ADMM</span></a>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># ridge penalty (using closed-form solution)</span></a>
 <a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw"><a href="reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>))</a></code></pre></div>
 <pre><code>## 
 ## Call: RIDGEsigma(X = X, lam = 10^seq(-8, 8, 0.01))

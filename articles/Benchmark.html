@@ -36,7 +36,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ADMMsigma</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">2.1</span>
       </span>
     </div>
 
@@ -144,73 +144,100 @@
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(ADMMsigma)</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(microbenchmark)</a>
 <a class="sourceLine" id="cb1-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co">#  generate data from tri-diagonal (sparse) matrix</span></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># compute covariance matrix (can confirm inverse is tri-diagonal)</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># generate data from tri-diagonal (sparse) matrix compute covariance matrix</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># (can confirm inverse is tri-diagonal)</span></a>
 <a class="sourceLine" id="cb1-6" data-line-number="6">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">0</span>, <span class="dt">nrow =</span> <span class="dv">100</span>, <span class="dt">ncol =</span> <span class="dv">100</span>)</a>
 <a class="sourceLine" id="cb1-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>){</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>){</a>
-<a class="sourceLine" id="cb1-10" data-line-number="10">    S[i, j] =<span class="st"> </span><span class="fl">0.7</span><span class="op">^</span>(<span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j))</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11">  }</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>) {</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>) {</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">        S[i, j] =<span class="st"> </span><span class="fl">0.7</span><span class="op">^</span>(<span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j))</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">    }</a>
 <a class="sourceLine" id="cb1-12" data-line-number="12">}</a>
 <a class="sourceLine" id="cb1-13" data-line-number="13"></a>
 <a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co"># generate 1000 x 100 matrix with rows drawn from iid N_p(0, S)</span></a>
 <a class="sourceLine" id="cb1-15" data-line-number="15"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb1-16" data-line-number="16">Z =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">1000</span><span class="op">*</span><span class="dv">100</span>), <span class="dt">nrow =</span> <span class="dv">1000</span>, <span class="dt">ncol =</span> <span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">Z =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">1000</span> <span class="op">*</span><span class="st"> </span><span class="dv">100</span>), <span class="dt">nrow =</span> <span class="dv">1000</span>, <span class="dt">ncol =</span> <span class="dv">100</span>)</a>
 <a class="sourceLine" id="cb1-17" data-line-number="17">out =<span class="st"> </span><span class="kw">eigen</span>(S, <span class="dt">symmetric =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb1-18" data-line-number="18">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
 <a class="sourceLine" id="cb1-19" data-line-number="19">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a>
 <a class="sourceLine" id="cb1-20" data-line-number="20"></a>
 <a class="sourceLine" id="cb1-21" data-line-number="21"><span class="co"># calculate sample covariance matrix</span></a>
-<a class="sourceLine" id="cb1-22" data-line-number="22">Sample =<span class="st"> </span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)<span class="op">*</span><span class="kw">cov</span>(X)</a></code></pre></div>
-<p>Default convergence tolerance with specified tuning parameters (no cross validation):</p>
+<a class="sourceLine" id="cb1-22" data-line-number="22">Sample =<span class="st"> </span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X) <span class="op">*</span><span class="st"> </span><span class="kw">cov</span>(X)</a></code></pre></div>
+<p><br></p>
+<ul>
+<li>Default convergence tolerance with specified tuning parameters (no cross validation):</li>
+</ul>
+<p><br></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># benchmark ADMMsigma - default tolerance</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(<span class="dt">S =</span> Sample, <span class="dt">lam =</span> <span class="fl">0.1</span>, <span class="dt">alpha =</span> <span class="dv">1</span>, <span class="dt">tol.abs =</span> <span class="fl">1e-4</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-4</span>, <span class="dt">trace =</span> <span class="st">"none"</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(<span class="dt">S =</span> Sample, <span class="dt">lam =</span> <span class="fl">0.1</span>, <span class="dt">alpha =</span> <span class="dv">1</span>, <span class="dt">tol.abs =</span> <span class="fl">1e-04</span>, </a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="dt">tol.rel =</span> <span class="fl">1e-04</span>, <span class="dt">trace =</span> <span class="st">"none"</span>))</a></code></pre></div>
 <pre><code>## Unit: milliseconds
 ##                                                                                                expr
 ##  ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-04,      tol.rel = 1e-04, trace = "none")
-##      min       lq     mean   median       uq      max neval
-##  276.492 332.6673 374.4165 396.7445 407.3674 471.5392   100</code></pre>
-<p>Smaller convergence tolerance with specified tuning parameters (no cross validation):</p>
+##       min       lq     mean   median       uq      max neval
+##  278.4504 293.7949 304.0958 300.3942 305.5738 422.6546   100</code></pre>
+<p><br></p>
+<ul>
+<li>Stricter convergence tolerance with specified tuning parameters (no cross validation):</li>
+</ul>
+<p><br></p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># benchmark ADMMsigma - tolerance 1e-8</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(<span class="dt">S =</span> Sample, <span class="dt">lam =</span> <span class="fl">0.1</span>, <span class="dt">alpha =</span> <span class="dv">1</span>, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>, <span class="dt">trace =</span> <span class="st">"none"</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(<span class="dt">S =</span> Sample, <span class="dt">lam =</span> <span class="fl">0.1</span>, <span class="dt">alpha =</span> <span class="dv">1</span>, <span class="dt">tol.abs =</span> <span class="fl">1e-08</span>, </a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">    <span class="dt">tol.rel =</span> <span class="fl">1e-08</span>, <span class="dt">trace =</span> <span class="st">"none"</span>))</a></code></pre></div>
 <pre><code>## Unit: milliseconds
 ##                                                                                                expr
 ##  ADMMsigma(S = Sample, lam = 0.1, alpha = 1, tol.abs = 1e-08,      tol.rel = 1e-08, trace = "none")
-##       min       lq     mean   median       uq      max neval
-##  983.7525 1019.993 1057.049 1045.153 1069.489 1403.562   100</code></pre>
-<p>Default convergence tolerance with cross validation for both <code>lam</code> and <code>alpha</code>:</p>
+##      min       lq     mean   median       uq      max neval
+##  988.431 1026.075 1053.112 1045.152 1062.363 1492.586   100</code></pre>
+<p><br></p>
+<ul>
+<li>Default convergence tolerance with cross validation for both <code>lam</code> and <code>alpha</code>:</li>
+</ul>
+<p><br></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># benchmark ADMMsigma CV - default parameter grid</span></a>
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
-##                          expr     min       lq     mean   median       uq
-##  ADMMsigma(X, trace = "none") 24.5665 26.19343 26.62331 27.18005 27.58188
+##                          expr     min      lq     mean   median       uq
+##  ADMMsigma(X, trace = "none") 23.6899 24.2819 25.11894 25.07152 26.04628
 ##       max neval
-##  27.59469     5</code></pre>
-<p>Parallel (<code>cores = 2</code>) cross validation:</p>
+##  26.50509     5</code></pre>
+<p><br></p>
+<ul>
+<li>Parallel (<code>cores = 2</code>) cross validation:</li>
+</ul>
+<p><br></p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># benchmark ADMMsigma parallel CV</span></a>
 <a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">cores =</span> <span class="dv">2</span>, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
-##                                     expr      min       lq     mean
-##  ADMMsigma(X, cores = 2, trace = "none") 16.40392 16.65611 16.82245
+##                                     expr      min      lq     mean
+##  ADMMsigma(X, cores = 2, trace = "none") 15.17672 16.2388 16.29358
 ##    median       uq      max neval
-##  16.93578 17.05696 17.05948     5</code></pre>
-<p>Cross validation with log-likelihood convergence criteria:</p>
+##  16.33887 16.49242 17.22108     5</code></pre>
+<p><br></p>
+<ul>
+<li>Cross validation with log-likelihood convergence criteria:</li>
+</ul>
+<p><br></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># benchmark ADMMsigma CV - likelihood convergence criteria</span></a>
 <a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">crit =</span> <span class="st">"loglik"</span>, <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
-##                                           expr      min       lq    mean
-##  ADMMsigma(X, crit = "loglik", trace = "none") 24.49047 24.82818 25.5192
-##    median       uq      max neval
-##  25.54709 26.20455 26.52571     5</code></pre>
-<p><code>RIDGEsigma</code> with extremely fine parameter grid:</p>
+##                                           expr     min       lq     mean
+##  ADMMsigma(X, crit = "loglik", trace = "none") 22.5702 23.06386 25.32957
+##  median       uq      max neval
+##  24.202 27.28585 29.52593     5</code></pre>
+<p><br></p>
+<ul>
+<li>
+<code>RIDGEsigma</code> with fine parameter grid:</li>
+</ul>
+<p><br></p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co"># benchmark RIDGEsigma CV</span></a>
 <a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/microbenchmark/topics/microbenchmark">microbenchmark</a></span>(<span class="kw"><a href="../reference/RIDGEsigma.html">RIDGEsigma</a></span>(X, <span class="dt">lam =</span> <span class="dv">10</span><span class="op">^</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">8</span>, <span class="dv">8</span>, <span class="fl">0.01</span>), <span class="dt">trace =</span> <span class="st">"none"</span>), <span class="dt">times =</span> <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>## Unit: seconds
-##                                                      expr      min
-##  RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none") 40.29801
-##        lq     mean   median       uq      max neval
-##  40.42436 41.50569 41.86162 42.21457 42.72986     5</code></pre>
+##                                                      expr      min      lq
+##  RIDGEsigma(X, lam = 10^seq(-8, 8, 0.01), trace = "none") 57.73914 59.0269
+##      mean  median       uq      max neval
+##  59.10073 59.3084 59.46445 59.96478     5</code></pre>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
