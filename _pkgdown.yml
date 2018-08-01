@@ -34,7 +34,7 @@ navbar:
           href: https://mgallow.github.io/GLASSOO/
         - text: "CVglasso"
           href: https://mgallow.github.io/CVglasso/
-        - text: "shrink"
+        - text: "SCPME"
           href: https://mgallow.github.io/SCPME/
   right:
     - icon: fa-newspaper-o fa-lg

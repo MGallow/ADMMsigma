@@ -5,7 +5,7 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
 ```
 
 [![Build Status](https://travis-ci.org/MGallow/ADMMsigma.svg?branch=master)](https://travis-ci.org/MGallow/ADMMsigma)
@@ -48,6 +48,7 @@ If there are any issues/bugs, please let me know: [github](https://github.com/MG
 
 ```{r, message = FALSE}
 library(ADMMsigma)
+set.seed(1234)
 
 # generate data from a sparse oracle precision matrix
 # we will try to estimate this matrix from the data
@@ -74,8 +75,8 @@ X = Z %*% S.sqrt
 
 # print sample precision matrix from the data
 # this is perhaps a bad estimate (its not sparse)
-Sample = (nrow(X) - 1)/nrow(X)*cov(X)
-round(qr.solve(Sample), 5)
+sample = (nrow(X) - 1)/nrow(X)*cov(X)
+round(qr.solve(sample), 5)
 
 # now use ADMMsigma to provide estimates
 # elastic-net type penalty (set tolerance to 1e-8)
