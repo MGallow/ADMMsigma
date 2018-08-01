@@ -86,7 +86,7 @@
       <a href="https://mgallow.github.io/CVglasso/">CVglasso</a>
     </li>
     <li>
-      <a href="https://mgallow.github.io/SCPME/">shrink</a>
+      <a href="https://mgallow.github.io/SCPME/">SCPME</a>
     </li>
   </ul>
 </li>
@@ -136,7 +136,7 @@
 <div id="introduction" class="section level2">
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
-<p>In many statistical applications, estimating the covariance for a set of random variables is a critical computational task. The covariance is useful because it characterizes the <em>relationship</em> between variables. For instance, suppose we have three variables <span class="math inline">\(X, Y, \mbox{ and } Z\)</span> and their covariance matrix is of the form</p>
+<p>In many statistical applications, estimating the covariance for a set of random variables is a critical task. The covariance is useful because it characterizes the <em>relationship</em> between variables. For instance, suppose we have three variables <span class="math inline">\(X, Y, \mbox{ and } Z\)</span> and their covariance matrix is of the form</p>
 <p><span class="math display">\[ \Sigma_{xyz} = \begin{pmatrix}
 1 &amp; 0 &amp; 0.5 \\ 
 0 &amp; 1 &amp; 0 \\ 
@@ -155,24 +155,23 @@
 <p><br></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(ADMMsigma)</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co">#  generate data from a sparse matrix</span></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># first compute covariance matrix</span></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.7</span>, <span class="dt">nrow =</span> <span class="dv">5</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7">  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>){</a>
-<a class="sourceLine" id="cb1-8" data-line-number="8">    S[i, j] =<span class="st"> </span>S[i, j]<span class="op">^</span><span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j)</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">  }</a>
-<a class="sourceLine" id="cb1-10" data-line-number="10">}</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="co"># generate 100 x 5 matrix with rows drawn from iid N_p(0, S)</span></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb1-14" data-line-number="14">Z =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">100</span><span class="op">*</span><span class="dv">5</span>), <span class="dt">nrow =</span> <span class="dv">100</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb1-15" data-line-number="15">out =<span class="st"> </span><span class="kw">eigen</span>(S, <span class="dt">symmetric =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb1-16" data-line-number="16">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
-<a class="sourceLine" id="cb1-17" data-line-number="17">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a>
-<a class="sourceLine" id="cb1-18" data-line-number="18"></a>
-<a class="sourceLine" id="cb1-19" data-line-number="19"><span class="co"># snap shot of data</span></a>
-<a class="sourceLine" id="cb1-20" data-line-number="20"><span class="kw">head</span>(X)</a></code></pre></div>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co"># generate data from a sparse matrix first compute covariance matrix</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">S =<span class="st"> </span><span class="kw">matrix</span>(<span class="fl">0.7</span>, <span class="dt">nrow =</span> <span class="dv">5</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>) {</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>) {</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">        S[i, j] =<span class="st"> </span>S[i, j]<span class="op">^</span><span class="kw">abs</span>(i <span class="op">-</span><span class="st"> </span>j)</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">    }</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">}</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># generate 100 x 5 matrix with rows drawn from iid N_p(0, S)</span></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">Z =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(<span class="dv">100</span> <span class="op">*</span><span class="st"> </span><span class="dv">5</span>), <span class="dt">nrow =</span> <span class="dv">100</span>, <span class="dt">ncol =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">out =<span class="st"> </span><span class="kw">eigen</span>(S, <span class="dt">symmetric =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">S.sqrt =<span class="st"> </span>out<span class="op">$</span>vectors <span class="op">%*%</span><span class="st"> </span><span class="kw">diag</span>(out<span class="op">$</span>values<span class="op">^</span><span class="fl">0.5</span>) <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(out<span class="op">$</span>vectors)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">X =<span class="st"> </span>Z <span class="op">%*%</span><span class="st"> </span>S.sqrt</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="co"># snap shot of data</span></a>
+<a class="sourceLine" id="cb1-19" data-line-number="19"><span class="kw">head</span>(X)</a></code></pre></div>
 <pre><code>##            [,1]         [,2]         [,3]       [,4]        [,5]
 ## [1,] -0.4311177 -0.217744186  1.276826576 -0.1061308 -0.02363953
 ## [2,] -0.0418538  0.304253474  0.688201742 -0.5976510 -1.06758924
@@ -204,7 +203,7 @@
 <p>In this particular setting, we could estimate <span class="math inline">\(\Omega\)</span> by taking the inverse of the sample covariance matrix <span class="math inline">\(\hat{S} = \sum_{i = 1}^{n}(X_{i} - \bar{X})(X_{i} - \bar{X})^{T}/n\)</span>:</p>
 <p><br></p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># print inverse of sample precision matrix (perhaps a bad estimate)</span></a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">round</span>(<span class="kw">qr.solve</span>(<span class="kw">cov</span>(X)<span class="op">*</span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)), <span class="dv">5</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">round</span>(<span class="kw">qr.solve</span>(<span class="kw">cov</span>(X) <span class="op">*</span><span class="st"> </span>(<span class="kw">nrow</span>(X) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)<span class="op">/</span><span class="kw">nrow</span>(X)), <span class="dv">5</span>)</a></code></pre></div>
 <pre><code>##          [,1]     [,2]     [,3]     [,4]     [,5]
 ## [1,]  2.32976 -1.55033  0.22105 -0.08607  0.24309
 ## [2,] -1.55033  3.27561 -1.68026 -0.14277  0.18949
@@ -216,7 +215,7 @@
 <p>By default, <code>ADMMsigma</code> will construct <span class="math inline">\(\Omega\)</span> using an elastic-net penalty and choose the optimal <code>lam</code> and <code>alpha</code> tuning parameters.</p>
 <p><br></p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co"># elastic-net type penalty (set tolerance to 1e-8)</span></a>
-<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-08</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-08</span>)</a></code></pre></div>
 <pre><code>## 
 ## Call: ADMMsigma(X = X, tol.abs = 1e-08, tol.rel = 1e-08)
 ## 
@@ -328,7 +327,7 @@
 <p>In the heatmap plot below, the more bright (white) areas of the heat map correspond to a better tuning parameter selection.</p>
 <p><br></p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="co"># produce CV heat map for ADMMsigma</span></a>
-<a class="sourceLine" id="cb19-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-8</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-8</span>)</a>
+<a class="sourceLine" id="cb19-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-08</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-08</span>)</a>
 <a class="sourceLine" id="cb19-3" data-line-number="3"><span class="kw">plot</span>(ADMM, <span class="dt">type =</span> <span class="st">"heatmap"</span>)</a></code></pre></div>
 <p><img src="Tutorial_files/figure-html/unnamed-chunk-8-1.png" width="700"><br></p>
 <p>We can also produce a line graph of the cross validation errors:</p>
@@ -363,7 +362,7 @@
 <a class="sourceLine" id="cb25-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">path =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb25-3" data-line-number="3"></a>
 <a class="sourceLine" id="cb25-4" data-line-number="4"><span class="co"># print only first three objects</span></a>
-<a class="sourceLine" id="cb25-5" data-line-number="5">ADMM<span class="op">$</span>Path[,,<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>]</a></code></pre></div>
+<a class="sourceLine" id="cb25-5" data-line-number="5">ADMM<span class="op">$</span>Path[, , <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>]</a></code></pre></div>
 <pre><code>## , , 1
 ## 
 ##             [,1]       [,2]        [,3]        [,4]       [,5]
@@ -392,32 +391,44 @@
 ## [5,]  0.22874252  0.1641385 -0.12695399 -1.28299472  1.9861783</code></pre>
 <p><br></p>
 <p>A huge issue in precision matrix estimation is the computational complexity when the sample size and dimension of our data is particularly large. There are a number of built-in options in <code>ADMMsigma</code> that can be used to improve computation speed:</p>
-<p>Reduce the number of <code>lam</code> values during cross validation. The default number is 10.</p>
+<ul>
+<li>Reduce the number of <code>lam</code> values during cross validation. The default number is 10.</li>
+</ul>
 <p><br></p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1"><span class="co"># reduce number of lam to 5</span></a>
 <a class="sourceLine" id="cb27-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">nlam =</span> <span class="dv">5</span>)</a></code></pre></div>
 <p><br></p>
-<p>Reduce the number of <code>K</code> folds during cross validation. The default number is 5.</p>
+<ul>
+<li>Reduce the number of <code>K</code> folds during cross validation. The default number is 5.</li>
+</ul>
 <p><br></p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="co"># reduce number of folds to 3</span></a>
 <a class="sourceLine" id="cb28-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">K =</span> <span class="dv">3</span>)</a></code></pre></div>
 <p><br></p>
-<p>Relax the convergence critera for the ADMM algorithm using the <code>tol.abs</code> and <code>tol.rel</code> options. The default for each is 1e-4.</p>
+<ul>
+<li>Relax the convergence critera for the ADMM algorithm using the <code>tol.abs</code> and <code>tol.rel</code> options. The default for each is 1e-4.</li>
+</ul>
 <p><br></p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1"><span class="co"># relax convergence criteria</span></a>
-<a class="sourceLine" id="cb29-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">1e-3</span>, <span class="dt">tol.rel =</span> <span class="fl">1e-3</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb29-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">tol.abs =</span> <span class="fl">0.001</span>, <span class="dt">tol.rel =</span> <span class="fl">0.001</span>)</a></code></pre></div>
 <p><br></p>
-<p>Adjust the maximum number of iterations. The default is 1e4.</p>
+<ul>
+<li>Adjust the maximum number of iterations. The default is 1e4.</li>
+</ul>
 <p><br></p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="co"># adjust maximum number of iterations</span></a>
-<a class="sourceLine" id="cb30-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">maxit =</span> <span class="fl">1e3</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb30-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">maxit =</span> <span class="dv">1000</span>)</a></code></pre></div>
 <p><br></p>
-<p>Adjust <code>adjmaxit</code>. This allows the user to adjust the maximum number of iterations <em>after</em> the first <code>lam</code> tuning parameter has fully converged during cross validation. This allows for <em>one-step estimators</em> and can greatly reduce the time required for the cross validation procedure while still choosing near-optimal tuning parameters.</p>
+<ul>
+<li>Adjust <code>adjmaxit</code>. This allows the user to adjust the maximum number of iterations <em>after</em> the first <code>lam</code> tuning parameter has fully converged during cross validation. This allows for <em>one-step estimators</em> and can greatly reduce the time required for the cross validation procedure while still choosing near-optimal tuning parameters.</li>
+</ul>
 <p><br></p>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" data-line-number="1"><span class="co"># adjust adjmaxit</span></a>
-<a class="sourceLine" id="cb31-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">maxit =</span> <span class="fl">1e4</span>, <span class="dt">adjmaxit =</span> <span class="dv">2</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb31-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">maxit =</span> <span class="dv">10000</span>, <span class="dt">adjmaxit =</span> <span class="dv">2</span>)</a></code></pre></div>
 <p><br></p>
-<p>We can also opt to run our cross validation procedure in parallel. The user should check how many cores are on their system before using this option</p>
+<ul>
+<li>We can also opt to run our cross validation procedure in parallel. The user should check how many cores are on their system before using this option</li>
+</ul>
 <p><br></p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="co"># parallel CV</span></a>
 <a class="sourceLine" id="cb32-2" data-line-number="2">ADMM =<span class="st"> </span><span class="kw"><a href="../reference/ADMMsigma.html">ADMMsigma</a></span>(X, <span class="dt">cores =</span> <span class="dv">3</span>)</a></code></pre></div>
