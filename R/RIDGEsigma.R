@@ -71,9 +71,9 @@
 #' RIDGEsigma(X, lam = 10^seq(-5, 5, 0.5))
 
 # we define the ADMM covariance estimation function
-RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2, 
-    2, 0.1), path = FALSE, K = 5, cores = 1, trace = c("none", 
-    "progress", "print")) {
+RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2, 2, 0.1), 
+    path = FALSE, K = 5, cores = 1, trace = c("none", "progress", 
+        "print")) {
     
     # checks
     if (is.null(X) && is.null(S)) {
@@ -116,8 +116,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2,
         if (cores > 1) {
             
             # execute ParallelCV
-            RIDGE = CVP_RIDGE(X = X, lam = lam, K = K, 
-                cores = cores, trace = trace)
+            RIDGE = CVP_RIDGE(X = X, lam = lam, K = K, cores = cores, 
+                trace = trace)
             MIN.error = RIDGE$min.error
             AVG.error = RIDGE$avg.error
             CV.error = RIDGE$cv.error
@@ -129,8 +129,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2,
             if (is.null(X)) {
                 X = matrix(0)
             }
-            RIDGE = CV_RIDGEc(X = X, S = S, lam = lam, 
-                path = path, K = K, trace = trace)
+            RIDGE = CV_RIDGEc(X = X, S = S, lam = lam, path = path, 
+                K = K, trace = trace)
             MIN.error = RIDGE$min.error
             AVG.error = RIDGE$avg.error
             CV.error = RIDGE$cv.error
@@ -163,8 +163,8 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2,
     grad = S - qr.solve(Omega) + lam * Omega
     
     # compute penalized loglik
-    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, 
-        logarithm = TRUE)$modulus[1] + lam * sum(Omega^2))
+    loglik = (-n/2) * (sum(Omega * S) - determinant(Omega, logarithm = TRUE)$modulus[1] + 
+        lam * sum(Omega^2))
     
     # return values
     tuning = matrix(c(log10(lam), lam), ncol = 2)
@@ -174,9 +174,9 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2,
     }
     
     returns = list(Call = call, Lambda = tuning, Lambdas = Lambdas, 
-        Omega = Omega, Sigma = qr.solve(Omega), Path = Path, 
-        Gradient = grad, Loglik = loglik, MIN.error = MIN.error, 
-        AVG.error = AVG.error, CV.error = CV.error)
+        Omega = Omega, Sigma = qr.solve(Omega), Path = Path, Gradient = grad, 
+        Loglik = loglik, MIN.error = MIN.error, AVG.error = AVG.error, 
+        CV.error = CV.error)
     
     class(returns) = "RIDGE"
     return(returns)
@@ -200,16 +200,16 @@ RIDGEsigma = function(X = NULL, S = NULL, lam = 10^seq(-2,
 print.RIDGE = function(x, ...) {
     
     # print call
-    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", 
-        collapse = "\n"), "\n", sep = "")
+    cat("\nCall: ", paste(deparse(x$Call), sep = "\n", collapse = "\n"), 
+        "\n", sep = "")
     
     # print optimal tuning parameter
     cat("\nTuning parameter:\n")
     print.default(round(x$Lambda, 3), print.gap = 2L, quote = FALSE)
     
     # print loglik
-    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), 
-        sep = "\n", collapse = "\n"), "\n", sep = "")
+    cat("\nLog-likelihood: ", paste(round(x$Loglik, 5), sep = "\n", 
+        collapse = "\n"), "\n", sep = "")
     
     # print Omega if dim <= 10
     if (nrow(x$Omega) <= 10) {
@@ -272,8 +272,7 @@ plot.RIDGE = function(x, type = c("heatmap", "line"), footnote = TRUE,
     if (type == "line") {
         
         # gather values to plot
-        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), 
-            Errors = as.data.frame.table(x$CV.error)$Freq)
+        cv = cbind(expand.grid(lam = x$Lambdas, alpha = 0), Errors = as.data.frame.table(x$CV.error)$Freq)
         
         # produce line graph
         graph = ggplot(summarise(group_by(cv, lam), Means = mean(Errors)), 
@@ -286,8 +285,7 @@ plot.RIDGE = function(x, type = c("heatmap", "line"), footnote = TRUE,
         # augment values for heat map (helps visually)
         lam = x$Lambdas
         cv = expand.grid(lam = lam, alpha = 0)
-        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 
-            1)
+        Errors = 1/(c(x$AVG.error) + abs(min(x$AVG.error)) + 1)
         cv = cbind(cv, Errors)
         
         # design color palette

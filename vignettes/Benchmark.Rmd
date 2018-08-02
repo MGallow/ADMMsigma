@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE, tidy = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 This is a short effort to give users an idea of how long the functions take to process. The benchmarks were performed using the default R install on [Travis CI](https://travis-ci.org/).

@@ -9,3 +9,6 @@
 ^ADMMsigma\.pdf$
 ^_pkgdown\.yml$
 ^pkgdown$
+^vignettes/Benchmark\.Rmd$
+^vignettes/Benchmark_cache$
+^vignettes/Benchmark\.html$

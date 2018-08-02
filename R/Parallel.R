@@ -33,13 +33,12 @@
 #' @keywords internal
 
 # we define the CV_ADMMc function
-CVP_ADMM = function(X = NULL, lam = 10^seq(-2, 2, 0.2), 
-    alpha = seq(0, 1, 0.2), diagonal = FALSE, rho = 2, 
-    mu = 10, tau.inc = 2, tau.dec = 2, crit = c("ADMM", 
-        "loglik"), tol.abs = 1e-04, tol.rel = 1e-04, maxit = 1000, 
-    adjmaxit = NULL, K = 5, crit.cv = c("loglik", "penloglik", 
-        "AIC", "BIC"), start = c("warm", "cold"), cores = 1, 
-    trace = c("progress", "print", "none")) {
+CVP_ADMM = function(X = NULL, lam = 10^seq(-2, 2, 0.2), alpha = seq(0, 
+    1, 0.2), diagonal = FALSE, rho = 2, mu = 10, tau.inc = 2, tau.dec = 2, 
+    crit = c("ADMM", "loglik"), tol.abs = 1e-04, tol.rel = 1e-04, 
+    maxit = 1000, adjmaxit = NULL, K = 5, crit.cv = c("loglik", 
+        "penloglik", "AIC", "BIC"), start = c("warm", "cold"), 
+    cores = 1, trace = c("progress", "print", "none")) {
     
     # match values
     crit = match.arg(crit)
@@ -52,8 +51,7 @@ CVP_ADMM = function(X = NULL, lam = 10^seq(-2, 2, 0.2),
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        cat("\nOnly detected", paste(num_cores, "cores...", 
-            sep = " "))
+        cat("\nOnly detected", paste(num_cores, "cores...", sep = " "))
     }
     if (cores > K) {
         cat("\nNumber of cores exceeds K... setting cores = K")
@@ -87,19 +85,18 @@ CVP_ADMM = function(X = NULL, lam = 10^seq(-2, 2, 0.2),
             S.valid = crossprod(X.valid)/(dim(X.valid)[1])
             
             # run foreach loop on CVP_ADMMc
-            CVP_ADMMc(n = nrow(X.valid), S_train = S.train, 
-                S_valid = S.valid, lam = lam, alpha = alpha, 
-                diagonal = diagonal, rho = rho, mu = mu, 
-                tau_inc = tau.inc, tau_dec = tau.dec, crit = crit, 
-                tol_abs = tol.abs, tol_rel = tol.rel, maxit = maxit, 
-                adjmaxit = adjmaxit, crit_cv = crit.cv, 
+            CVP_ADMMc(n = nrow(X.valid), S_train = S.train, S_valid = S.valid, 
+                lam = lam, alpha = alpha, diagonal = diagonal, 
+                rho = rho, mu = mu, tau_inc = tau.inc, tau_dec = tau.dec, 
+                crit = crit, tol_abs = tol.abs, tol_rel = tol.rel, 
+                maxit = maxit, adjmaxit = adjmaxit, crit_cv = crit.cv, 
                 start = start, trace = trace)
             
         }
     
     # determine optimal tuning parameters
-    CV = array(as.numeric(unlist(CV)), dim = c(length(lam), 
-        length(alpha), K))
+    CV = array(as.numeric(unlist(CV)), dim = c(length(lam), length(alpha), 
+        K))
     AVG = apply(CV, c(1, 2), mean)
     best = which(AVG == min(AVG), arr.ind = TRUE)
     error = min(AVG)
@@ -141,14 +138,13 @@ CVP_ADMM = function(X = NULL, lam = 10^seq(-2, 2, 0.2),
 #' @keywords internal
 
 # we define the CVP_RIDGE function
-CVP_RIDGE = function(X = NULL, lam = 10^seq(-2, 2, 0.1), 
-    K = 5, cores = 1, trace = c("none", "progress", "print")) {
+CVP_RIDGE = function(X = NULL, lam = 10^seq(-2, 2, 0.1), K = 5, 
+    cores = 1, trace = c("none", "progress", "print")) {
     
     # make cluster and register cluster
     num_cores = detectCores()
     if (cores > num_cores) {
-        cat("\nOnly detected", paste(num_cores, "cores...", 
-            sep = " "))
+        cat("\nOnly detected", paste(num_cores, "cores...", sep = " "))
     }
     if (cores > K) {
         cat("\nNumber of cores exceeds K... setting cores = K")
@@ -166,8 +162,7 @@ CVP_RIDGE = function(X = NULL, lam = 10^seq(-2, 2, 0.1),
     CV = foreach(k = 1:K, .packages = "ADMMsigma", .combine = "cbind", 
         .inorder = FALSE) %dopar% {
         
-        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * 
-            n/K)]
+        leave.out = ind[(1 + floor((k - 1) * n/K)):floor(k * n/K)]
         
         # training set
         X.train = X[-leave.out, , drop = FALSE]
@@ -183,8 +178,8 @@ CVP_RIDGE = function(X = NULL, lam = 10^seq(-2, 2, 0.1),
         S.valid = crossprod(X.valid)/(dim(X.valid)[1])
         
         # run foreach loop on CVP_RIDGEc
-        CVP_RIDGEc(n = nrow(X.valid), S_train = S.train, 
-            S_valid = S.valid, lam = lam, trace = trace)
+        CVP_RIDGEc(n = nrow(X.valid), S_train = S.train, S_valid = S.valid, 
+            lam = lam, trace = trace)
         
     }
     
